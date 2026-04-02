@@ -11,12 +11,12 @@ RM = rm -rf
 
 all: ${NAME}
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	@mkdir -p $(OBJ_DIR)
-	$(CC) $(FLAGS) $(INCLUDES) -c $< -o $@
+${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
+	@mkdir -p ${OBJ_DIR}
+	${CC} ${FLAGS} ${INCLUDES} -c $< -o $@
 
-$(NAME): $(OBJS)
-	$(CC) $(FLAGS) $(OBJS) -o $(NAME)
+${NAME}: ${OBJS}
+	${CC} ${FLAGS} $^ -o $@
 
 clean:
 	${RM} ${OBJ_DIR}
@@ -26,4 +26,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY all clean fclean re
+.PHONY: all clean fclean re

@@ -2,13 +2,27 @@
 #define SERVER_HPP
 #include <stdint.h>
 
+#include <arpa/inet.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <sys/epoll.h>
+#include <sys/socket.h>
+#include <unistd.h>
+
+#include <cctype>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <map>
-#include <string>
+#include <sstream>
+#include <vector>
 
 #include "Client.hpp"
 #include "Message.hpp"
 #include "Parser.hpp"
+#include "EpollConfig.hpp"
+#include "ClientStatus.hpp"
 
 class Server {
  private:
@@ -33,6 +47,22 @@ class Server {
   Server(int argc, char **argv);
   ~Server();
   void run();
+
+  uint16_t parse_string_port(const char* port_str);
+  int create_socket();
+  void bind_socket(int socket_fd, uint32_t ip_addr, uint16_t host);
+  void start_socket(int socket_fd);
+  void init_socket(Server& server);
+  void register_socket(int epoll_fd, int socket_fd);
+  int init_epoll(Server& server);
+  void loop_epoll(int epoll_fd, Server& server);
+  bool process_message(Client& client);
+  HandleResult read_chunk(Client& client);
+  void schedule_epollout(int epoll_fd, Client& client);
+  void schedule_epollin(int epoll_fd, Client& client);
+  int process_connect(int epoll_fd, int socket_fd);
+  HandleResult process_request(int epoll_fd, uint32_t events, Client& client);
+  HandleResult respond(Client& client);
 };
 
 #endif

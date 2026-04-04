@@ -1,11 +1,24 @@
-#include "Server.hpp" 
+#include "Server.hpp"
+#include "./server/server.hpp"
+#include "./server/EpollConfig.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <stdexcept>
+#include <arpa/inet.h>
 
 Server::Server(int argc, char **argv)
 {
     parseArg(argc, argv);
+}
+
+uint16_t parse_string_port(const char* port_str) {
+  char* endptr;
+  long port_num = std::strtol(port_str, &endptr, NUM_BASE);
+
+  if (*endptr != '\0' || port_num <= 1024 || port_num > 65535) {
+    throw std::invalid_argument("Invalid port number");
+  }
+  return htons((uint16_t)port_num);
 }
 
 void Server::parseArg(int argc, char **argv)
@@ -13,8 +26,8 @@ void Server::parseArg(int argc, char **argv)
     if (argc != 3)
         throw std::invalid_argument("Please use format: ./irc <port> <password>");
     this->_port = std::atoi(argv[1]);
-    if (this->_port <= 1024 || this->_port > 65535)
-        throw std::out_of_range("Port must be between 1025 and 65535");
+    this->_port_num = parse_string_port(argv[1]);
+    this->_host_ip = inet_addr("127.0.0.1"); // sets the default address to localhost
     this->_password = std::string(argv[2]);
     if (this->_password.empty())
         throw std::out_of_range("Password must contain of at least 1 letter");
@@ -31,49 +44,33 @@ void Server::executeCommand(/*Client* client, */const Message& message)
     std::cout << "Sanity check for vector of strings size: " << message.params.size() << std::endl;
 }
 
-/*------------------ for Szymon ------------------
-Source: https://deepwiki.com/42YerevanProjects/ft_irc/3-command-processing-system
-When a client sends a message to the server, the following process occurs:
-1. The server receives the message and passes it to the Parser's method
-2. The Parser tokenizes the message into a command name and arguments (struct Message in our case)
-*/
-bool Server::processReceivedData(int client_fd) 
-{
-    (void)client_fd;
-    //read with recv() until \r\n
-    //use Client's getBuffer()
-    //append data chunks to Client's buffer
-    //erase the buffer up to \r\n, leave the rest in the buffer for the next loop
-    //send this buffer as a messagLine (std::string) to parser.
-    //also: create client's object to pass for command execution
 
 
-    //Hardcoded message for parsing
-    std::string messageLine = ":dupa #shouldbecommandhere lol :hehe";
-    Message msg;
-    if (!messageLine.empty())
-    {
-        Parser::parse(messageLine, msg);
-        this->executeCommand(/*client, */msg);
-    }
-    return true;
-}
-
-/* ------------------ belongs to Hubert ------------------ */
+// Source: https://deepwiki.com/42YerevanProjects/ft_irc/3-command-processing-system
 void Server::run()
 {
-    /*
-    setup sockets, pollfds array etc.
-
-    get client_fd for Hubert for parsing
-
-    call processReceivedData(client_fd)
-    ...
-    */
-    processReceivedData(10000);
+  listener::init_socket(*this);
+  int epoll_fd = multiplexer::init_epoll(*this);
+  multiplexer::loop_epoll(epoll_fd, *this);
 }
 
 Server::~Server()
 {
     //cleaning
+}
+
+uint32_t Server::getHostIp() const {
+    return this->_host_ip;
+}
+
+uint16_t Server::getPortNum() const {
+    return this->_port_num;
+}
+
+int Server::getSocketFd() const {
+  return this->_socket_fd;
+}
+
+void Server::setSocketFd(int fd) {
+    this->_socket_fd = fd;
 }

@@ -1,23 +1,27 @@
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 # include <string>
+# include "ClientStatus.hpp"
 
-class Client 
+class Client
 {
     private:
-        int         _fd;
-        std::string _nickname;
-        std::string _username;
-        //...
+        int          _fd;
+        std::string  _nickname;
+        std::string  _username;
+        ClientStatus _status;
 
-        /* buffer for incoming data from recv() */
-        std::string _buffer;
+        std::string _request_buffer;
+        std::string _response_buffer;
     public:
         Client(int fd);
-        //...
-        
+
         int          getFd() const;
-        std::string& getBuffer();
+        std::string& getRequestBuffer();
+        std::string& getResponseBuffer();
+        ClientStatus getStatus() const;
+        void         setStatus(ClientStatus status);
+        void         reset();
 };
 
-#endif 
+#endif

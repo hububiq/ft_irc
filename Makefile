@@ -5,14 +5,14 @@ INC_DIR = include
 SRC_DIR = src
 OBJ_DIR = obj
 INCLUDES = -I${INC_DIR}
-SRCS = ${wildcard ${SRC_DIR}/*.cpp}
+SRCS = ${wildcard ${SRC_DIR}/*.cpp} ${wildcard ${SRC_DIR}/*/%.cpp} ${wildcard ${SRC_DIR}/server/*.cpp}
 OBJS = ${SRCS:${SRC_DIR}/%.cpp=${OBJ_DIR}/%.o}
 RM = rm -rf
 
 all: ${NAME}
 
 ${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
-	@mkdir -p ${OBJ_DIR}
+	@mkdir -p $(dir $@)
 	${CC} ${FLAGS} ${INCLUDES} -c $< -o $@
 
 ${NAME}: ${OBJS}

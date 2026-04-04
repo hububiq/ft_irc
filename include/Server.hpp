@@ -5,22 +5,31 @@
 # include "Message.hpp"
 # include <string>
 # include <map>
+# include <stdint.h>
 # include <iostream>
 
 class Server 
 {
     private:
+        int _socket_fd;
         int                    _port;
+        uint32_t               _host_ip;
+        uint16_t               _port_num;
         std::string            _password;
         std::map<int, Client*> _clients;
         void                   parseArg(int argc, char **argv);
         void                   executeCommand(/*Client* client, */const Message& message);  //belongs to semantic parsing 
+        
 
-
-        /* ------ processReceivedData BELONGS TO SZYMON
-        function for receiving from socket with recv() and sending raw message to parser */
-        bool                   processReceivedData(int client_fd);
+        
+        // now in request_handler -> bool process_message(Client& client)
+        // bool                   processReceivedData(int client_fd);
     public:
+        uint32_t getHostIp() const;
+        uint16_t getPortNum() const;
+        int getSocketFd() const;
+        void setSocketFd(int fd);
+
         Server(int argc, char **argv);
         ~Server();
         void run();

@@ -1,3 +1,4 @@
 obj/
 *.txt
 !README.txt
+irc

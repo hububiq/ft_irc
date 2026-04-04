@@ -1,13 +1,13 @@
 #ifndef PARSER_HPP
-# define PARSER_HPP
-# include "Message.hpp"
-# include <stdexcept>
-# include <string>
+#define PARSER_HPP
+#include <stdexcept>
+#include <string>
 
-namespace Parser 
-{
-    void    parse(const std::string& rawMessage, Message& msg);
-    void    extractParams(std::string line, Message& msg);
-};
+#include "Message.hpp"
+
+namespace Parser {
+void parse(const std::string& rawMessage, Message& msg);
+void extractParams(std::string line, Message& msg);
+};  // namespace Parser
 
 #endif

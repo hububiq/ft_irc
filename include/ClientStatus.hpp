@@ -2,7 +2,7 @@
 #define CLIENTSTATUS_HPP
 
 enum ClientStatus {
-  READING,  // Waiting for command end
+  READING,
   READY_TO_RESPOND
 };
 

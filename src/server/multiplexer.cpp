@@ -36,8 +36,9 @@ void multiplexer::loop_epoll(int epoll_fd, Server& server) {
           std::cout << "Client connected" << std::endl;
         }
       } else if (clients.find(event_fd) != clients.end()) {
-        if (request_handler::process_request(
-                epoll_fd, events[i].events, clients.find(event_fd)->second) == DROP_CONNECTION) {
+        if (request_handler::process_request(epoll_fd, events[i].events,
+                                             clients.find(event_fd)->second) ==
+            DROP_CONNECTION) {
           std::cout << "Client disconnected" << std::endl;
           clients.erase(event_fd);
           close(event_fd);

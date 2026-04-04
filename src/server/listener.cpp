@@ -63,7 +63,7 @@ void start_socket(int socket_fd) {
   }
 }
 
-}
+}  // namespace
 
 void listener::init_socket(Server& server) {
   int socket_fd = create_socket();

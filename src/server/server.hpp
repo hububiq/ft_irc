@@ -9,19 +9,18 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <cctype>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <map>
 #include <sstream>
 #include <vector>
-#include <cctype>
 
-#include "EpollConfig.hpp"
-#include "./../../include/ClientStatus.hpp"
-#include "Server.hpp"
 #include "Client.hpp"
-
+#include "ClientStatus.hpp"
+#include "EpollConfig.hpp"
+#include "Server.hpp"
 
 class Server;
 class Client;

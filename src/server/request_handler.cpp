@@ -20,8 +20,11 @@ bool process_message(Client& client) {
       //     this->executeCommand(/*client, */msg);
       // }
       // Szymon - Response format unclear, for now it's just a string.
-      // In the future create an object, set it in client, and parse it to a string response in the responder
-      client.getResponseBuffer().append(":irc-server NOTICE * :*** Received your command: " + message_line + "\r\n");
+      // In the future create an object, set it in client, and parse it to a
+      // string response in the responder
+      client.getResponseBuffer().append(
+          ":irc-server NOTICE * :*** Received your command: " + message_line +
+          "\r\n");
     }
     client.setStatus(READY_TO_RESPOND);
     return true;
@@ -52,7 +55,7 @@ void schedule_epollin(int epoll_fd, Client& client) {
   epoll_ctl(epoll_fd, EPOLL_CTL_MOD, client.getFd(), &event);
 }
 
-}
+}  // namespace
 
 int request_handler::process_connect(int epoll_fd, int socket_fd) {
   struct sockaddr_in addr;
@@ -84,16 +87,14 @@ HandleResult request_handler::process_request(int epoll_fd, uint32_t events,
     switch (client.getStatus()) {
       case READING: {
         if (!process_message(client)) {
-          if (events & EPOLLOUT)
-            schedule_epollin(epoll_fd, client);
+          if (events & EPOLLOUT) schedule_epollin(epoll_fd, client);
           return KEEP_CONNECTION;
         }
       }
-       // fall through
+        // fall through
       case READY_TO_RESPOND: {
         if (events & EPOLLOUT) {
-          if (responder::respond(client) ==
-              DROP_CONNECTION)
+          if (responder::respond(client) == DROP_CONNECTION)
             return DROP_CONNECTION;
           if (client.getResponseBuffer().empty())
             client.reset();

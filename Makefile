@@ -18,6 +18,9 @@ ${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
 ${NAME}: ${OBJS}
 	${CC} ${FLAGS} $^ -o $@
 
+format:
+	find -iname '*.hpp' -o -iname '*.cpp' | xargs clang-format --style=Google -i
+
 clean:
 	${RM} ${OBJ_DIR}
 

@@ -1,79 +1,299 @@
-#include "Server.hpp" 
-#include <iostream>
-#include <cstdlib>
-#include <stdexcept>
+#include "Server.hpp"
 
-Server::Server(int argc, char **argv)
-{
-    parseArg(argc, argv);
+Server::Server(int argc, char** argv) { parseArg(argc, argv); }
+
+uint16_t Server::parse_string_port(const char* port_str) {
+  char* endptr;
+  long port_num = std::strtol(port_str, &endptr, NUM_BASE);
+
+  if (*endptr != '\0' || port_num <= 1024 || port_num > 65535) {
+    throw std::invalid_argument("Invalid port number");
+  }
+  return htons((uint16_t)port_num);
 }
 
-void Server::parseArg(int argc, char **argv)
-{
-    if (argc != 3)
-        throw std::invalid_argument("Please use format: ./irc <port> <password>");
-    this->_port = std::atoi(argv[1]);
-    if (this->_port <= 1024 || this->_port > 65535)
-        throw std::out_of_range("Port must be between 1025 and 65535");
-    this->_password = std::string(argv[2]);
-    if (this->_password.empty())
-        throw std::out_of_range("Password must contain of at least 1 letter");
+void Server::parseArg(int argc, char** argv) {
+  if (argc != 3)
+    throw std::invalid_argument("Please use format: ./irc <port> <password>");
+  this->_port = std::atoi(argv[1]);
+  this->_port_num = parse_string_port(argv[1]);
+  this->_host_ip =
+      inet_addr("127.0.0.1");  // sets the default address to localhost
+  this->_password = std::string(argv[2]);
+  if (this->_password.empty())
+    throw std::out_of_range("Password must contain of at least 1 letter");
 }
 
 /* ------------------ belongs to Hubert ------------------*/
-void Server::executeCommand(/*Client* client, */const Message& message)
-{
-    //just testing Message struct
-    std::cout << message.prefix + " ";
-    std::cout << message.command << std::endl;
-    for (size_t i = 0; i < message.params.size(); i++)
-        std::cout << message.params[i] << std::endl;
-    std::cout << "Sanity check for vector of strings size: " << message.params.size() << std::endl;
+void Server::executeCommand(/*Client* client, */ const Message& message) {
+  // just testing Message struct
+  std::cout << message.prefix + " ";
+  std::cout << message.command << std::endl;
+  for (size_t i = 0; i < message.params.size(); i++)
+    std::cout << message.params[i] << std::endl;
+  std::cout << "Sanity check for vector of strings size: "
+            << message.params.size() << std::endl;
 }
 
-/*------------------ for Szymon ------------------
-Source: https://deepwiki.com/42YerevanProjects/ft_irc/3-command-processing-system
-When a client sends a message to the server, the following process occurs:
-1. The server receives the message and passes it to the Parser's method
-2. The Parser tokenizes the message into a command name and arguments (struct Message in our case)
+// Source:
+// https://deepwiki.com/42YerevanProjects/ft_irc/3-command-processing-system
+void Server::run() {
+  init_socket(*this);
+  int epoll_fd = init_epoll(*this);
+  loop_epoll(epoll_fd, *this);
+}
+
+Server::~Server() {
+  // cleaning
+}
+
+uint32_t Server::getHostIp() const { return this->_host_ip; }
+
+uint16_t Server::getPortNum() const { return this->_port_num; }
+
+int Server::getSocketFd() const { return this->_socket_fd; }
+
+void Server::setSocketFd(int fd) { this->_socket_fd = fd; }
+
+
+/* listener */
+
+/*
+  Create a listening socket
+
+  AF_INET = IPv4
+  SOCK_STREAM = TCP
+
+  Set SO_REUSEADDR to 1 (True) Allow Address Reuse
+  Set O_NONBLOCK while preserving flags
 */
-bool Server::processReceivedData(int client_fd) 
-{
-    (void)client_fd;
-    //read with recv() until \r\n
-    //use Client's getBuffer()
-    //append data chunks to Client's buffer
-    //erase the buffer up to \r\n, leave the rest in the buffer for the next loop
-    //send this buffer as a messagLine (std::string) to parser.
-    //also: create client's object to pass for command execution
+int Server::create_socket() {
+  struct protoent* proto = getprotobyname("tcp");
+  int protocol_num = proto ? proto->p_proto : 0;
+
+  int socket_fd = socket(AF_INET, SOCK_STREAM, protocol_num);
+  if (socket_fd == -1) {
+    throw std::runtime_error("Failed to create socket.");
+  }
+
+  int o = 1;
+  if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &o, sizeof(o)) == -1) {
+    throw std::runtime_error("Failed to set socket SO_REUSEADDR.");
+  }
+
+  int flags = fcntl(socket_fd, F_GETFL);
+  int status = fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK);
+  if (status == -1) {
+    throw std::runtime_error("Failed to set socket O_NONBLOCK");
+  }
+  return socket_fd;
+}
+
+void Server::bind_socket(int socket_fd, uint32_t ip_addr, uint16_t host) {
+  struct sockaddr_in addr;
+
+  addr.sin_family = AF_INET;
+  addr.sin_addr.s_addr = ip_addr;
+  addr.sin_port = host;
+
+  if (bind(socket_fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
+    throw std::runtime_error("Failed to bind socket.");
+  }
+
+  struct sockaddr_in bound_addr;
+  socklen_t bound_len = sizeof(bound_addr);
+  if (getsockname(socket_fd, (struct sockaddr*)&bound_addr, &bound_len) != 0) {
+    throw std::runtime_error("Failed to verify bind socket.");
+  }
+}
 
 
-    //Hardcoded message for parsing
-    std::string messageLine = ":dupa #shouldbecommandhere lol :hehe";
-    Message msg;
-    if (!messageLine.empty())
-    {
-        Parser::parse(messageLine, msg);
-        this->executeCommand(/*client, */msg);
+/*
+  SOMAXCONN sets the maximum queue length for pending connections
+*/
+void Server::start_socket(int socket_fd) {
+  if (listen(socket_fd, SOMAXCONN) == -1) {
+    throw std::runtime_error("Failed to listen on socket.");
+  }
+}
+
+void Server::init_socket(Server& server) {
+  int socket_fd = create_socket();
+  bind_socket(socket_fd, server.getHostIp(), server.getPortNum());
+  start_socket(socket_fd);
+  server.setSocketFd(socket_fd);
+}
+
+/* listener */
+/* multiplexer */
+
+void Server::register_socket(int epoll_fd, int socket_fd) {
+  struct epoll_event event;
+  event.events = EPOLLIN;
+  event.data.fd = socket_fd;
+  if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, socket_fd, &event) == -1) {
+    throw std::runtime_error("Failed to add socket to epoll.");
+  }
+}
+
+int Server::init_epoll(Server& server) {
+  int epoll_fd = epoll_create(1);
+  if (epoll_fd == -1) {
+    throw std::runtime_error("Failed to create epoll file descriptor.");
+  }
+  register_socket(epoll_fd, server.getSocketFd());
+  return epoll_fd;
+}
+
+void Server::loop_epoll(int epoll_fd, Server& server) {
+  struct epoll_event events[LIMIT];
+  std::map<int, Client> clients;
+  while (true) {
+    int num_ready = epoll_wait(epoll_fd, events, LIMIT, TIMEOUT);
+    for (int i = 0; i < num_ready; i++) {
+      int event_fd = events[i].data.fd;
+      if (event_fd == server.getSocketFd()) {
+        int client_fd = process_connect(epoll_fd, event_fd);
+        if (client_fd >= 0) {
+          Client c(client_fd);
+          clients.insert(std::make_pair(client_fd, c));
+          std::cout << "Client connected" << std::endl;
+        }
+      } else if (clients.find(event_fd) != clients.end()) {
+        if (process_request(epoll_fd, events[i].events,
+                                             clients.find(event_fd)->second) ==
+            DROP_CONNECTION) {
+          std::cout << "Client disconnected" << std::endl;
+          clients.erase(event_fd);
+          close(event_fd);
+        }
+      }
     }
+  }
+}
+
+/* multiplexer */
+/* request_handler */
+bool Server::process_message(Client& client) {
+  size_t end_pos = client.getRequestBuffer().find(READ_END);
+  if (end_pos != std::string::npos) {
+    std::string message_line = client.getRequestBuffer().substr(0, end_pos);
+    client.getRequestBuffer().erase(0, end_pos + READ_END.size());
+    if (!message_line.empty()) {
+      std::cout << "Parsed line: " << message_line << std::endl;
+      // TODO: Process the message_line (Server::executeCommand)
+      // Message msg;
+      // Parser::parse(message_line, msg);
+      // server.executeCommand(msg);
+      // Message msg;
+      // if (!message_line.empty())
+      // {
+      //     Parser::parse(message_line, msg);
+      //     this->executeCommand(/*client, */msg);
+      // }
+      // Szymon - Response format unclear, for now it's just a string.
+      // In the future create an object, set it in client, and parse it to a
+      // string response in the responder
+      client.getResponseBuffer().append(
+          ":irc-server NOTICE * :*** Received your command: " + message_line +
+          "\r\n");
+    }
+    client.setStatus(READY_TO_RESPOND);
     return true;
+  }
+  return false;
 }
 
-/* ------------------ belongs to Hubert ------------------ */
-void Server::run()
-{
-    /*
-    setup sockets, pollfds array etc.
+HandleResult Server::read_chunk(Client& client) {
+  char recv_buffer[RECV_SIZE];
+  ssize_t bytes = recv(client.getFd(), recv_buffer, sizeof(recv_buffer) - 1, 0);
 
-    get client_fd for Hubert for parsing
-
-    call processReceivedData(client_fd)
-    ...
-    */
-    processReceivedData(10000);
+  if (bytes <= 0) return DROP_CONNECTION;
+  client.getRequestBuffer().append(recv_buffer, bytes);
+  return KEEP_CONNECTION;
 }
 
-Server::~Server()
-{
-    //cleaning
+void Server::schedule_epollout(int epoll_fd, Client& client) {
+  struct epoll_event event = {};
+  event.events = EPOLLIN | EPOLLOUT;
+  event.data.fd = client.getFd();
+  epoll_ctl(epoll_fd, EPOLL_CTL_MOD, client.getFd(), &event);
 }
+
+void Server::schedule_epollin(int epoll_fd, Client& client) {
+  struct epoll_event event = {};
+  event.events = EPOLLIN;
+  event.data.fd = client.getFd();
+  epoll_ctl(epoll_fd, EPOLL_CTL_MOD, client.getFd(), &event);
+}
+
+int Server::process_connect(int epoll_fd, int socket_fd) {
+  struct sockaddr_in addr;
+  socklen_t len = sizeof(addr);
+
+  int client_fd = accept(socket_fd, (struct sockaddr*)&addr, &len);
+  if (client_fd >= 0) {
+    int flags = fcntl(client_fd, F_GETFL, 0);
+    if (flags != -1) {
+      fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);
+    }
+    struct epoll_event event;
+    event.events = EPOLLIN;
+    event.data.fd = client_fd;
+    epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &event);
+  }
+  return client_fd;
+}
+
+HandleResult Server::process_request(int epoll_fd, uint32_t events,
+                                              Client& client) {
+  if (events & EPOLLIN) {
+    if (read_chunk(client) == DROP_CONNECTION) {
+      return DROP_CONNECTION;
+    }
+  }
+
+  while (1) {
+    switch (client.getStatus()) {
+      case READING: {
+        if (!process_message(client)) {
+          if (events & EPOLLOUT) schedule_epollin(epoll_fd, client);
+          return KEEP_CONNECTION;
+        }
+      }
+        // fall through
+      case READY_TO_RESPOND: {
+        if (events & EPOLLOUT) {
+          if (respond(client) == DROP_CONNECTION)
+            return DROP_CONNECTION;
+          if (client.getResponseBuffer().empty())
+            client.reset();
+          else
+            return KEEP_CONNECTION;
+        } else {
+          schedule_epollout(epoll_fd, client);
+          return KEEP_CONNECTION;
+        }
+      }
+    }
+  }
+}
+/* request_handler */
+
+/* response stuff */
+HandleResult Server::respond(Client& client) {
+  if (client.getResponseBuffer().empty()) {
+    return KEEP_CONNECTION;
+  }
+
+  const std::string& buf = client.getResponseBuffer();
+  ssize_t sent = send(client.getFd(), buf.c_str(), buf.size(), 0);
+
+  if (sent <= 0) {
+    return DROP_CONNECTION;
+  }
+
+  client.getResponseBuffer().erase(0, sent);
+  return KEEP_CONNECTION;
+}
+/* response stuff */

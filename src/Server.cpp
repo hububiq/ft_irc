@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "CommandHandler.hpp"
 
 Server::Server(int argc, char** argv) { parseArg(argc, argv); }
 
@@ -21,22 +22,34 @@ void Server::parseArg(int argc, char** argv) {
       inet_addr("127.0.0.1");  // sets the default address to localhost
   this->_password = std::string(argv[2]);
   if (this->_password.empty())
-    throw std::out_of_range("Password must contain of at least 1 letter");
+    throw std::out_of_range("Password must contain at least 1 letter");
 }
 
 /* ------------------ belongs to Hubert ------------------*/
-void Server::executeCommand(/*Client* client, */ const Message& message) {
-  // just testing Message struct
-  std::cout << message.prefix + " ";
-  std::cout << message.command << std::endl;
-  for (size_t i = 0; i < message.params.size(); i++)
-    std::cout << message.params[i] << std::endl;
-  std::cout << "Sanity check for vector of strings size: "
-            << message.params.size() << std::endl;
+void Server::executeMessage(Client& client, Message& msg, Server& server) {
+  switch (client.getState()) {
+    case HANDSHAKE: {
+      if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER") {
+          break ;
+      }
+      else {
+        std::cerr << "ERR_NOTREGISTERED - log" << std::endl;
+        return ;
+      }
+    }
+    case REGISTERED: {
+      if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER") {
+        std::cerr << "ERR_ALREADYREGISTERED - log" << std::endl;
+        return ;
+      }
+      break;
+    // default:
+    //   return ;
+    }
+  }
+  CommandHandler::handleCommand(client, msg, server);
 }
 
-// Source:
-// https://deepwiki.com/42YerevanProjects/ft_irc/3-command-processing-system
 void Server::run() {
   init_socket(*this);
   int epoll_fd = init_epoll(*this);
@@ -55,6 +68,7 @@ int Server::getSocketFd() const { return this->_socket_fd; }
 
 void Server::setSocketFd(int fd) { this->_socket_fd = fd; }
 
+std::string Server::getPassword() { return this->_password; }
 
 /* listener */
 
@@ -77,6 +91,9 @@ int Server::create_socket() {
   }
 
   int o = 1;
+  if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &o, sizeof(o)) == -1) {
+    throw std::runtime_error("Failed to set socket SO_REUSEADDR.");
+  }
   if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &o, sizeof(o)) == -1) {
     throw std::runtime_error("Failed to set socket SO_REUSEADDR.");
   }
@@ -157,7 +174,7 @@ void Server::loop_epoll(int epoll_fd, Server& server) {
         if (client_fd >= 0) {
           Client c(client_fd);
           clients.insert(std::make_pair(client_fd, c));
-          std::cout << "Client connected" << std::endl;
+          std::cout << "Client connected." << std::endl;
         }
       } else if (clients.find(event_fd) != clients.end()) {
         if (process_request(epoll_fd, events[i].events,
@@ -177,27 +194,19 @@ void Server::loop_epoll(int epoll_fd, Server& server) {
 bool Server::process_message(Client& client) {
   size_t end_pos = client.getRequestBuffer().find(READ_END);
   if (end_pos != std::string::npos) {
-    std::string message_line = client.getRequestBuffer().substr(0, end_pos);
+    std::string messageLine = client.getRequestBuffer().substr(0, end_pos);
     client.getRequestBuffer().erase(0, end_pos + READ_END.size());
-    if (!message_line.empty()) {
-      std::cout << "Parsed line: " << message_line << std::endl;
-      // TODO: Process the message_line (Server::executeCommand)
-      // Message msg;
-      // Parser::parse(message_line, msg);
-      // server.executeCommand(msg);
-      // Message msg;
-      // if (!message_line.empty())
-      // {
-      //     Parser::parse(message_line, msg);
-      //     this->executeCommand(/*client, */msg);
-      // }
+    Message msg;
+    if (!messageLine.empty()) {
+        Parser::parseToStruct(messageLine, msg);
+        this->executeMessage(client, msg, *this);
+      }
       // Szymon - Response format unclear, for now it's just a string.
       // In the future create an object, set it in client, and parse it to a
       // string response in the responder
-      client.getResponseBuffer().append(
-          ":irc-server NOTICE * :*** Received your command: " + message_line +
-          "\r\n");
-    }
+      // client.getResponseBuffer().append(
+      //     ":irc-server NOTICE * :*** Received your command: " + messageLine +
+      //     "\r\n");
     client.setStatus(READY_TO_RESPOND);
     return true;
   }

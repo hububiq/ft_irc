@@ -18,7 +18,7 @@ void Parser::extractParams(std::string line, Message& msg) {
   }
 }
 
-void Parser::parse(const std::string& rawMessage, Message& msg) {
+void Parser::parseToStruct(const std::string& rawMessage, Message& msg) {
   std::string line = rawMessage;  // there are 510 characters maximum allowed by
                                   // protocol - should I handle it?
   if (line[0] == ':') {

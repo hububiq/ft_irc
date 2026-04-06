@@ -33,17 +33,14 @@ class Server {
   std::string _password;
   std::map<int, Client *> _clients;
   void parseArg(int argc, char **argv);
-  void executeCommand(/*Client* client, */ const Message
-                          &message);  // belongs to semantic parsing
-
-  // now in request_handler -> bool process_message(Client& client)
-  // bool                   processReceivedData(int client_fd);
- public:
+  void executeMessage(Client& client, Message &msg, Server& server);  // belongs to semantic parsing
+ 
+  public:
   uint32_t getHostIp() const;
   uint16_t getPortNum() const;
   int getSocketFd() const;
   void setSocketFd(int fd);
-
+  std::string getPassword();
   Server(int argc, char **argv);
   ~Server();
   void run();

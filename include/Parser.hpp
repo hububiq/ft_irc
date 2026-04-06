@@ -6,8 +6,10 @@
 #include "Message.hpp"
 
 namespace Parser {
-void parse(const std::string& rawMessage, Message& msg);
+void parseToStruct(const std::string& rawMessage, Message& msg);
 void extractParams(std::string line, Message& msg);
-};  // namespace Parser
+
+// bool isValidNickname()
+};
 
 #endif

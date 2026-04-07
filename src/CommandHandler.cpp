@@ -1,19 +1,55 @@
 #include "CommandHandler.hpp"
 #include "ClientStatus.hpp"
 #include "Parser.hpp"
+
 #include <map>
 #include <iostream>
+#include <cctype>
+#include <algorithm>
+
+void CommandHandler::handleUser(Client& client, Message& msg, Server& server)
+{
+    (void)server;
+    if (msg.params.size() < 2) {
+        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl;
+        return ;
+    }
+    std::string username = msg.params[0];
+    std::string realname = msg.params[1];
+    if (std::find_if(username.begin(), username.end(), ::isalpha) == username.end()
+        || username.find_first_of(std::string(" \r\n\0", 4)) != std::string::npos
+        || realname[0] != ':'
+        || realname.find_first_of(std::string("\0\r\n", 3)) != std::string::npos) {
+        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl;
+        return ;
+    }
+    client.setRealName(realname.substr(1));
+    client.setState(REGISTERED);
+    client.setRegister();
+    std::cout << client.getState() << ": enum state" << std::endl;
+    std::cout << client.getRealName() << ": this is realname" << std::endl;
+    std::cout << client.getRegisterInfo() << " -- 1 if registered" << std::endl;
+}
 
 void CommandHandler::handleNick(Client& client, Message& msg, Server& server)
 {
-    (void)server;
     if (msg.params.empty()) {
         std::cerr << "ERR_NONICKNAMEGIVEN - log" << std::endl; 
         return ;
     }
-    if (!Parser::isValidNickname(msg.params[0]))
+    if (!Parser::isValidNickname(msg.params[0])) {
         std::cerr << "ERR_ERRONEUSNICKNAME - log" << std::endl;
-    client.setNickname(msg.params[0]);    
+        return ;
+    }
+    std::map<int, Client >& cliMap = server.getClients();
+    std::map<int, Client >::iterator it;
+    for (it = cliMap.begin(); it != cliMap.end(); it++) {
+        if (it->second.getNickname() == msg.params[0]) {
+            std::cerr << "ERR_NICKNAMEINUSE - log" << std::endl;
+            return ;
+        }
+    }
+    client.setNickname(msg.params[0]);
 }
 
 void CommandHandler::handlePass(Client& client, Message& msg, Server& server)
@@ -37,7 +73,7 @@ void CommandHandler::handleCommand(Client& client, Message& msg, Server& server)
     {
         commands["PASS"] = handlePass;
         commands["NICK"] = handleNick;
-        //placeholder for other commands' pairs.
+        commands["USER"] = handleUser;
     
     };
     std::map<std::string, void(*)(Client&, Message&, Server&)>::iterator it = commands.find(msg.command);

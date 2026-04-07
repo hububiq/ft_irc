@@ -12,11 +12,15 @@ ClientStatus Client::getStatus() const { return this->_status; }
 
 std::string& Client::getNickname() { return this->_nickname; }
 
+std::string& Client::getRealName() { return this->_realname; }
+
 bool Client::getRegisterInfo() const { return this->_isRegistered; }
 
 bool Client::getAuthInfo() const { return this->_isAuthent; }
 
 ClientState Client::getState() const { return this->_state; }
+
+void Client::setRegister() { this->_isRegistered = true; }
 
 void Client::setAuth() { this->_isAuthent = true; }
 
@@ -27,6 +31,8 @@ void Client::setStatus(ClientStatus status) { this->_status = status; }
 void Client::setHostname(std::string& hostname) { this->_hostname = hostname; }
 
 void Client::setNickname(std::string nick) { this->_nickname = nick; }
+
+void Client::setRealName(std::string rname) { this->_realname = rname; }
 
 void Client::reset() {
   this->_status = READING;

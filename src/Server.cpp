@@ -33,8 +33,7 @@ void Server::executeMessage(Client& client, Message& msg, Server& server) {
         std::cerr << "ERR_NOTREGISTERED - log" << std::endl;
         return ;
       }
-      else
-        break;
+      break;
     }
     case HANDSHAKE: {
       if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER") {
@@ -75,6 +74,8 @@ int Server::getSocketFd() const { return this->_socket_fd; }
 void Server::setSocketFd(int fd) { this->_socket_fd = fd; }
 
 std::string Server::getPassword() { return this->_password; }
+
+std::map<int, Client>& Server::getClients() { return this->_clients; }
 
 /* listener */
 
@@ -158,21 +159,19 @@ int Server::init_epoll(Server& server) {
 
 void Server::loop_epoll(int epoll_fd, Server& server) {
   struct epoll_event events[LIMIT];
-  std::map<int, Client> clients;
   while (true) {
     int num_ready = epoll_wait(epoll_fd, events, LIMIT, TIMEOUT);
     for (int i = 0; i < num_ready; i++) {
       int event_fd = events[i].data.fd;
-      process_event()
       if (event_fd == server.getSocketFd()) {
-        process_connect(epoll_fd, event_fd, clients);
+        process_connect(epoll_fd, event_fd, server._clients);
       } else {
-        std::map<int, Client>::iterator it = clients.find(event_fd);
-        if (it != clients.end()) {
+        std::map<int, Client>::iterator it = server._clients.find(event_fd);
+        if (it != server._clients.end()) {
           HandleResult res = process_request(epoll_fd, events[i].events, it->second);
           if (res == DROP_CONNECTION) {
             std::cout << "Client disconnected" << std::endl;
-            clients.erase(it);
+            server._clients.erase(it);
             close(event_fd);
           }
         }
@@ -220,6 +219,7 @@ bool Server::process_message(Client& client) {
         Parser::parseToStruct(messageLine, msg);
         this->executeMessage(client, msg, *this);
       }
+
       // Szymon - Response format unclear, for now it's just a string.
       // In the future create an object, set it in client, and parse it to a
       // string response in the responder

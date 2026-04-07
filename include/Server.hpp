@@ -31,7 +31,7 @@ class Server {
   uint32_t _host_ip;
   uint16_t _port_num;
   std::string _password;
-  std::map<int, Client *> _clients;
+  std::map<int, Client> _clients;
   void parseArg(int argc, char **argv);
   void executeMessage(Client& client, Message &msg, Server& server);  // belongs to semantic parsing
  
@@ -61,6 +61,7 @@ class Server {
   void process_connect(int epoll_fd, int socket_fd, std::map<int, Client>& clients);
   HandleResult process_request(int epoll_fd, uint32_t events, Client& client);
   HandleResult respond(Client& client);
+  std::map<int, Client>& getClients();
 };
 
 #endif

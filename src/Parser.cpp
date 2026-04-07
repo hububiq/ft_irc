@@ -6,7 +6,6 @@
 #include <iostream>
 
 bool Parser::isValidNickname(std::string& nick) {
-  // std::string nick = client.getNickname();
   std::string specials = "-\\[]`^{}";
   if (nick.size() > 9 || !isalpha(nick[0])) {
     std::cerr << "ERR_ERRONEUSNICKNAME - log" << std::endl;

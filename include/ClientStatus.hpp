@@ -8,6 +8,7 @@ enum ClientStatus {
 /*Szymon, you can merge these two enums if you need yours*/
 enum ClientState
 {
+    CONNECTED,
     HANDSHAKE,
     REGISTERED
 };

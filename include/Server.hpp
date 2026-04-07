@@ -57,7 +57,7 @@ class Server {
   HandleResult read_chunk(Client& client);
   void schedule_epollout(int epoll_fd, Client& client);
   void schedule_epollin(int epoll_fd, Client& client);
-  int process_connect(int epoll_fd, int socket_fd);
+  int process_connect(int epoll_fd, int socket_fd, std::string& hostname);
   HandleResult process_request(int epoll_fd, uint32_t events, Client& client);
   HandleResult respond(Client& client);
 };

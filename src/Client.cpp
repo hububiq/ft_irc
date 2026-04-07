@@ -10,6 +10,8 @@ std::string& Client::getResponseBuffer() { return this->_response_buffer; }
 
 ClientStatus Client::getStatus() const { return this->_status; }
 
+std::string& Client::getNickname() { return this->_nickname; }
+
 bool Client::getRegisterInfo() const { return this->_isRegistered; }
 
 bool Client::getAuthInfo() const { return this->_isAuthent; }
@@ -21,6 +23,10 @@ void Client::setAuth() { this->_isAuthent = true; }
 void Client::setState(ClientState state) { this->_state = state; }
 
 void Client::setStatus(ClientStatus status) { this->_status = status; }
+
+void Client::setHostname(std::string& hostname) { this->_hostname = hostname; }
+
+void Client::setNickname(std::string nick) { this->_nickname = nick; }
 
 void Client::reset() {
   this->_status = READING;

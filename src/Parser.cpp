@@ -2,6 +2,24 @@
 
 #include <algorithm>
 #include <sstream>
+#include <cctype>
+#include <iostream>
+
+bool Parser::isValidNickname(std::string& nick) {
+  // std::string nick = client.getNickname();
+  std::string specials = "-\\[]`^{}";
+  if (nick.size() > 9 || !isalpha(nick[0])) {
+    std::cerr << "ERR_ERRONEUSNICKNAME - log" << std::endl;
+    return false;
+  }
+  for (size_t i = 1; i < nick.size(); i++) {
+    if (!isalpha(nick[i]) && !isdigit(nick[i]) && specials.find(nick[i]) == std::string::npos) {
+      std::cerr << "ERR_ERRONEUSNICKNAME - log" << std::endl;
+      return false;
+    }
+  }
+  return true;
+}
 
 void Parser::extractParams(std::string line, Message& msg) {
   std::istringstream ss(line);

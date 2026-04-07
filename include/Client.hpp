@@ -9,6 +9,7 @@ class Client {
   int _fd;
   std::string _nickname;
   std::string _username;
+  std::string _hostname;
   ClientStatus _status;
   ClientState _state;
   bool _isRegistered;
@@ -24,12 +25,15 @@ class Client {
   bool getRegisterInfo() const;
   bool getAuthInfo() const;
   ClientState getState() const;
+  std::string& getNickname();
   std::string& getRequestBuffer();
   std::string& getResponseBuffer();
   ClientStatus getStatus() const;
   void setStatus(ClientStatus status);
   void setAuth();
   void setState(ClientState state);
+  void setHostname(std::string& hostname);
+  void setNickname(std::string nick);
   void reset();
 };
 

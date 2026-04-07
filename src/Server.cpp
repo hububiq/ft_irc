@@ -28,6 +28,14 @@ void Server::parseArg(int argc, char** argv) {
 /* ------------------ belongs to Hubert ------------------*/
 void Server::executeMessage(Client& client, Message& msg, Server& server) {
   switch (client.getState()) {
+    case CONNECTED: {
+      if (msg.command != "PASS") {
+        std::cerr << "ERR_NOTREGISTERED - log" << std::endl;
+        return ;
+      }
+      else
+        break;
+    }
     case HANDSHAKE: {
       if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER") {
           break ;
@@ -43,8 +51,6 @@ void Server::executeMessage(Client& client, Message& msg, Server& server) {
         return ;
       }
       break;
-    // default:
-    //   return ;
     }
   }
   CommandHandler::handleCommand(client, msg, server);
@@ -170,9 +176,12 @@ void Server::loop_epoll(int epoll_fd, Server& server) {
     for (int i = 0; i < num_ready; i++) {
       int event_fd = events[i].data.fd;
       if (event_fd == server.getSocketFd()) {
-        int client_fd = process_connect(epoll_fd, event_fd);
+        std::string hostname;
+        int client_fd = process_connect(epoll_fd, event_fd, hostname);
         if (client_fd >= 0) {
           Client c(client_fd);
+          c.setHostname(hostname);
+          c.setState(CONNECTED);
           clients.insert(std::make_pair(client_fd, c));
           std::cout << "Client connected." << std::endl;
         }
@@ -236,12 +245,13 @@ void Server::schedule_epollin(int epoll_fd, Client& client) {
   epoll_ctl(epoll_fd, EPOLL_CTL_MOD, client.getFd(), &event);
 }
 
-int Server::process_connect(int epoll_fd, int socket_fd) {
+int Server::process_connect(int epoll_fd, int socket_fd, std::string& hostname) {
   struct sockaddr_in addr;
   socklen_t len = sizeof(addr);
 
   int client_fd = accept(socket_fd, (struct sockaddr*)&addr, &len);
   if (client_fd >= 0) {
+    hostname = inet_ntoa(addr.sin_addr);
     int flags = fcntl(client_fd, F_GETFL, 0);
     if (flags != -1) {
       fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);

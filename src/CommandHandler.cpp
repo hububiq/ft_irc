@@ -1,12 +1,20 @@
 #include "CommandHandler.hpp"
 #include "ClientStatus.hpp"
+#include "Parser.hpp"
 #include <map>
 #include <iostream>
 
-// void CommandHandler::handleNick(Client& client, Message& msg, Server& server)
-// {
-//     (void)client;
-// }
+void CommandHandler::handleNick(Client& client, Message& msg, Server& server)
+{
+    (void)server;
+    if (msg.params.empty()) {
+        std::cerr << "ERR_NONICKNAMEGIVEN - log" << std::endl; 
+        return ;
+    }
+    if (!Parser::isValidNickname(msg.params[0]))
+        std::cerr << "ERR_ERRONEUSNICKNAME - log" << std::endl;
+    client.setNickname(msg.params[0]);    
+}
 
 void CommandHandler::handlePass(Client& client, Message& msg, Server& server)
 {
@@ -28,7 +36,7 @@ void CommandHandler::handleCommand(Client& client, Message& msg, Server& server)
     if (commands.empty())
     {
         commands["PASS"] = handlePass;
-        // commands["NICK"] = handleNick;
+        commands["NICK"] = handleNick;
         //placeholder for other commands' pairs.
     
     };

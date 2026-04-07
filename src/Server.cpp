@@ -78,15 +78,6 @@ std::string Server::getPassword() { return this->_password; }
 
 /* listener */
 
-/*
-  Create a listening socket
-
-  AF_INET = IPv4
-  SOCK_STREAM = TCP
-
-  Set SO_REUSEADDR to 1 (True) Allow Address Reuse
-  Set O_NONBLOCK while preserving flags
-*/
 int Server::create_socket() {
   struct protoent* proto = getprotobyname("tcp");
   int protocol_num = proto ? proto->p_proto : 0;
@@ -131,9 +122,6 @@ void Server::bind_socket(int socket_fd, uint32_t ip_addr, uint16_t host) {
 }
 
 
-/*
-  SOMAXCONN sets the maximum queue length for pending connections
-*/
 void Server::start_socket(int socket_fd) {
   if (listen(socket_fd, SOMAXCONN) == -1) {
     throw std::runtime_error("Failed to listen on socket.");
@@ -175,27 +163,49 @@ void Server::loop_epoll(int epoll_fd, Server& server) {
     int num_ready = epoll_wait(epoll_fd, events, LIMIT, TIMEOUT);
     for (int i = 0; i < num_ready; i++) {
       int event_fd = events[i].data.fd;
+      process_event()
       if (event_fd == server.getSocketFd()) {
-        std::string hostname;
-        int client_fd = process_connect(epoll_fd, event_fd, hostname);
-        if (client_fd >= 0) {
-          Client c(client_fd);
-          c.setHostname(hostname);
-          c.setState(CONNECTED);
-          clients.insert(std::make_pair(client_fd, c));
-          std::cout << "Client connected." << std::endl;
-        }
-      } else if (clients.find(event_fd) != clients.end()) {
-        if (process_request(epoll_fd, events[i].events,
-                                             clients.find(event_fd)->second) ==
-            DROP_CONNECTION) {
-          std::cout << "Client disconnected" << std::endl;
-          clients.erase(event_fd);
-          close(event_fd);
+        process_connect(epoll_fd, event_fd, clients);
+      } else {
+        std::map<int, Client>::iterator it = clients.find(event_fd);
+        if (it != clients.end()) {
+          HandleResult res = process_request(epoll_fd, events[i].events, it->second);
+          if (res == DROP_CONNECTION) {
+            std::cout << "Client disconnected" << std::endl;
+            clients.erase(it);
+            close(event_fd);
+          }
         }
       }
     }
   }
+}
+
+void Server::register_client(int client_fd, std::string& hostname, std::map<int, Client>& clients) {
+  Client c(client_fd);
+  c.setHostname(hostname);
+  c.setState(CONNECTED);
+  clients.insert(std::make_pair(client_fd, c));
+  std::cout << "Client connected." << std::endl;
+}
+
+void Server::process_connect(int epoll_fd, int socket_fd, std::map<int, Client>& clients) {
+  struct sockaddr_in addr;
+  socklen_t len = sizeof(addr);
+
+  int client_fd = accept(socket_fd, (struct sockaddr*)&addr, &len);
+  if (client_fd >= 0) {
+    std::string hostname = inet_ntoa(addr.sin_addr);
+    int flags = fcntl(client_fd, F_GETFL, 0);
+    if (flags != -1) {
+      fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);
+    }
+    struct epoll_event event;
+    event.events = EPOLLIN;
+    event.data.fd = client_fd;
+    epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &event);
+    register_client(client_fd, hostname, clients);
+  } 
 }
 
 /* multiplexer */
@@ -243,25 +253,6 @@ void Server::schedule_epollin(int epoll_fd, Client& client) {
   event.events = EPOLLIN;
   event.data.fd = client.getFd();
   epoll_ctl(epoll_fd, EPOLL_CTL_MOD, client.getFd(), &event);
-}
-
-int Server::process_connect(int epoll_fd, int socket_fd, std::string& hostname) {
-  struct sockaddr_in addr;
-  socklen_t len = sizeof(addr);
-
-  int client_fd = accept(socket_fd, (struct sockaddr*)&addr, &len);
-  if (client_fd >= 0) {
-    hostname = inet_ntoa(addr.sin_addr);
-    int flags = fcntl(client_fd, F_GETFL, 0);
-    if (flags != -1) {
-      fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);
-    }
-    struct epoll_event event;
-    event.events = EPOLLIN;
-    event.data.fd = client_fd;
-    epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &event);
-  }
-  return client_fd;
 }
 
 HandleResult Server::process_request(int epoll_fd, uint32_t events,

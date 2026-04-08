@@ -1,4 +1,7 @@
-#include "Channel.hpp"
+//#include "Channel.hpp"
+//#include "Client.hpp"
+#include "../include/Channel.hpp"
+#include "../include/Client.hpp"
 #include <algorithm>
 
 Channel::Channel(std::string& name, std::string& key, Client *admin)
@@ -10,7 +13,7 @@ Channel::Channel(std::string& name, std::string& key, Client *admin)
 }
 Channel::~Channel() {}
 
-void Channel::add_client(Client* cli)
+void Channel::add_client(Client* client)
 {
   this->_clients_list.push_back(client);
 }
@@ -23,10 +26,23 @@ void Channel::remove_client(Client* client)
     // find an object in a vector object list
     this->_clients_list.erase(
       std::find(_clients_list.begin(),
-      _clients_list.end(), 
+      _clients_list.end(),
       client));
   }
   // Check the std::remove also
+}
+
+
+void Channel::broadcast(const std::string& message)
+{
+  std::vector<Client*>::iterator it = _clients_list.begin();
+  std::vector<Client*>::iterator it_end = _clients_list.end();
+
+  while (it != it_end) 
+  {
+    (*it)->write_msg(message); // will send a message on a socket for each client
+    ++it;
+  }
 }
 
 // --- Getters and Setters

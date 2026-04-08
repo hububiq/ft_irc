@@ -12,6 +12,7 @@ class Channel
 private:
   std::string           _channel_name;
   std::string           _topic;
+  Client                *_admin;
   std::vector<Client *> _admins;
   std::vector<Client*>  _clients_list;
   /* Channel MODEs */
@@ -25,8 +26,10 @@ public:
   Channel(std::string& name, std::string& key, Client *admin);
   ~Channel();
 
-  void add_client(Client* cli);
+  void add_client(Client*);
   void remove_client(Client*);
+  void kick(Client *client, Client *target, const std::string& reason);
+  void broadcast(const std::string&);
   /* 1. Some sort of broadcast message to notify
    * all clients that someone joined (_clinets_list)*/
   /* 2. general broadcast message in the channel */

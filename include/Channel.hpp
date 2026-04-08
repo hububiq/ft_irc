@@ -11,7 +11,8 @@ class Channel
 {
 private:
   std::string           _channel_name;
-  Client                *_admin;
+  std::string           _topic;
+  std::vector<Client *> _admins;
   std::vector<Client*>  _clients_list;
   /* Channel MODEs */
   bool                  _i; // Set/remove Invite-only
@@ -24,7 +25,7 @@ public:
   Channel(std::string& name, std::string& key, Client *admin);
   ~Channel();
 
-  void add_client(Client*);
+  void add_client(Client* cli);
   void remove_client(Client*);
   /* 1. Some sort of broadcast message to notify
    * all clients that someone joined (_clinets_list)*/
@@ -38,3 +39,4 @@ public:
 };
 
 #endif
+

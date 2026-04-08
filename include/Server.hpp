@@ -21,6 +21,7 @@
 #include "Client.hpp"
 #include "Message.hpp"
 #include "Parser.hpp"
+#include "Channel.hpp"
 #include "EpollConfig.hpp"
 #include "ClientStatus.hpp"
 
@@ -32,6 +33,7 @@ class Server {
   uint16_t _port_num;
   std::string _password;
   std::map<int, Client> _clients;
+  std::map<std::string, Channel> _channels;
   void parseArg(int argc, char **argv);
   void executeMessage(Client& client, Message &msg, Server& server);  // belongs to semantic parsing
  
@@ -62,7 +64,7 @@ class Server {
   HandleResult process_request(int epoll_fd, uint32_t events, Client& client);
   HandleResult respond(Client& client);
   std::map<int, Client>& getClients();
-  // Channel
+  Channel& getChannel(std::string& chann);
   void create_channel();
 };
 

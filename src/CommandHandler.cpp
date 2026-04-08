@@ -7,6 +7,26 @@
 #include <cctype>
 #include <algorithm>
 
+// void CommandHandler::handleQuit(Client& client, Message& msg, Server& server)
+// {
+//     //build reason and prefix
+//     //notify and remove from all channels
+//     //erase from server._clients using fd
+//     //closing fd probably happens on server's side?
+// }
+
+// void CommandHandler::handlePrivMsg(Client& client, Message& msg, Server& server)
+// {
+
+// }
+
+// void CommandHandler::handleJoin(Client& client, Message& msg, Server& server)
+// {
+//     '#' parsing
+//     if he wanna join specific channel, serve.getChannel(), addMember(), remember if it was empty, add to operator.
+//     if no specific channel given in parameters, create new channel with him as an operator.
+// }
+
 void CommandHandler::handleUser(Client& client, Message& msg, Server& server)
 {
     (void)server;
@@ -74,6 +94,7 @@ void CommandHandler::handleCommand(Client& client, Message& msg, Server& server)
         commands["PASS"] = handlePass;
         commands["NICK"] = handleNick;
         commands["USER"] = handleUser;
+        // commands["QUIT"] = handleQuit;
     
     };
     std::map<std::string, void(*)(Client&, Message&, Server&)>::iterator it = commands.find(msg.command);

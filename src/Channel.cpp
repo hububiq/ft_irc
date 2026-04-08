@@ -1,4 +1,4 @@
-#include "../include/Channel.hpp"
+#include "Channel.hpp"
 #include <algorithm>
 
 Channel::Channel(std::string& name, std::string& key, Client *admin)
@@ -10,7 +10,7 @@ Channel::Channel(std::string& name, std::string& key, Client *admin)
 }
 Channel::~Channel() {}
 
-void Channel::add_client(Client* client)
+void Channel::add_client(Client* cli)
 {
   this->_clients_list.push_back(client);
 }

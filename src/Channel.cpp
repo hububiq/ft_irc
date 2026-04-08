@@ -1,5 +1,37 @@
 #include "Channel.hpp"
+#include <algorithm>
 
-void Channel::addMember(Client* cli) {
-    this->_members.push_back(cli);
+Channel::Channel(std::string& name, std::string& key, Client *admin)
+{
+  this->_channel_name = name;
+  this->_k = key;
+  this->_admin = admin;
+  this->_l = 0;
 }
+Channel::~Channel() {}
+
+void Channel::add_client(Client* cli)
+{
+  this->_clients_list.push_back(client);
+}
+void Channel::remove_client(Client* client)
+{
+  if (client && this->_admin)
+    // find new admin
+    // and then remove
+  if (client) {
+    // find an object in a vector object list
+    this->_clients_list.erase(
+      std::find(_clients_list.begin(),
+      _clients_list.end(), 
+      client));
+  }
+  // Check the std::remove also
+}
+
+// --- Getters and Setters
+void Channel::setKey(std::string& key) { _k = key; }
+std::string Channel::getKey() const { return this->_k; }
+
+void Channel::setMaxMembers(unsigned int max) { _l = max; }
+unsigned int Channel::getMaxMembers() const { return this->_l; }

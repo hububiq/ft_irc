@@ -5,7 +5,7 @@ INC_DIR = include
 SRC_DIR = src
 OBJ_DIR = obj
 INCLUDES = -I${INC_DIR}
-SRCS = ${wildcard ${SRC_DIR}/*.cpp} ${wildcard ${SRC_DIR}/*/%.cpp} ${wildcard ${SRC_DIR}/server/*.cpp}
+SRCS = ${wildcard ${SRC_DIR}/*.cpp}
 OBJS = ${SRCS:${SRC_DIR}/%.cpp=${OBJ_DIR}/%.o}
 RM = rm -rf
 

@@ -2,6 +2,23 @@
 
 #include <algorithm>
 #include <sstream>
+#include <cctype>
+#include <iostream>
+
+bool Parser::isValidNickname(std::string& nick) {
+  std::string specials = "-\\[]`^{}";
+  if (nick.size() > 9 || !isalpha(nick[0])) {
+    std::cerr << "ERR_ERRONEUSNICKNAME - log" << std::endl;
+    return false;
+  }
+  for (size_t i = 1; i < nick.size(); i++) {
+    if (!isalpha(nick[i]) && !isdigit(nick[i]) && specials.find(nick[i]) == std::string::npos) {
+      std::cerr << "ERR_ERRONEUSNICKNAME - log" << std::endl;
+      return false;
+    }
+  }
+  return true;
+}
 
 void Parser::extractParams(std::string line, Message& msg) {
   std::istringstream ss(line);
@@ -18,7 +35,7 @@ void Parser::extractParams(std::string line, Message& msg) {
   }
 }
 
-void Parser::parse(const std::string& rawMessage, Message& msg) {
+void Parser::parseToStruct(const std::string& rawMessage, Message& msg) {
   std::string line = rawMessage;  // there are 510 characters maximum allowed by
                                   // protocol - should I handle it?
   if (line[0] == ':') {

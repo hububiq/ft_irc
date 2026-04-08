@@ -4,10 +4,12 @@
 #include <string>
 
 #include "Message.hpp"
+#include "Client.hpp"
 
 namespace Parser {
-void parse(const std::string& rawMessage, Message& msg);
+void parseToStruct(const std::string& rawMessage, Message& msg);
 void extractParams(std::string line, Message& msg);
-};  // namespace Parser
+bool isValidNickname(std::string& nick);
+};
 
 #endif

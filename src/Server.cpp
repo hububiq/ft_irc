@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "CommandHandler.hpp"
 
 Server::Server(int argc, char** argv) { parseArg(argc, argv); }
 
@@ -21,22 +22,39 @@ void Server::parseArg(int argc, char** argv) {
       inet_addr("127.0.0.1");  // sets the default address to localhost
   this->_password = std::string(argv[2]);
   if (this->_password.empty())
-    throw std::out_of_range("Password must contain of at least 1 letter");
+    throw std::out_of_range("Password must contain at least 1 letter");
 }
 
 /* ------------------ belongs to Hubert ------------------*/
-void Server::executeCommand(/*Client* client, */ const Message& message) {
-  // just testing Message struct
-  std::cout << message.prefix + " ";
-  std::cout << message.command << std::endl;
-  for (size_t i = 0; i < message.params.size(); i++)
-    std::cout << message.params[i] << std::endl;
-  std::cout << "Sanity check for vector of strings size: "
-            << message.params.size() << std::endl;
+void Server::executeMessage(Client& client, Message& msg, Server& server) {
+  switch (client.getState()) {
+    case CONNECTED: {
+      if (msg.command != "PASS") {
+        std::cerr << "ERR_NOTREGISTERED - log" << std::endl;
+        return ;
+      }
+      break;
+    }
+    case HANDSHAKE: {
+      if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER") {
+          break ;
+      }
+      else {
+        std::cerr << "ERR_NOTREGISTERED - log" << std::endl;
+        return ;
+      }
+    }
+    case REGISTERED: {
+      if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER") {
+        std::cerr << "ERR_ALREADYREGISTERED - log" << std::endl;
+        return ;
+      }
+      break;
+    }
+  }
+  CommandHandler::handleCommand(client, msg, server);
 }
 
-// Source:
-// https://deepwiki.com/42YerevanProjects/ft_irc/3-command-processing-system
 void Server::run() {
   init_socket(*this);
   int epoll_fd = init_epoll(*this);
@@ -55,18 +73,12 @@ int Server::getSocketFd() const { return this->_socket_fd; }
 
 void Server::setSocketFd(int fd) { this->_socket_fd = fd; }
 
+std::string Server::getPassword() { return this->_password; }
+
+std::map<int, Client>& Server::getClients() { return this->_clients; }
 
 /* listener */
 
-/*
-  Create a listening socket
-
-  AF_INET = IPv4
-  SOCK_STREAM = TCP
-
-  Set SO_REUSEADDR to 1 (True) Allow Address Reuse
-  Set O_NONBLOCK while preserving flags
-*/
 int Server::create_socket() {
   struct protoent* proto = getprotobyname("tcp");
   int protocol_num = proto ? proto->p_proto : 0;
@@ -77,6 +89,9 @@ int Server::create_socket() {
   }
 
   int o = 1;
+  if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &o, sizeof(o)) == -1) {
+    throw std::runtime_error("Failed to set socket SO_REUSEADDR.");
+  }
   if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &o, sizeof(o)) == -1) {
     throw std::runtime_error("Failed to set socket SO_REUSEADDR.");
   }
@@ -108,9 +123,6 @@ void Server::bind_socket(int socket_fd, uint32_t ip_addr, uint16_t host) {
 }
 
 
-/*
-  SOMAXCONN sets the maximum queue length for pending connections
-*/
 void Server::start_socket(int socket_fd) {
   if (listen(socket_fd, SOMAXCONN) == -1) {
     throw std::runtime_error("Failed to listen on socket.");
@@ -147,29 +159,52 @@ int Server::init_epoll(Server& server) {
 
 void Server::loop_epoll(int epoll_fd, Server& server) {
   struct epoll_event events[LIMIT];
-  std::map<int, Client> clients;
   while (true) {
     int num_ready = epoll_wait(epoll_fd, events, LIMIT, TIMEOUT);
     for (int i = 0; i < num_ready; i++) {
       int event_fd = events[i].data.fd;
       if (event_fd == server.getSocketFd()) {
-        int client_fd = process_connect(epoll_fd, event_fd);
-        if (client_fd >= 0) {
-          Client c(client_fd);
-          clients.insert(std::make_pair(client_fd, c));
-          std::cout << "Client connected" << std::endl;
-        }
-      } else if (clients.find(event_fd) != clients.end()) {
-        if (process_request(epoll_fd, events[i].events,
-                                             clients.find(event_fd)->second) ==
-            DROP_CONNECTION) {
-          std::cout << "Client disconnected" << std::endl;
-          clients.erase(event_fd);
-          close(event_fd);
+        process_connect(epoll_fd, event_fd, server._clients);
+      } else {
+        std::map<int, Client>::iterator it = server._clients.find(event_fd);
+        if (it != server._clients.end()) {
+          HandleResult res = process_request(epoll_fd, events[i].events, it->second);
+          if (res == DROP_CONNECTION) {
+            std::cout << "Client disconnected" << std::endl;
+            server._clients.erase(it);
+            close(event_fd);
+          }
         }
       }
     }
   }
+}
+
+void Server::register_client(int client_fd, std::string& hostname, std::map<int, Client>& clients) {
+  Client c(client_fd);
+  c.setHostname(hostname);
+  c.setState(CONNECTED);
+  clients.insert(std::make_pair(client_fd, c));
+  std::cout << "Client connected." << std::endl;
+}
+
+void Server::process_connect(int epoll_fd, int socket_fd, std::map<int, Client>& clients) {
+  struct sockaddr_in addr;
+  socklen_t len = sizeof(addr);
+
+  int client_fd = accept(socket_fd, (struct sockaddr*)&addr, &len);
+  if (client_fd >= 0) {
+    std::string hostname = inet_ntoa(addr.sin_addr);
+    int flags = fcntl(client_fd, F_GETFL, 0);
+    if (flags != -1) {
+      fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);
+    }
+    struct epoll_event event;
+    event.events = EPOLLIN;
+    event.data.fd = client_fd;
+    epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &event);
+    register_client(client_fd, hostname, clients);
+  } 
 }
 
 /* multiplexer */
@@ -177,27 +212,20 @@ void Server::loop_epoll(int epoll_fd, Server& server) {
 bool Server::process_message(Client& client) {
   size_t end_pos = client.getRequestBuffer().find(READ_END);
   if (end_pos != std::string::npos) {
-    std::string message_line = client.getRequestBuffer().substr(0, end_pos);
+    std::string messageLine = client.getRequestBuffer().substr(0, end_pos);
     client.getRequestBuffer().erase(0, end_pos + READ_END.size());
-    if (!message_line.empty()) {
-      std::cout << "Parsed line: " << message_line << std::endl;
-      // TODO: Process the message_line (Server::executeCommand)
-      // Message msg;
-      // Parser::parse(message_line, msg);
-      // server.executeCommand(msg);
-      // Message msg;
-      // if (!message_line.empty())
-      // {
-      //     Parser::parse(message_line, msg);
-      //     this->executeCommand(/*client, */msg);
-      // }
+    Message msg;
+    if (!messageLine.empty()) {
+        Parser::parseToStruct(messageLine, msg);
+        this->executeMessage(client, msg, *this);
+      }
+
       // Szymon - Response format unclear, for now it's just a string.
       // In the future create an object, set it in client, and parse it to a
       // string response in the responder
-      client.getResponseBuffer().append(
-          ":irc-server NOTICE * :*** Received your command: " + message_line +
-          "\r\n");
-    }
+      // client.getResponseBuffer().append(
+      //     ":irc-server NOTICE * :*** Received your command: " + messageLine +
+      //     "\r\n");
     client.setStatus(READY_TO_RESPOND);
     return true;
   }
@@ -225,24 +253,6 @@ void Server::schedule_epollin(int epoll_fd, Client& client) {
   event.events = EPOLLIN;
   event.data.fd = client.getFd();
   epoll_ctl(epoll_fd, EPOLL_CTL_MOD, client.getFd(), &event);
-}
-
-int Server::process_connect(int epoll_fd, int socket_fd) {
-  struct sockaddr_in addr;
-  socklen_t len = sizeof(addr);
-
-  int client_fd = accept(socket_fd, (struct sockaddr*)&addr, &len);
-  if (client_fd >= 0) {
-    int flags = fcntl(client_fd, F_GETFL, 0);
-    if (flags != -1) {
-      fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);
-    }
-    struct epoll_event event;
-    event.events = EPOLLIN;
-    event.data.fd = client_fd;
-    epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &event);
-  }
-  return client_fd;
 }
 
 HandleResult Server::process_request(int epoll_fd, uint32_t events,

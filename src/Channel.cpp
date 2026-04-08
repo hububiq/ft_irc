@@ -1,37 +1,58 @@
 #include "Channel.hpp"
 #include <algorithm>
 
-Channel::Channel(std::string& name, std::string& key, Client *admin)
-{
-  this->_channel_name = name;
-  this->_k = key;
-  this->_admin = admin;
-  this->_l = 0;
-}
+Channel::Channel(): //PRIMITIVES dont initialise to 0 automatically
+  _limit(0), _i(false), _t(false),
+  _k(false), _l(false), _o(false) {}
+
+// ------ NOTE TO MYSELF------need to use this constructor to make handleJoin cleaner!!------
+// Channel::Channel(std::string& name, std::string& key, Client *admin)
+// {
+//   this->_channel_name = name;
+//   this->_k = key;
+//   this->_admin = admin;
+//   this->_l = 0;
+// }
 Channel::~Channel() {}
 
-void Channel::add_client(Client* cli)
-{
-  this->_clients_list.push_back(client);
-}
-void Channel::remove_client(Client* client)
-{
-  if (client && this->_admin)
-    // find new admin
-    // and then remove
-  if (client) {
-    // find an object in a vector object list
-    this->_clients_list.erase(
-      std::find(_clients_list.begin(),
-      _clients_list.end(), 
-      client));
-  }
-  // Check the std::remove also
+void Channel::add_client(Client* cli) {
+  this->_members.push_back(cli);
 }
 
-// --- Getters and Setters
-void Channel::setKey(std::string& key) { _k = key; }
-std::string Channel::getKey() const { return this->_k; }
+std::vector<Client *>& Channel::getAdmins() { return this->_admins; }
 
-void Channel::setMaxMembers(unsigned int max) { _l = max; }
-unsigned int Channel::getMaxMembers() const { return this->_l; }
+std::vector<Client *>& Channel::getMembers() { return this->_members; }
+
+unsigned int Channel::getLimit() const { return this->_limit; }
+
+std::string Channel::getKey() const { return this->_key; }
+
+unsigned int Channel::getMaxMembers() const { return this->_limit; }
+
+void Channel::setKey(std::string& key) { _key = key; }
+
+bool Channel::isInviteOnly() { return this->_i; }
+
+bool Channel::isTopicForOperator() { return this->_t; }
+
+bool Channel::isChannelKey() { return this->_k; }
+
+bool Channel::isChannelLimit() { return this->_l; }
+
+bool Channel::isOperatorAssignable() { return this->_o; }
+
+
+// void Channel::remove_client(Client* client)
+// {
+//   if (client && this->_admin)
+//     // find new admin
+//     // and then remove
+//   if (client) {
+//     // find an object in a vector object list
+//     this->_clients_list.erase(
+//       std::find(_clients_list.begin(),
+//       _clients_list.end(), 
+//       client));
+//   }
+//   // Check the std::remove also
+// }

@@ -77,12 +77,18 @@ std::string Server::getPassword() { return this->_password; }
 
 std::map<int, Client>& Server::getClients() { return this->_clients; }
 
-Channel& Server::getChannel(std::string& chann) {
+Channel* Server::getChannel(std::string& chann) {
   std::map<std::string, Channel>::iterator it = this->_channels.find(chann);
   if (it != this->_channels.end())
-    return it->second;
-  return _channels[chann]; //creates empty channel in map, gonna add operator, automatic resize
+    return &it->second; //address of second map parameter - channel
+  return NULL; //creates empty channel in map, gonna add operator,
+                          // map automatically resizes
 }
+
+void Server::addChannel(Channel& ch, std::string& chName) {
+  this->_channels[chName] = ch;
+}
+
 /* listener */
 
 int Server::create_socket() {

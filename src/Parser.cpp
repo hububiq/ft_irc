@@ -5,6 +5,42 @@
 #include <cctype>
 #include <iostream>
 
+bool Parser::modeGuardChecks(Channel* ch, Message& msg) {
+  if (ch->isInviteOnly()) {
+      std::cerr << "ERR_INVITEONLYCHAN - log" << std::endl;
+      return true;
+    }
+  if (ch->isChannelKey()) {
+       if (msg.params.size() < 2 || msg.params[1].empty()) {
+          std::cerr << "ERR_BADCHANNELKEY - log" << std::endl;
+          return true;
+      }
+      if (msg.params[1].empty()) {
+          std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl;
+          return true;
+      }
+      else if (msg.params[1] != ch->getKey()) {
+          std::cerr << "ERR_BADCHANNELKEY - log" << std::endl;
+          return true;
+      }
+  }
+  if (ch->isChannelLimit()) {
+      if (ch->getMembers().size() == ch->getLimit()) {
+          std::cerr << "ERR_CHANNELISFULL - log" << std::endl;
+          return true;
+      }
+  }
+  return false;
+}
+
+bool Parser::isValidChannelName(std::string& channName) {
+  if (channName[0] != '#'
+     || channName.find_first_of(std::string(" \0\r\n"), 5) != std::string::npos
+     || channName.size() > 200)
+    return false;
+  return true;
+}
+
 bool Parser::isValidNickname(std::string& nick) {
   std::string specials = "-\\[]`^{}";
   if (nick.size() > 9 || !isalpha(nick[0])) {

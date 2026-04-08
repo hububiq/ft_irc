@@ -62,6 +62,8 @@ class Server {
   HandleResult process_request(int epoll_fd, uint32_t events, Client& client);
   HandleResult respond(Client& client);
   std::map<int, Client>& getClients();
+  // Channel
+  void create_channel();
 };
 
 #endif

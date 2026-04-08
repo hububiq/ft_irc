@@ -92,8 +92,8 @@ int Server::create_socket() {
   if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &o, sizeof(o)) == -1) {
     throw std::runtime_error("Failed to set socket SO_REUSEADDR.");
   }
-  if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &o, sizeof(o)) == -1) {
-    throw std::runtime_error("Failed to set socket SO_REUSEADDR.");
+  if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEPORT, &o, sizeof(o)) == -1) {
+    throw std::runtime_error("Failed to set socket SO_REUSEPORT.");
   }
 
   int flags = fcntl(socket_fd, F_GETFL);

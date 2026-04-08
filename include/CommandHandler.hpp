@@ -10,6 +10,9 @@ namespace CommandHandler
     void handlePass(Client& client, Message& msg, Server& server);
     void handleNick(Client& client, Message& msg, Server& server);
     void handleUser(Client& client, Message& msg, Server& server);
+    void handleJoin(Client& client, Message& msg, Server& server);
+    void handlePrivMsg(Client& client, Message& msg, Server& server);
+    // void handleQuit(Client& client, Message& msg, Server& server);
 };
 
 #endif 

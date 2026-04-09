@@ -30,8 +30,6 @@ public:
 
   void add_client(Client* cli);
   // void remove_client(Client*);
-
-  void add_client(Client*);
   void remove_client(Client*);
   void kick(Client *client, Client *target, const std::string& reason);
   void broadcast(const std::string&);

@@ -105,6 +105,7 @@ void CommandHandler::handlePass(Client& client, Message& msg, Server& server)
         std::cerr << "462 ERR_ALREADYREGISTERED - log" << std::endl;
         return;
     }
+    std::cout << client.getHostname() << std::endl; 
     client.setAuth();
     client.setState(HANDSHAKE);
 }

@@ -31,6 +31,7 @@ class Client {
   std::string& getRequestBuffer();
   std::string& getResponseBuffer();
   ClientStatus getStatus() const;
+  std::string getHostname() const;
   void setStatus(ClientStatus status);
   void setRegister();
   void setAuth();

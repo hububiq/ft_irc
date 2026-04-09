@@ -20,6 +20,8 @@ bool Client::getAuthInfo() const { return this->_isAuthent; }
 
 ClientState Client::getState() const { return this->_state; }
 
+std::string Client::getHostname() const { return this->_hostname; }
+
 void Client::setRegister() { this->_isRegistered = true; }
 
 void Client::setAuth() { this->_isAuthent = true; }

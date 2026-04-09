@@ -35,21 +35,12 @@ bool Parser::modeGuardChecks(Channel* ch, Message& msg) {
 
 bool Parser::isValidChannelName(std::string& channName) {
 	if (channName.size() < 2 || channName[0] != '#' || channName.size() > 200 )
-	{
-		std::cout << "It went inside - name is not valid" << std::endl; 
-		return false;
-	}
-	// for (size_t i = 0; i < msg.params.size(); i++)
-	// 	std::cout << i << " " << msg.params[i] << std::endl;
-	std::cout << channName << std::endl;
+    return false;
 	for (size_t i = 1; i < channName.size(); i++)
 	{
 		char c = channName[i];
 		if (c == ' ' || c == '\0' || c == '\r' || c == '\n' || c == ',')
-		{
-			std::cout << "It went inside - name is not valid" << std::endl; 
-			return false;
-		}
+      return false;
 	}
   return true;
 }

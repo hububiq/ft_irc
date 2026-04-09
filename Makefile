@@ -1,6 +1,6 @@
 CC = c++
 NAME = irc
-FLAGS = -Wall -Wextra -Werror -std=c++98
+FLAGS = -Wall -Wextra -Werror -std=c++98 -g -fsanitize=address
 INC_DIR = include
 SRC_DIR = src
 OBJ_DIR = obj

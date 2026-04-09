@@ -5,6 +5,16 @@
 #include <cctype>
 #include <iostream>
 
+bool Parser::findClient(std::map<int, Client>& cliMap, std::string& name)
+{
+  std::map<int, Client>::iterator it;
+  for (it = cliMap.begin(); it != cliMap.end(); it++) {
+    if (it->second.getNickname() == name)
+      return true;
+  }
+  return false;
+}
+
 bool Parser::modeGuardChecks(Channel* ch, Message& msg) {
   if (ch->isInviteOnly()) {
       std::cerr << "ERR_INVITEONLYCHAN - log" << std::endl;

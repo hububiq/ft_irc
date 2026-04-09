@@ -14,7 +14,7 @@ private:
   std::string           _topic;
   Client                *_admin;
   std::vector<Client *> _admins;
-  std::vector<Client*>  _members;
+  std::vector<Client *>  _members;
   std::string           _key; 
   unsigned int          _limit;
   bool                  _i; // Set/remove Invite-only
@@ -34,6 +34,7 @@ public:
   void kick(Client *client, Client *target, const std::string& reason);
   void broadcast(const std::string&);
 
+  std::string&           getChannelName();
   std::vector<Client *>& getAdmins();
   std::vector<Client *>& getMembers();
   unsigned int           getLimit() const;
@@ -45,6 +46,8 @@ public:
   bool isChannelKey();
   bool isChannelLimit();
   bool isOperatorAssignable();
+
+  void broadcast(Client& sender, std::string& msg);
 
 };
 

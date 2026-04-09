@@ -4,7 +4,7 @@
 #include <sys/socket.h>
 #include <iostream>
 
-Client::Client(int fd) : _fd(fd), _status(READING) {}
+Client::Client(int fd): _fd(fd), _status(READING), _isRegistered(false), _isAuthent(false) {}
 
 int Client::getFd() const { return this->_fd; }
 

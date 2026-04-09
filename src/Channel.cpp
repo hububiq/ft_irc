@@ -1,4 +1,7 @@
-#include "Channel.hpp"
+//#include "Channel.hpp"
+//#include "Client.hpp"
+#include "../include/Channel.hpp"
+#include "../include/Client.hpp"
 #include <algorithm>
 
 Channel::Channel(): //PRIMITIVES dont initialise to 0 automatically
@@ -41,6 +44,18 @@ bool Channel::isChannelLimit() { return this->_l; }
 
 bool Channel::isOperatorAssignable() { return this->_o; }
 
+
+void Channel::broadcast(const std::string& message)
+{
+  std::vector<Client*>::iterator it = _clients_list.begin();
+  std::vector<Client*>::iterator it_end = _clients_list.end();
+
+  while (it != it_end) 
+  {
+    (*it)->write_msg(message); // will send a message on a socket for each client
+    ++it;
+  }
+}
 
 // void Channel::remove_client(Client* client)
 // {

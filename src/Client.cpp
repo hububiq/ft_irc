@@ -1,4 +1,8 @@
-#include "Client.hpp"
+//#include "Client.hpp"
+#include "../include/Client.hpp"
+#include <string>
+#include <sys/socket.h>
+#include <iostream>
 
 Client::Client(int fd) : _fd(fd), _status(READING) {}
 
@@ -38,4 +42,12 @@ void Client::reset() {
   this->_status = READING;
   // this->_buffer could be cleared if needed, but since we parsed lines we
   // don't clear right now
+}
+
+void Client::write_msg(const std::string& message)
+{
+  // send(sockfd, buf, len, flags);
+  std::string buf = message + READ_END;
+  if (send(this->_fd, buf.c_str(), buf.length(), MSG_DONTWAIT) == -1)
+    std::cout << "Error: send()" << std::endl;
 }

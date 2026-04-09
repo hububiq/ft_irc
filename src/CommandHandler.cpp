@@ -1,7 +1,8 @@
-#include "CommandHandler.hpp"
-#include "ClientStatus.hpp"
-#include "Channel.hpp"
-#include "Parser.hpp"
+//#include "CommandHandler.hpp"
+//#include "ClientStatus.hpp"
+//#include "Channel.hpp"
+//#include "Parser.hpp"
+#include "../include/CommandHandler.hpp"
 
 #include <map>
 #include <iostream>
@@ -45,6 +46,40 @@ void CommandHandler::handleJoin(Client& client, Message& msg, Server& server) {
     }   
 }
 
+bool clientCanKICK(Channel *channel_obj, Client &client)
+{
+    std::vector<Client *> temp_members = channel_obj->getMembers();
+    std::vector<Client*>::iterator it = temp_members.begin();
+    std::vector<Client*>::iterator it_end = temp_members.end();
+    while (it != it_end)
+    {
+        if (*it == &client) {
+            std::cout << "I can KICK" << std::endl;
+            return true;
+        }
+        ++it;
+    }
+    return false;
+}
+
+void CommandHandler::handleKick(Client &client, Message &msg, Server &server)
+{
+    // KICK <channel> <nick> [<reason>]
+    if (msg.params.empty() || msg.params.size() < 2) {
+        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl;
+        return ;
+    }
+    std::string nick = client.getNickname();
+    std::string channel_name = msg.params[0];
+    Channel *channel_obj = server.getChannel(channel_name);
+    // Check if the person KICKing is in the channel or registerd
+    if (clientCanKICK(channel_obj, client))
+    {
+        // do the kicking stuff
+    }
+
+    // If the user performing the kick does not have appropriate permissions ERR_CHANOPRIVSNEEDED
+}
 
 void CommandHandler::handleUser(Client& client, Message& msg, Server& server)
 {
@@ -119,6 +154,7 @@ void CommandHandler::handleCommand(Client& client, Message& msg, Server& server)
         commands["NICK"] = handleNick;
         commands["USER"] = handleUser;
         commands["JOIN"] = handleJoin;
+        commands["KICK"] = handleKick;
         // commands["PRIVMSG"] = handlePrivMsg;
         // commands["QUIT"] = handleQuit;
     

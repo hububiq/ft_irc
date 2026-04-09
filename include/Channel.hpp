@@ -34,9 +34,6 @@ public:
   void kick(Client *client, Client *target, const std::string& reason);
   void broadcast(const std::string&);
 
-  /* 1. Some sort of broadcast message to notify
-   * all clients that someone joined (_clinets_list)*/
-  /* 2. general broadcast message in the channel */
   std::vector<Client *>& getAdmins();
   std::vector<Client *>& getMembers();
   unsigned int           getLimit() const;

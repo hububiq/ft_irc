@@ -165,5 +165,5 @@ void CommandHandler::handleCommand(Client& client, Message& msg, Server& server)
         it->second(client, msg, server);
     }
     else
-        throw std::runtime_error("ERR_COMMANDUNKNOWN");
+        std::cerr << "ERR_COMMANDUNKNOWN - log" << std::endl;
 }

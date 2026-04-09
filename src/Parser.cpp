@@ -34,10 +34,23 @@ bool Parser::modeGuardChecks(Channel* ch, Message& msg) {
 }
 
 bool Parser::isValidChannelName(std::string& channName) {
-  if (channName[0] != '#'
-     || channName.find_first_of(std::string(" \0\r\n"), 5) != std::string::npos
-     || channName.size() > 200)
-    return false;
+	if (channName.size() < 2 || channName[0] != '#' || channName.size() > 200 )
+	{
+		std::cout << "It went inside - name is not valid" << std::endl; 
+		return false;
+	}
+	// for (size_t i = 0; i < msg.params.size(); i++)
+	// 	std::cout << i << " " << msg.params[i] << std::endl;
+	std::cout << channName << std::endl;
+	for (size_t i = 1; i < channName.size(); i++)
+	{
+		char c = channName[i];
+		if (c == ' ' || c == '\0' || c == '\r' || c == '\n' || c == ',')
+		{
+			std::cout << "It went inside - name is not valid" << std::endl; 
+			return false;
+		}
+	}
   return true;
 }
 
@@ -73,7 +86,7 @@ void Parser::extractParams(std::string line, Message& msg) {
 
 void Parser::parseToStruct(const std::string& rawMessage, Message& msg) {
   std::string line = rawMessage;  // there are 510 characters maximum allowed by
-                                  // protocol - should I handle it?
+                                  // protocol - should I handle it?	
   if (line[0] == ':') {
     size_t prefixEnd = line.find(' ');
     if (prefixEnd == std::string::npos)

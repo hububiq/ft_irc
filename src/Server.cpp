@@ -81,8 +81,7 @@ Channel* Server::getChannel(std::string& chann) {
   std::map<std::string, Channel>::iterator it = this->_channels.find(chann);
   if (it != this->_channels.end())
     return &it->second; //address of second map parameter - channel
-  return NULL; //creates empty channel in map, gonna add operator,
-                          // map automatically resizes
+  return NULL; 
 }
 
 void Server::addChannel(Channel& ch, std::string& chName) {

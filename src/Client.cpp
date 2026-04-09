@@ -4,7 +4,7 @@
 #include <sys/socket.h>
 #include <iostream>
 
-Client::Client(int fd) : _fd(fd), _status(READING) {}
+Client::Client(int fd): _fd(fd), _status(READING), _isRegistered(false), _isAuthent(false) {}
 
 int Client::getFd() const { return this->_fd; }
 
@@ -23,6 +23,8 @@ bool Client::getRegisterInfo() const { return this->_isRegistered; }
 bool Client::getAuthInfo() const { return this->_isAuthent; }
 
 ClientState Client::getState() const { return this->_state; }
+
+std::string Client::getHostname() const { return this->_hostname; }
 
 void Client::setRegister() { this->_isRegistered = true; }
 

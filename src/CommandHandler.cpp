@@ -102,7 +102,8 @@ void CommandHandler::handlePass(Client& client, Message& msg, Server& server)
         return ;
     }
     if (client.getAuthInfo()) {
-        std::cerr << "462 ERR_ALREADYREGISTERED - log" << std::endl;
+		std::cout << client.getAuthInfo() << std::endl; 
+        std::cerr << "462 ERR_ALREADYREGISTERED DUPA - log" << std::endl;
         return;
     }
     client.setAuth();

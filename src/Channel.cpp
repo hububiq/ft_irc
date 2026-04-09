@@ -23,39 +23,29 @@ void Channel::add_client(Client* cli) {
 }
 
 std::vector<Client *>& Channel::getAdmins() { return this->_admins; }
-
 std::vector<Client *>& Channel::getMembers() { return this->_members; }
-
 unsigned int Channel::getLimit() const { return this->_limit; }
-
 std::string Channel::getKey() const { return this->_key; }
-
 unsigned int Channel::getMaxMembers() const { return this->_limit; }
-
 void Channel::setKey(std::string& key) { _key = key; }
-
 bool Channel::isInviteOnly() { return this->_i; }
-
 bool Channel::isTopicForOperator() { return this->_t; }
-
 bool Channel::isChannelKey() { return this->_k; }
-
 bool Channel::isChannelLimit() { return this->_l; }
-
 bool Channel::isOperatorAssignable() { return this->_o; }
 
 
-void Channel::broadcast(const std::string& message)
-{
-  std::vector<Client*>::iterator it = _clients_list.begin();
-  std::vector<Client*>::iterator it_end = _clients_list.end();
+// void Channel::broadcast(const std::string& message)
+// {
+//   std::vector<Client*>::iterator it = _clients_list.begin();
+//   std::vector<Client*>::iterator it_end = _clients_list.end();
 
-  while (it != it_end) 
-  {
-    (*it)->write_msg(message); // will send a message on a socket for each client
-    ++it;
-  }
-}
+//   while (it != it_end) 
+//   {
+//     (*it)->write_msg(message); // will send a message on a socket for each client
+//     ++it;
+//   }
+// }
 
 // void Channel::remove_client(Client* client)
 // {

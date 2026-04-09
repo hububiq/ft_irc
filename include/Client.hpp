@@ -40,6 +40,8 @@ class Client {
   void setNickname(std::string nick);
   void setRealName(std::string rname);
   void reset();
+  // ---
+  void write_msg(const std::string&);
 };
 
 #endif

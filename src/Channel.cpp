@@ -4,36 +4,45 @@
 #include "../include/Client.hpp"
 #include <algorithm>
 
-Channel::Channel(std::string& name, std::string& key, Client *admin)
-{
-  this->_channel_name = name;
-  this->_k = key;
-  this->_admin = admin;
-  this->_l = 0;
-}
+Channel::Channel(): //PRIMITIVES dont initialise to 0 automatically
+  _limit(0), _i(false), _t(false),
+  _k(false), _l(false), _o(false) {}
+
+// ------ NOTE TO MYSELF------need to use this constructor to make handleJoin cleaner!!------
+// Channel::Channel(std::string& name, std::string& key, Client *admin)
+// {
+//   this->_channel_name = name;
+//   this->_k = key;
+//   this->_admin = admin;
+//   this->_l = 0;
+// }
 Channel::~Channel() {}
 
-Channel::Channel() {
+void Channel::add_client(Client* cli) {
+  this->_members.push_back(cli);
 }
 
-void Channel::add_client(Client* client)
-{
-  this->_clients_list.push_back(client);
-}
-void Channel::remove_client(Client* client)
-{
-  if (client && this->_admin)
-    // find new admin
-    // and then remove
-  if (client) {
-    // find an object in a vector object list
-    this->_clients_list.erase(
-      std::find(_clients_list.begin(),
-      _clients_list.end(),
-      client));
-  }
-  // Check the std::remove also
-}
+std::vector<Client *>& Channel::getAdmins() { return this->_admins; }
+
+std::vector<Client *>& Channel::getMembers() { return this->_members; }
+
+unsigned int Channel::getLimit() const { return this->_limit; }
+
+std::string Channel::getKey() const { return this->_key; }
+
+unsigned int Channel::getMaxMembers() const { return this->_limit; }
+
+void Channel::setKey(std::string& key) { _key = key; }
+
+bool Channel::isInviteOnly() { return this->_i; }
+
+bool Channel::isTopicForOperator() { return this->_t; }
+
+bool Channel::isChannelKey() { return this->_k; }
+
+bool Channel::isChannelLimit() { return this->_l; }
+
+bool Channel::isOperatorAssignable() { return this->_o; }
 
 
 void Channel::broadcast(const std::string& message)
@@ -48,9 +57,17 @@ void Channel::broadcast(const std::string& message)
   }
 }
 
-// --- Getters and Setters
-void Channel::setKey(std::string& key) { _k = key; }
-std::string Channel::getKey() const { return this->_k; }
-
-void Channel::setMaxMembers(unsigned int max) { _l = max; }
-unsigned int Channel::getMaxMembers() const { return this->_l; }
+// void Channel::remove_client(Client* client)
+// {
+//   if (client && this->_admin)
+//     // find new admin
+//     // and then remove
+//   if (client) {
+//     // find an object in a vector object list
+//     this->_clients_list.erase(
+//       std::find(_clients_list.begin(),
+//       _clients_list.end(), 
+//       client));
+//   }
+//   // Check the std::remove also
+// }

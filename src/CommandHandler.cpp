@@ -1,5 +1,6 @@
 #include "CommandHandler.hpp"
 #include "ClientStatus.hpp"
+#include "Channel.hpp"
 #include "Parser.hpp"
 
 #include <map>
@@ -20,12 +21,30 @@
 
 // }
 
-// void CommandHandler::handleJoin(Client& client, Message& msg, Server& server)
-// {
-//     '#' parsing
-//     if he wanna join specific channel, serve.getChannel(), addMember(), remember if it was empty, add to operator.
-//     if no specific channel given in parameters, create new channel with him as an operator.
-// }
+void CommandHandler::handleJoin(Client& client, Message& msg, Server& server) {
+    if (msg.params.empty()) {
+        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl;
+        return ;
+    }
+    std::string& channelName = msg.params[0];
+    if (!Parser::isValidChannelName(channelName)) {
+        std::cerr << "ERR_NOSUCHCHANNEL - log" << std::endl;
+        return ;
+    }
+    Channel* ch = server.getChannel(channelName);
+    if (ch == NULL) {
+        Channel channel = Channel(); //could be refactored with parametrised constructor
+        server.addChannel(channel, channelName);
+        server.getChannel(channelName)->getAdmins().push_back(&client);
+        server.getChannel(channelName)->add_client(&client);
+    }
+    else if (ch != NULL) {
+        if (Parser::modeGuardChecks(ch, msg))
+            return ;
+        ch->add_client(&client);
+    }   
+}
+
 
 void CommandHandler::handleUser(Client& client, Message& msg, Server& server)
 {
@@ -82,6 +101,10 @@ void CommandHandler::handlePass(Client& client, Message& msg, Server& server)
         std::cerr << "ERR_PASSWDMISMATCH - log" << std::endl;
         return ;
     }
+    if (client.getAuthInfo()) {
+        std::cerr << "462 ERR_ALREADYREGISTERED - log" << std::endl;
+        return;
+    }
     client.setAuth();
     client.setState(HANDSHAKE);
 }
@@ -94,6 +117,8 @@ void CommandHandler::handleCommand(Client& client, Message& msg, Server& server)
         commands["PASS"] = handlePass;
         commands["NICK"] = handleNick;
         commands["USER"] = handleUser;
+        commands["JOIN"] = handleJoin;
+        // commands["PRIVMSG"] = handlePrivMsg;
         // commands["QUIT"] = handleQuit;
     
     };

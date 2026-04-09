@@ -1,11 +1,9 @@
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
 
-//#include "Client.hpp"
+#include "Client.hpp"
 #include <string>
 #include <vector>
-
-class Client;
 
 class Channel
 {
@@ -23,6 +21,7 @@ private:
   // Give/take channel operator privilege
 
 public:
+  Channel();
   Channel(std::string& name, std::string& key, Client *admin);
   ~Channel();
 

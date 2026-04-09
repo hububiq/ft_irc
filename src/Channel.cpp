@@ -13,6 +13,9 @@ Channel::Channel(std::string& name, std::string& key, Client *admin)
 }
 Channel::~Channel() {}
 
+Channel::Channel() {
+}
+
 void Channel::add_client(Client* client)
 {
   this->_clients_list.push_back(client);

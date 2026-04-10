@@ -40,6 +40,8 @@ void Client::setHostname(std::string& hostname) { this->_hostname = hostname; }
 
 void Client::setNickname(std::string nick) { this->_nickname = nick; }
 
+void Client::setUsername(std::string usname) { this->_username = usname; }
+
 void Client::setRealName(std::string rname) { this->_realname = rname; }
 
 void Client::reset() {
@@ -53,8 +55,4 @@ void Client::write_msg(std::string& message) //send() goes through the socket to
     std::string buf = message;
     if (send(this->_fd, buf.c_str(), buf.length(), MSG_DONTWAIT) == -1)
       std::cout << "Error: send()" << std::endl;
-  // send(sockfd, buf, len, flags);
-//   std::string buf = message + READ_END;
-//   if (send(this->_fd, buf.c_str(), buf.length(), MSG_DONTWAIT) == -1)
-//     std::cout << "Error: send()" << std::endl;
 }

@@ -12,7 +12,6 @@ std::string Replies::getReply(ReplyCode code, const std::string& userNick,
         
         // --- SUCCESSFUL REPLIES ---
         case RPL_WELCOME:
-            // Format: :server 001 <nick> :Welcome to the Internet Relay Network nick!user@host
             return prefix + "001 " + userNick + " :Welcome to the Internet Relay Network " + 
                    userNick + "!" + arg1 + "@" + arg2 + "\r\n";
 

@@ -36,15 +36,21 @@ void CommandHandler::handlePrivMsg(Client& client, Message& msg, Server& server)
         std::cerr << "ERR_NOSUCHNICK - log" << std::endl;
         return ;
     }
+    std::string prefix = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname();
     if (channForMsg != NULL) {    //PRIVMSG to channel
-        std::string prefix = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname();
         std::string reply = prefix + " PRIVMSG " + channForMsg->getChannelName() + " " + msg.params[1] + "\r\n";
         channForMsg->broadcast(client, reply);
     }
-    else {
-
+    else if (msg.params[0][0] != '#') { //PRIVMSG to client
+        std::map<int, Client>& cl = server.getClients();
+        std::map<int, Client>::iterator it;
+        for (it = cl.begin(); it != cl.end(); it++) {
+            if (it->second.getNickname() == msg.params[0]) {
+                std::string reply = prefix + " PRIVMSG " + it->second.getNickname() + " " + msg.params[1] + "\r\n";
+                it->second.write_msg(reply);
+            }
+        }
     }
-    //the same for PRIVMSG to client directly
 }
 
 void CommandHandler::handleJoin(Client& client, Message& msg, Server& server) {
@@ -145,18 +151,18 @@ void CommandHandler::handleUser(Client& client, Message& msg, Server& server)
     std::string username = msg.params[0];
     std::string realname = msg.params[1];
     if (std::find_if(username.begin(), username.end(), ::isalpha) == username.end()
-        || username.find_first_of(std::string(" \r\n\0", 4)) != std::string::npos
+        || username.find_first_of(std::string(" \r\n\0", 5)) != std::string::npos
         || realname[0] != ':'
-        || realname.find_first_of(std::string("\0\r\n", 3)) != std::string::npos) {
+        || realname.find_first_of(std::string("\0\r\n", 4)) != std::string::npos) {
         std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl;
         return ;
     }
+    client.setUsername(username);
     client.setRealName(realname.substr(1));
     client.setState(REGISTERED);
     client.setRegister();
-    std::cout << client.getState() << ": enum state" << std::endl;
-    std::cout << client.getRealName() << ": this is realname" << std::endl;
-    std::cout << client.getRegisterInfo() << " -- 1 if registered" << std::endl;
+    std::string reply = Replies::getReply(RPL_WELCOME, client.getNickname(), client.getUsername(), client.getHostname());
+    client.write_msg(reply);
 }
 
 void CommandHandler::handleNick(Client& client, Message& msg, Server& server)
@@ -215,9 +221,7 @@ void CommandHandler::handleCommand(Client& client, Message& msg, Server& server)
     };
     std::map<std::string, void(*)(Client&, Message&, Server&)>::iterator it = commands.find(msg.command);
     if (it != commands.end())
-    {
         it->second(client, msg, server);
-    }
     else
         std::cerr << "ERR_COMMANDUNKNOWN - log" << std::endl;
 }

@@ -4,6 +4,7 @@
 //#include "Parser.hpp"
 #include "../include/CommandHandler.hpp"
 #include "../include/Channel.hpp"
+#include "../include/Replies.hpp"
 
 
 #include <map>
@@ -88,17 +89,18 @@ bool clientCanKICK(Channel *channel_obj, Client &client)
     }
     return false;
 }
-bool clientToBeKICKed(Channel *channel_obj, const std::string& person_to_kick)
+bool clientToBeKICKed(Channel *channel_obj, const std::string& client_to_kick)
 {
-    std::vector<Client *> temp_members = channel_obj->getMembers();
+    std::vector<Client *>& temp_members = channel_obj->getMembers();
     std::vector<Client*>::iterator it = temp_members.begin();
     std::vector<Client*>::iterator it_end = temp_members.end();
 
     while (it != it_end)
     {
         Client * tmp_mem = *it;
-        if (tmp_mem->getNickname() == person_to_kick) {
-            std::cout << "Fount client to kick" << std::endl;
+        if (tmp_mem->getNickname() == client_to_kick) {
+            temp_members.erase(it);
+            std::cout << "Found client to kick" << std::endl;
             return true;
         }
         ++it;
@@ -109,32 +111,28 @@ bool clientToBeKICKed(Channel *channel_obj, const std::string& person_to_kick)
 void CommandHandler::handleKick(Client &client, Message &msg, Server &server)
 {
     // KICK <channel> <nick> [<reason>]
-    // ERR_NEEDMOREPARAMS - done
-    // ERR_NOTONCHANNEL - done
-    // ERR_NOSUCHCHANNEL - done
-    // ERR_CHANOPRIVSNEEDED - done
     if (msg.params.empty() || msg.params.size() < 2) {
-        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl;
+        std::cerr << Replies::getReply(ERR_NEEDMOREPARAMS, client.getNickname(), "KICK", "");
         return ;
     }
     std::string nick = client.getNickname(); // nick of the KICKer
     std::string channel_name = msg.params[0];
-    std::string person_to_kick = msg.params[1];
-    std::cout << nick << " is looking to kick " << person_to_kick << std::endl;
+    std::string client_to_kick = msg.params[1];
+    std::cout << nick << " is looking to kick " << client_to_kick << std::endl;
     Channel *channel_obj = server.getChannel(channel_name);
     if (!channel_obj) {
-        std::cout << "ERR_NOSUCHCHANNEL -log" << std::endl;
+        std::cout << Replies::getReply(ERR_NOSUCHCHANNEL, nick, channel_name, "");
         return;
     }
     if (clientCanKICK(channel_obj, client))
     {
-        if (clientToBeKICKed(channel_obj, person_to_kick))
-            std::cout << nick << " kicked " << person_to_kick << " form " << channel_name << std::endl;
+        if (clientToBeKICKed(channel_obj, client_to_kick))
+            std::cout << nick << " kicked " << client_to_kick << " form " << channel_name << std::endl;
         else
-         std::cout << "ERR_NOTONCHANNEL" <<  std::endl;
+         std::cout << Replies::getReply(ERR_USERNOTINCHANNEL, nick, channel_name, "");
     }
     else
-        std::cerr << "ERR_CHANOPRIVSNEEDED - You're not a channel operator" << std::endl;
+        std::cerr << Replies::getReply(ERR_CHANOPRIVSNEEDED, nick, channel_name, "");
 }
 
 void CommandHandler::handleUser(Client& client, Message& msg, Server& server)

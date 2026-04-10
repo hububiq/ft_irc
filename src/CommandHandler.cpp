@@ -21,15 +21,15 @@
 
 void CommandHandler::handlePrivMsg(Client& client, Message& msg, Server& server)
 {
-    if (msg.params.empty()) {
+    if (msg.params.empty() || msg.params[0].empty()) {
         std::cerr << "ERR_NORECIPIENT- log" << std::endl;
         return ;
     }
-    if (msg.params.size() < 2 || msg.params[1].empty()) {
+    if (msg.params.size() < 2 || msg.params[1].empty() || msg.params[1][0] != ':') {
         std::cerr << "ERR_NOTEXTTOSEND- log" << std::endl;
         return ;
     }
-    Channel* channForMsg = server.getChannel(msg.params[0]);
+    Channel* channForMsg = server.getChannel(msg.params[0]); 
     if (channForMsg == NULL 
         && !Parser::findClient(server.getClients(), msg.params[0])) {
         std::cerr << "ERR_NOSUCHNICK - log" << std::endl;
@@ -37,8 +37,11 @@ void CommandHandler::handlePrivMsg(Client& client, Message& msg, Server& server)
     }
     if (channForMsg != NULL) {    //PRIVMSG to channel
         std::string prefix = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname();
-        std::string reply = prefix + " PRIVMSG " + channForMsg->getChannelName() + " :" + msg.params[1] + "\r\n";
+        std::string reply = prefix + " PRIVMSG " + channForMsg->getChannelName() + " " + msg.params[1] + "\r\n";
         channForMsg->broadcast(client, reply);
+    }
+    else {
+
     }
     //the same for PRIVMSG to client directly
 }

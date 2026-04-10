@@ -41,6 +41,7 @@ public:
   std::string            getKey() const;
   unsigned int           getMaxMembers() const;
   void            setKey(std::string&);
+  void            setChannelName(std::string& name);
   bool isInviteOnly();
   bool isTopicForOperator();
   bool isChannelKey();

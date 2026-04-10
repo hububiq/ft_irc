@@ -29,6 +29,7 @@ unsigned int Channel::getLimit() const { return this->_limit; }
 std::string Channel::getKey() const { return this->_key; }
 unsigned int Channel::getMaxMembers() const { return this->_limit; }
 void Channel::setKey(std::string& key) { _key = key; }
+void Channel::setChannelName(std::string& name) { this->_channel_name = name; }
 bool Channel::isInviteOnly() { return this->_i; }
 bool Channel::isTopicForOperator() { return this->_t; }
 bool Channel::isChannelKey() { return this->_k; }

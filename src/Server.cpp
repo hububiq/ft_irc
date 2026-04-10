@@ -77,7 +77,7 @@ std::string Server::getPassword() { return this->_password; }
 
 std::map<int, Client>& Server::getClients() { return this->_clients; }
 
-Channel* Server::getChannel(std::string& chann) {
+Channel* Server::getChannel(const std::string& chann) {
   std::map<std::string, Channel>::iterator it = this->_channels.find(chann);
   if (it != this->_channels.end())
     return &it->second; //address of second map parameter - channel
@@ -85,6 +85,7 @@ Channel* Server::getChannel(std::string& chann) {
 }
 
 void Server::addChannel(Channel& ch, std::string& chName) {
+  ch.setChannelName(chName);
   this->_channels[chName] = ch;
 }
 

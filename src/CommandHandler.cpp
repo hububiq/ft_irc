@@ -3,6 +3,8 @@
 //#include "Channel.hpp"
 //#include "Parser.hpp"
 #include "../include/CommandHandler.hpp"
+#include "../include/Channel.hpp"
+
 
 #include <map>
 #include <iostream>
@@ -17,10 +19,29 @@
 //     //closing fd probably happens on server's side?
 // }
 
-// void CommandHandler::handlePrivMsg(Client& client, Message& msg, Server& server)
-// {
-
-// }
+void CommandHandler::handlePrivMsg(Client& client, Message& msg, Server& server)
+{
+    if (msg.params.empty()) {
+        std::cerr << "ERR_NORECIPIENT- log" << std::endl;
+        return ;
+    }
+    if (msg.params.size() < 2 || msg.params[1].empty()) {
+        std::cerr << "ERR_NOTEXTTOSEND- log" << std::endl;
+        return ;
+    }
+    Channel* channForMsg = server.getChannel(msg.params[0]);
+    if (channForMsg == NULL 
+        && !Parser::findClient(server.getClients(), msg.params[0])) {
+        std::cerr << "ERR_NOSUCHNICK - log" << std::endl;
+        return ;
+    }
+    if (channForMsg != NULL) {    //PRIVMSG to channel
+        std::string prefix = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname();
+        std::string reply = prefix + " PRIVMSG " + channForMsg->getChannelName() + " :" + msg.params[1] + "\r\n";
+        channForMsg->broadcast(client, reply);
+    }
+    //the same for PRIVMSG to client directly
+}
 
 void CommandHandler::handleJoin(Client& client, Message& msg, Server& server) {
     if (msg.params.empty()) {
@@ -154,8 +175,8 @@ void CommandHandler::handleCommand(Client& client, Message& msg, Server& server)
         commands["NICK"] = handleNick;
         commands["USER"] = handleUser;
         commands["JOIN"] = handleJoin;
+        commands["PRIVMSG"] = handlePrivMsg;
         commands["KICK"] = handleKick;
-        // commands["PRIVMSG"] = handlePrivMsg;
         // commands["QUIT"] = handleQuit;
     
     };

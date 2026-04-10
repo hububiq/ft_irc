@@ -16,6 +16,8 @@ ClientStatus Client::getStatus() const { return this->_status; }
 
 std::string& Client::getNickname() { return this->_nickname; }
 
+std::string& Client::getUsername() { return this->_username; }
+
 std::string& Client::getRealName() { return this->_realname; }
 
 bool Client::getRegisterInfo() const { return this->_isRegistered; }
@@ -46,10 +48,13 @@ void Client::reset() {
   // don't clear right now
 }
 
-void Client::write_msg(const std::string& message)
+void Client::write_msg(std::string& message) //send() goes through the socket to client's terminal with the message.
 {
+    std::string buf = message;
+    if (send(this->_fd, buf.c_str(), buf.length(), MSG_DONTWAIT) == -1)
+      std::cout << "Error: send()" << std::endl;
   // send(sockfd, buf, len, flags);
-  std::string buf = message + READ_END;
-  if (send(this->_fd, buf.c_str(), buf.length(), MSG_DONTWAIT) == -1)
-    std::cout << "Error: send()" << std::endl;
+//   std::string buf = message + READ_END;
+//   if (send(this->_fd, buf.c_str(), buf.length(), MSG_DONTWAIT) == -1)
+//     std::cout << "Error: send()" << std::endl;
 }

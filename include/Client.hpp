@@ -27,6 +27,7 @@ class Client {
   bool getAuthInfo() const;
   ClientState getState() const;
   std::string& getNickname();
+  std::string& getUsername();
   std::string& getRealName();
   std::string& getRequestBuffer();
   std::string& getResponseBuffer();
@@ -41,7 +42,7 @@ class Client {
   void setRealName(std::string rname);
   void reset();
   // ---
-  void write_msg(const std::string&);
+  void write_msg(std::string& message);
 };
 
 #endif

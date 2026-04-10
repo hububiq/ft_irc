@@ -66,22 +66,17 @@ Server::~Server() {
 }
 
 uint32_t Server::getHostIp() const { return this->_host_ip; }
-
 uint16_t Server::getPortNum() const { return this->_port_num; }
-
 int Server::getSocketFd() const { return this->_socket_fd; }
-
 void Server::setSocketFd(int fd) { this->_socket_fd = fd; }
-
 std::string Server::getPassword() { return this->_password; }
-
 std::map<int, Client>& Server::getClients() { return this->_clients; }
 
 Channel* Server::getChannel(std::string& chann) {
   std::map<std::string, Channel>::iterator it = this->_channels.find(chann);
   if (it != this->_channels.end())
     return &it->second; //address of second map parameter - channel
-  return NULL; 
+  return NULL;
 }
 
 void Server::addChannel(Channel& ch, std::string& chName) {

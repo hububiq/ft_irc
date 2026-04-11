@@ -39,6 +39,7 @@ class Client {
   void setState(ClientState state);
   void setHostname(std::string& hostname);
   void setNickname(std::string nick);
+  void setUsername(std::string username);
   void setRealName(std::string rname);
   void reset();
   // ---

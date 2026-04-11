@@ -1,7 +1,6 @@
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
 
-
 #include "Client.hpp"
 
 #include <string>
@@ -15,6 +14,7 @@ private:
   Client                *_admin;
   std::vector<Client *> _admins;
   std::vector<Client *>  _members;
+  std::vector<Client *> _invited;
   std::string           _key; 
   unsigned int          _limit;
   bool                  _i; // Set/remove Invite-only
@@ -29,14 +29,16 @@ public:
   ~Channel();
 
   void add_client(Client* cli);
+  void addToInvited(Client* client);
   // void remove_client(Client*);
-  void remove_client(Client*);
+  // void remove_client(Client*);
   void kick(Client *client, Client *target, const std::string& reason);
   void broadcast(const std::string&);
 
   std::string&           getChannelName();
   std::vector<Client *>& getAdmins();
   std::vector<Client *>& getMembers();
+  std::vector<Client *>& getInvited();
   unsigned int           getLimit() const;
   std::string            getKey() const;
   unsigned int           getMaxMembers() const;
@@ -47,7 +49,7 @@ public:
   bool isChannelKey();
   bool isChannelLimit();
   bool isOperatorAssignable();
-
+  bool isInvited(Client& clientToFind);
   void broadcast(Client& sender, std::string& msg);
 
 };

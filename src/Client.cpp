@@ -14,11 +14,11 @@ std::string& Client::getResponseBuffer() { return this->_response_buffer; }
 
 ClientStatus Client::getStatus() const { return this->_status; }
 
-std::string& Client::getNickname() { return this->_nickname; }
+const std::string& Client::getNickname() { return this->_nickname; }
 
-std::string& Client::getUsername() { return this->_username; }
+const std::string& Client::getUsername() { return this->_username; }
 
-std::string& Client::getRealName() { return this->_realname; }
+const std::string& Client::getRealName() { return this->_realname; }
 
 bool Client::getRegisterInfo() const { return this->_isRegistered; }
 

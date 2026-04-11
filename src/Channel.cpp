@@ -21,10 +21,13 @@ Channel::~Channel() {}
 void Channel::add_client(Client* cli) {
   this->_members.push_back(cli);
 }
-
+void  Channel::addToInvited(Client* client) { 
+  this->_invited.push_back(client); 
+}
 std::string& Channel::getChannelName() { return this->_channel_name; }
 std::vector<Client *>& Channel::getAdmins() { return this->_admins; }
 std::vector<Client *>& Channel::getMembers() { return this->_members; }
+std::vector<Client *>& Channel::getInvited() { return this->_invited; }
 unsigned int Channel::getLimit() const { return this->_limit; }
 std::string Channel::getKey() const { return this->_key; }
 unsigned int Channel::getMaxMembers() const { return this->_limit; }
@@ -35,6 +38,13 @@ bool Channel::isTopicForOperator() { return this->_t; }
 bool Channel::isChannelKey() { return this->_k; }
 bool Channel::isChannelLimit() { return this->_l; }
 bool Channel::isOperatorAssignable() { return this->_o; }
+bool Channel::isInvited(Client& clientToFind) {
+  for (size_t i = 0; i < this->getInvited().size(); i++) {
+    if (this->getInvited()[i]->getNickname() == clientToFind.getNickname())
+      return true;
+  }
+  return false;
+}
 
 void Channel::broadcast(Client& sender, std::string& msg)
 {
@@ -43,7 +53,7 @@ void Channel::broadcast(Client& sender, std::string& msg)
   for (it = members.begin(); it != members.end(); it++)
   {
     if (sender.getFd() != (*it)->getFd())
-      (*it)->write_msg(msg); //sending to every dereferenced client in channel except sender
+      (*it)->write_msg(msg);
   }
 }
 

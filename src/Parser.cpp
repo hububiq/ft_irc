@@ -1,9 +1,54 @@
 #include "Parser.hpp"
+#include "Client.hpp"
+#include "Server.hpp"
+#include "Channel.hpp"
+
 
 #include <algorithm>
 #include <sstream>
 #include <cctype>
 #include <iostream>
+
+bool Parser::isClientAdmin(Server& server, Client& client, std::string& chName)
+{
+  std::vector<Client *> admins = server.getChannel(chName)->getAdmins(); //wektor pointerow
+  std::string nick = client.getNickname();
+  for (size_t i = 0; i < admins.size(); i++) {
+    if (admins[i]->getNickname() == nick)
+      return true;
+  }
+  return false;
+}
+
+bool Parser::isInviteeInChannel(Server& server, Message& msg)
+{
+  const std::string& nick = msg.params[0];
+  std::map<std::string, Channel> chanls = server.getChannels();
+  std::map<std::string, Channel>::iterator it;
+  for (it = chanls.begin(); it != chanls.end(); it++) { //inefficient when big number of channels
+    std::vector<Client *> memb = it->second.getMembers();
+    for (size_t i = 0; i < memb.size(); i++) {
+      if (memb[i]->getNickname() == nick)
+        return true;
+    }
+  }
+  return false;
+}
+
+bool Parser::isInviterInChannel(Server& server, Client& client)
+{
+  const std::string& nick = client.getNickname();
+  std::map<std::string, Channel> chanls = server.getChannels();
+  std::map<std::string, Channel>::iterator it;
+  for (it = chanls.begin(); it != chanls.end(); it++) {
+   std::vector<Client *> memb = it->second.getMembers();
+   for (size_t i = 0; i < memb.size(); i++) {
+     if (memb[i]->getNickname() == nick)
+       return true;
+    }
+  }
+  return false;
+}
 
 bool Parser::findClient(std::map<int, Client>& cliMap, std::string& name)
 {
@@ -15,8 +60,8 @@ bool Parser::findClient(std::map<int, Client>& cliMap, std::string& name)
   return false;
 }
 
-bool Parser::modeGuardChecks(Channel* ch, Message& msg) {
-  if (ch->isInviteOnly()) {
+bool Parser::modeGuardChecks(Channel* ch, Message& msg, Client& client) {
+  if (ch->isInviteOnly() && !ch->isInvited(client)) {
       std::cerr << "ERR_INVITEONLYCHAN - log" << std::endl;
       return true;
     }

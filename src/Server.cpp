@@ -79,6 +79,8 @@ Channel* Server::getChannel(const std::string& chann) {
   return NULL;
 }
 
+std::map<std::string, Channel> Server::getChannels() { return this->_channels; }
+
 void Server::addChannel(Channel& ch, std::string& chName) {
   ch.setChannelName(chName);
   this->_channels[chName] = ch;

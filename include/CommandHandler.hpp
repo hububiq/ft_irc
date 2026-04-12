@@ -13,6 +13,8 @@ namespace CommandHandler
     void handleJoin(Client& client, Message& msg, Server& server);
     void handlePrivMsg(Client& client, Message& msg, Server& server);
     void handleKick(Client& client, Message& msg, Server& server);
+    void handleInvite(Client& client, Message& msg, Server& server);
+
     // void handleQuit(Client& client, Message& msg, Server& server);
 };
 

@@ -14,15 +14,17 @@ std::string Replies::getReply(ReplyCode code, const std::string& userNick,
         case RPL_WELCOME:
             return prefix + "001 " + userNick + " :Welcome to the Internet Relay Network " + 
                    userNick + "!" + arg1 + "@" + arg2 + "\r\n";
+        case RPL_INVITING:
+            return prefix + "341 " + userNick + " " + arg1 + " " + arg2;
 
         // --- ERROR REPLIES ---
         case ERR_NOSUCHNICK:
             // arg1 = the nickname that doesn't exist
-            return prefix + "401 " + userNick + " " + arg1 + " :No such nick/channel\r\n";
+            return prefix + "401 " + userNick + " " + arg1 +  " :No such nick/channel\r\n";
 
         case ERR_NOSUCHCHANNEL:
             // arg1 = the channel name
-            return prefix + "403 " + userNick + " " + arg1 + " :No such channel\r\n";
+            return prefix + "403 " + userNick + " " + arg1 +  " :No such channel\r\n";
 
         case ERR_TOOMANYCHANNELS:
             return prefix + "405 " + userNick + " " + arg1 + " ::You have joined too many channels\r\n";
@@ -40,6 +42,11 @@ std::string Replies::getReply(ReplyCode code, const std::string& userNick,
         case ERR_CHANOPRIVSNEEDED:
             // arg1 = the channel name
             return prefix + "482 " + userNick + " " + arg1 + " :You're not channel operator\r\n";
+        
+        case ERR_USERONCHANNEL:
+            // argv 1 = invited user
+            // arg2 = the channel name
+            return prefix + "443 " + userNick + " " + arg1 + " " + arg2 + " :is already on channel\r\n";
 
         default:
             return prefix + "500 " + userNick + " :Unknown Error\r\n";

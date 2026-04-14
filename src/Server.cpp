@@ -48,7 +48,7 @@ void Server::executeMessage(Client& client, Message& msg, Server& server) {
     } break;
     case REGISTERED: {
       std::cout << "inside REGISTERED: " <<msg.command << std::endl;
-      if (msg.command == "PASS" || msg.command == "USER") {
+      if (msg.command == "PASS" || msg.command == "USER" || msg.command == "NICK") {
         std::cerr << "ERR_ALREADYREGISTERED - log" << std::endl;
         return ;
       }

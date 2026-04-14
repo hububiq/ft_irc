@@ -14,7 +14,8 @@ namespace CommandHandler
     void handlePrivMsg(Client& client, Message& msg, Server& server);
     void handleKick(Client& client, Message& msg, Server& server);
     void handleInvite(Client& client, Message& msg, Server& server);
-
+    void handlePing(Client& client, Message& msg, Server& server);
+    void handleCap(Client&, Message&, Server&);
     // void handleQuit(Client& client, Message& msg, Server& server);
 };
 

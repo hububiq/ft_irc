@@ -120,16 +120,11 @@ void CommandHandler::handleJoin(Client& client, Message& msg, Server& server) {
         server.addChannel(channel, channelName);
         server.getChannel(channelName)->getAdmins().push_back(&client);
         server.getChannel(channelName)->add_client(&client);
-        std::cout << client.getRealName() 
-            << " joined channel: " 
-            << channelName 
-            << " --- operator" << std::endl;
     }
     else if (ch != NULL) {
         if (Parser::modeGuardChecks(ch, msg, client))
             return ;
         ch->add_client(&client);
-        std::cout << client.getRealName() << " joined channel: " << channelName << std::endl;
     }
 }
 
@@ -256,6 +251,29 @@ void CommandHandler::handlePass(Client& client, Message& msg, Server& server)
     client.setState(HANDSHAKE);
 }
 
+void CommandHandler::handlePing(Client &client, Message &msg, Server& server)
+{
+    if (msg.params.empty()) {
+        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl; 
+        return ;
+    }
+    (void)server;
+    if (!msg.params.empty()) {
+        std::string serverName = "localhost";
+        std::string prefix = ":" + serverName + " ";
+        std::string replay = prefix + " PONG " + serverName + " : " + msg.params[0] + "\r\n";
+        client.write_msg(replay);
+    }
+}
+void CommandHandler::handleCap(Client& client, Message& msg, Server& server)
+{
+    (void)server;
+    std::string serverName = "localhost";
+    std::string prefix = ":" + serverName + " ";
+    std::string replay = prefix + " CAP * " + msg.params[0] + " :\r\n";
+    client.write_msg(replay);
+}
+
 void CommandHandler::handleCommand(Client& client, Message& msg, Server& server)
 {
     static std::map<std::string, void(*)(Client&, Message&, Server&)> commands; 
@@ -268,6 +286,8 @@ void CommandHandler::handleCommand(Client& client, Message& msg, Server& server)
         commands["PRIVMSG"] = handlePrivMsg;
         commands["KICK"] = handleKick;
         commands["INVITE"] = handleInvite;
+        commands["PING"] = handlePing;
+        commands["CAP"] = handleCap;
         // commands["QUIT"] = handleQuit;
     
     };

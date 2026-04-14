@@ -29,23 +29,26 @@ void Server::parseArg(int argc, char** argv) {
 void Server::executeMessage(Client& client, Message& msg, Server& server) {
   switch (client.getState()) {
     case CONNECTED: {
-      if (msg.command != "PASS") {
-        std::cerr << "ERR_NOTREGISTERED - log" << std::endl;
-        return ;
+      std::cout << "inside CONNECTED: " <<msg.command << std::endl;
+      if (msg.command == "CAP" || msg.command == "PASS") {
+        break ;
       }
-      break;
+      std::cerr << "Login reguired: PASS" << std::endl;
+      return ;
     }
     case HANDSHAKE: {
-      if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER") {
+      std::cout << "inside HANDSHAKE: " << msg.command << std::endl;
+      if (msg.command == "NICK" || msg.command == "USER" || msg.command == "CAP") {
           break ;
       }
       else {
-        std::cerr << "ERR_NOTREGISTERED - log" << std::endl;
+        std::cerr << "ERR_NOTREGISTERED - logi --> HANDSHAKE" << std::endl;
         return ;
       }
-    }
+    } break;
     case REGISTERED: {
-      if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER") {
+      std::cout << "inside REGISTERED: " <<msg.command << std::endl;
+      if (msg.command == "PASS" || msg.command == "USER" || msg.command == "NICK") {
         std::cerr << "ERR_ALREADYREGISTERED - log" << std::endl;
         return ;
       }

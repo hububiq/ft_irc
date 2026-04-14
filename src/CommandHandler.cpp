@@ -12,6 +12,64 @@
 #include <cctype>
 #include <algorithm>
 
+void CommandHandler::handleTopic(Client& client, Message& msg, Server& server)
+{
+    std::string nickname = client.getNickname();
+    std::string command = msg.command;
+    bool isUserInChan = Parser::isUserInChannel(server, client);
+    if (msg.params.empty()) {
+        std::string reply = Replies::getReply(ERR_NEEDMOREPARAMS, nickname, command, "");
+        client.write_msg(reply);
+        return ;
+    }
+    Channel* chan = server.getChannel(msg.params[0]);
+    if (!chan) {
+        std::string reply = Replies::getReply(ERR_NOTONCHANNEL, nickname, msg.params[0], "");
+        client.write_msg(reply);
+        return ;
+    }
+    if (!isUserInChan) {
+        std::string reply = Replies::getReply(ERR_NOTONCHANNEL, nickname, msg.params[0], "");
+        client.write_msg(reply);
+        return ;
+    }
+    if (chan && isUserInChan && msg.params.size() == 1) { //there is only one parameter and user is in channel
+        if (chan->isThereTopic()) {
+            std::string reply = Replies::getReply(RPL_TOPIC, nickname, msg.params[0], chan->getTopic());
+            client.write_msg(reply);
+        }
+        else {
+            std::string reply = Replies::getReply(RPL_NOTOPIC, nickname, msg.params[0], "");
+            client.write_msg(reply);
+        }
+        return ;
+    }
+    if (isUserInChan && msg.params.size() >= 2) {
+        Channel* tempChan = server.getChannel(msg.params[0]);
+        if (!tempChan) { 
+            std::string reply = Replies::getReply(ERR_NOTONCHANNEL, nickname, msg.params[0], "");
+            client.write_msg(reply);
+            return ;
+        }
+        if (tempChan && tempChan->isTopicForOperator() && !(Parser::isClientAdmin(server, client, msg.params[0]))) {
+            std::string reply = Replies::getReply(ERR_CHANOPRIVSNEEDED, nickname, msg.params[0], "");
+            client.write_msg(reply);
+            return ;
+        }
+        
+        //no flag "topic only by operators" - everybody can assign topic if its not empty
+        if (tempChan && !msg.params[1].empty() && msg.params[1][0] != ':')
+            tempChan->setTopic(msg.params[1]);
+        if (!tempChan->getTopic().empty()) {
+            std::string reply = ":" + client.getNickname() + "!" + client.getUsername()
+                + "@" + client.getHostname() + " TOPIC " + tempChan->getChannelName() + " :" + tempChan->getTopic() + "\r\n";
+            tempChan->broadcast(client, reply);
+            client.write_msg(reply); //needed - TOPIC is also viewed for user-setter
+        }
+    }
+}
+
+
 // void CommandHandler::handleQuit(Client& client, Message& msg, Server& server)
 // {
 //     //build reason and prefix
@@ -34,7 +92,7 @@ void CommandHandler::handleInvite(Client& client, Message& msg, Server& server)
         client.write_msg(reply);
         return ;
     }
-    if (!Parser::isInviterInChannel(server, client)) {
+    if (!Parser::isUserInChannel(server, client)) {
         std::string reply = Replies::getReply(ERR_NOTONCHANNEL, nickname, msg.params[1], "");
         client.write_msg(reply);
         return ;
@@ -104,7 +162,11 @@ void CommandHandler::handlePrivMsg(Client& client, Message& msg, Server& server)
     }
 }
 
+/*TODO: check with Halloy if I need to sent RL_NOTOPIC if user joins canal without topic*/
+/*      broadcast when somebody is joining*/
 void CommandHandler::handleJoin(Client& client, Message& msg, Server& server) {
+    std::string nickname = client.getNickname();
+    std::string command = msg.command;
     if (msg.params.empty()) {
         std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl;
         return ;
@@ -115,7 +177,7 @@ void CommandHandler::handleJoin(Client& client, Message& msg, Server& server) {
         return ;
     }
     Channel* ch = server.getChannel(channelName);
-    if (ch == NULL) {
+    if (ch == NULL) { //channel will be freshly made so it has no topic - we dont send anythin to client which is joining
         Channel channel = Channel(); //could be refactored with parametrised constructor
         server.addChannel(channel, channelName);
         server.getChannel(channelName)->getAdmins().push_back(&client);
@@ -125,6 +187,11 @@ void CommandHandler::handleJoin(Client& client, Message& msg, Server& server) {
         if (Parser::modeGuardChecks(ch, msg, client))
             return ;
         ch->add_client(&client);
+        //ch->broadcast(client, reply) TODO here: add reply about joining to entire chanel
+        if (ch->isThereTopic()) { //client succesfully joined, passed key if any set, now he will have viewed the channel topic
+            std::string reply = Replies::getReply(RPL_TOPIC, nickname, msg.params[0], ch->getTopic());
+            client.write_msg(reply);
+        }
     }
 }
 
@@ -141,6 +208,7 @@ bool clientCanKICK(Channel *channel_obj, Client &client)
     }
     return false;
 }
+
 bool clientToBeKICKed(Channel *channel_obj, const std::string& client_to_kick)
 {
     std::vector<Client *>& temp_members = channel_obj->getMembers();
@@ -288,6 +356,7 @@ void CommandHandler::handleCommand(Client& client, Message& msg, Server& server)
         commands["INVITE"] = handleInvite;
         commands["PING"] = handlePing;
         commands["CAP"] = handleCap;
+        commands["TOPIC"] = handleTopic;
         // commands["QUIT"] = handleQuit;
     
     };

@@ -30,8 +30,10 @@ std::vector<Client *>& Channel::getMembers() { return this->_members; }
 std::vector<Client *>& Channel::getInvited() { return this->_invited; }
 unsigned int Channel::getLimit() const { return this->_limit; }
 std::string Channel::getKey() const { return this->_key; }
+std::string Channel::getTopic() const { return this->_topic; }
 unsigned int Channel::getMaxMembers() const { return this->_limit; }
 void Channel::setKey(std::string& key) { _key = key; }
+void Channel::setTopic(std::string& topic) { this->_topic = topic; }
 void Channel::setChannelName(std::string& name) { this->_channel_name = name; }
 bool Channel::isInviteOnly() { return this->_i; }
 bool Channel::isTopicForOperator() { return this->_t; }
@@ -43,6 +45,12 @@ bool Channel::isInvited(Client& clientToFind) {
     if (this->getInvited()[i]->getNickname() == clientToFind.getNickname())
       return true;
   }
+  return false;
+}
+
+bool Channel::isThereTopic() {
+  if (this->_topic.size() != 0)
+    return true;
   return false;
 }
 

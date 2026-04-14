@@ -35,7 +35,7 @@ bool Parser::isInviteeInChannel(Server& server, Message& msg)
   return false;
 }
 
-bool Parser::isUserInChannel(Server& server, Client& client)
+bool Parser::isInviterInChannel(Server& server, Client& client)
 {
   const std::string& nick = client.getNickname();
   std::map<std::string, Channel> chanls = server.getChannels();

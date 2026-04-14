@@ -41,10 +41,8 @@ public:
   std::vector<Client *>& getInvited();
   unsigned int           getLimit() const;
   std::string            getKey() const;
-  std::string            getTopic() const;
   unsigned int           getMaxMembers() const;
   void            setKey(std::string&);
-  void            setTopic(std::string& topic);
   void            setChannelName(std::string& name);
   bool isInviteOnly();
   bool isTopicForOperator();
@@ -52,7 +50,6 @@ public:
   bool isChannelLimit();
   bool isOperatorAssignable();
   bool isInvited(Client& clientToFind);
-  bool isThereTopic();
   void broadcast(Client& sender, std::string& msg);
 
 };

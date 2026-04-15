@@ -58,8 +58,8 @@ void CommandHandler::handleTopic(Client& client, Message& msg, Server& server)
         }
         
         //no flag "topic only by operators" - everybody can assign topic if its not empty
-        if (tempChan && !msg.params[1].empty() && msg.params[1][0] != ':')
-            tempChan->setTopic(msg.params[1]);
+        if (tempChan && !msg.params[1].empty())
+                tempChan->setTopic(msg.params[1]);
         if (!tempChan->getTopic().empty()) {
             std::string reply = ":" + client.getNickname() + "!" + client.getUsername()
                 + "@" + client.getHostname() + " TOPIC " + tempChan->getChannelName() + " :" + tempChan->getTopic() + "\r\n";
@@ -177,6 +177,9 @@ void CommandHandler::handleJoin(Client& client, Message& msg, Server& server) {
         return ;
     }
     Channel* ch = server.getChannel(channelName);
+    if (ch && Parser::isUserInChannel(server, client)) {
+        return; // case where user is on the channel - just ignore JOIN command
+    }
     if (ch == NULL) { //channel will be freshly made so it has no topic - we dont send anythin to client which is joining
         Channel channel = Channel(); //could be refactored with parametrised constructor
         server.addChannel(channel, channelName);
@@ -187,11 +190,18 @@ void CommandHandler::handleJoin(Client& client, Message& msg, Server& server) {
         if (Parser::modeGuardChecks(ch, msg, client))
             return ;
         ch->add_client(&client);
+        std::string joinReply = ":" + client.getNickname() + "!" + client.getUsername()
+                + "@" + client.getHostname() + " JOIN " + " :" + ch->getChannelName() + "\r\n";
+        ch->broadcast(client, joinReply);
+        client.write_msg(joinReply);
         //ch->broadcast(client, reply) TODO here: add reply about joining to entire chanel
         if (ch->isThereTopic()) { //client succesfully joined, passed key if any set, now he will have viewed the channel topic
             std::string reply = Replies::getReply(RPL_TOPIC, nickname, msg.params[0], ch->getTopic());
             client.write_msg(reply);
+            return ;
         }
+        std::string reply = Replies::getReply(RPL_NOTOPIC, nickname, msg.params[0], ""); //in case of no topic, information about it is shown to client
+        client.write_msg(reply);
     }
 }
 
@@ -336,6 +346,10 @@ void CommandHandler::handlePing(Client &client, Message &msg, Server& server)
 void CommandHandler::handleCap(Client& client, Message& msg, Server& server)
 {
     (void)server;
+    if (msg.params.empty()) {
+        std::cerr << "Need more paramters - log " << std::endl;
+        return ;
+    }
     std::string serverName = "localhost";
     std::string prefix = ":" + serverName + " ";
     std::string replay = prefix + " CAP * " + msg.params[0] + " :\r\n";

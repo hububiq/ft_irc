@@ -17,18 +17,26 @@ std::string Replies::getReply(ReplyCode code, const std::string& userNick,
             return prefix + "001 " + userNick + " :Welcome to the Internet Relay Network " + 
                    userNick + "!" + arg1 + "@" + arg2 + "\r\n";
         
-        case RPL_YOURHOST:
-            // arg1: server version
-            return prefix + "002 " + userNick + " :Your host is " + serverName + ", running version " + arg1 + "\r\n";
+        // case RPL_YOURHOST:
+        //     // arg1: server version
+        //     return prefix + "002 " + userNick + " :Your host is " + serverName + ", running version " + arg1 + "\r\n";
             
-        case RPL_CREATED:
-            // arg1: creation date
-            return prefix + "003 " + userNick + " :This server was created " + arg1 + "\r\n";
+        // case RPL_CREATED:
+        //     // arg1: creation date
+        //     return prefix + "003 " + userNick + " :This server was created " + arg1 + "\r\n";
 
-        case RPL_MYINFO:
+        // case RPL_MYINFO:
             // arg1: version, arg2: user modes, arg3: channel modes
             //:server 004 <nick> <servername> <version> <available umodes> <available cmodes> [<cmodes with param>]
             // ??? -> return prefix + "004 " + userNick + " " + serverName + " " + arg1 + " " + arg2 + " " + arg3 + "\r\n";
+
+        case RPL_TOPIC:
+            //shows the topic upon command or upon joining. arg1 is channel, arg2 the topic
+            return prefix + "332 " + userNick + " " + arg1 + " " + arg2 + "\r\n";
+        case RPL_NOTOPIC:
+            //shows info that there is no topic in case of input TOPIC with just channel as msg.params[0]
+            //arg1 is channel again, there is no arg2 but hardcoded message \/
+            return prefix + "331 " + userNick + " " + arg1 + " " + ":No topic is set!\r\n";
 
         // ==========================================
         // COMMAND RENSPONSES
@@ -47,12 +55,12 @@ std::string Replies::getReply(ReplyCode code, const std::string& userNick,
             // arg1 = the channel name
             return prefix + "403 " + userNick + " " + arg1 +  " :No such channel\r\n";
         
-        case ERR_CANNOTSENDTOCHAN:
-            // arg1: channel name
-            return prefix + "404 " + userNick + " " + arg1 + " :Cannot send to channel\r\n";
+        // case ERR_CANNOTSENDTOCHAN:
+        //     // arg1: channel name
+        //     return prefix + "404 " + userNick + " " + arg1 + " :Cannot send to channel\r\n";
 
-        case ERR_TOOMANYCHANNELS:
-            return prefix + "405 " + userNick + " " + arg1 + " ::You have joined too many channels\r\n";
+        // case ERR_TOOMANYCHANNELS:
+        //     return prefix + "405 " + userNick + " " + arg1 + " ::You have joined too many channels\r\n";
         
         case ERR_NORECIPIENT:
             // arg1: command name
@@ -68,8 +76,8 @@ std::string Replies::getReply(ReplyCode code, const std::string& userNick,
         // ==========================================
         // NICKNAME ERRORS
         // ==========================================
-        case ERR_NONICKNAMEGIVEN:
-            return prefix + "431 :No nickname given\r\n";
+        // case ERR_NONICKNAMEGIVEN:
+        //     return prefix + "431 :No nickname given\r\n";
 
         case ERR_ERRONEUSNICKNAME:
             // arg1: bad nickname
@@ -81,8 +89,8 @@ std::string Replies::getReply(ReplyCode code, const std::string& userNick,
         // ==========================================
         // CHANNEL PRESENCE ERRORS
         // ==========================================
-        case ERR_USERNOTINCHANNEL:
-            return prefix + "441 " + userNick + " " + arg1 + " :They aren't on that channel\r\n";
+        // case ERR_USERNOTINCHANNEL:
+        //     return prefix + "441 " + userNick + " " + arg1 + " :They aren't on that channel\r\n";
 
         case ERR_NOTONCHANNEL:
             return prefix + "442 " + arg1 + " :You're not on that channel\r\n";
@@ -114,24 +122,24 @@ std::string Replies::getReply(ReplyCode code, const std::string& userNick,
             // arg1: channel name
             return prefix + "471 " + userNick + " " + arg1 + " :Cannot join channel (+l)\r\n";
 
-        case ERR_UNKNOWNMODE:
-            // arg1: mode char
-            return prefix + "472 " + userNick + " " + arg1 + " :is unknown mode char to me\r\n";
+        // case ERR_UNKNOWNMODE:
+        //     // arg1: mode char
+        //     return prefix + "472 " + userNick + " " + arg1 + " :is unknown mode char to me\r\n";
 
         case ERR_INVITEONLYCHAN:
             // arg1: channel name
             return prefix + "473 " + userNick + " " + arg1 + " :Cannot join channel (+i)\r\n";
 
-        case ERR_BANNEDFROMCHAN:
-            // arg1: channel name
-            return prefix + "474 " + userNick + " " + arg1 + " :Cannot join channel (+b)\r\n";
+        // case ERR_BANNEDFROMCHAN:
+        //     // arg1: channel name
+        //     return prefix + "474 " + userNick + " " + arg1 + " :Cannot join channel (+b)\r\n";
 
         case ERR_BADCHANNELKEY:
             // arg1: channel name
             return prefix + "475 " + userNick + " " + arg1 + " :Cannot join channel (+k)\r\n";
 
-        case ERR_NOPRIVILEGES:
-            return prefix + "481 " + userNick + " :Permission Denied- You're not an IRC operator\r\n";
+        // case ERR_NOPRIVILEGES:
+        //     return prefix + "481 " + userNick + " :Permission Denied- You're not an IRC operator\r\n";
         
         case ERR_CHANOPRIVSNEEDED:
             // arg1 = the channel name

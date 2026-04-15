@@ -13,6 +13,8 @@ enum ReplyCode
 
     // --- Command replies 
     RPL_INVITING = 341, //
+    RPL_TOPIC = 332,
+    RPL_NOTOPIC = 331,
     
     // --- Command & Syntax Errors (400-439) ---
     ERR_NOSUCHNICK = 401,

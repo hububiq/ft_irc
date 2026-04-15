@@ -17,7 +17,7 @@ namespace Parser {
   bool isValidChannelName(std::string& channName);
   bool modeGuardChecks(Channel* ch, Message& msg, Client& client);
   bool findClient(std::map<int, Client>& cliMap, std::string& name);
-  bool isInviterInChannel(Server& server, Client& client); 
+  bool isUserInChannel(Server& server, Client& client); 
   bool isInviteeInChannel(Server& server, Message& msg);
   bool isClientAdmin(Server& server, Client& client, std::string& chName);
 };

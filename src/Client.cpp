@@ -44,7 +44,8 @@ void Client::setUsername(std::string usname) { this->_username = usname; }
 
 void Client::setRealName(std::string rname) { this->_realname = rname; }
 
-void Client::reset() {
+void Client::reset() 
+{
   this->_status = READING;
   // this->_buffer could be cleared if needed, but since we parsed lines we
   // don't clear right now
@@ -55,4 +56,5 @@ void Client::write_msg(std::string& message) //send() goes through the socket to
     std::string buf = message;
     if (send(this->_fd, buf.c_str(), buf.length(), MSG_DONTWAIT) == -1)
       std::cout << "Error: send()" << std::endl;
+	// [ ] [ ] [ ] [ ] \r\n
 }

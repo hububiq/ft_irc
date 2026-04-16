@@ -9,51 +9,52 @@
 class Channel
 {
 private:
-  std::string           _channel_name;
-  std::string           _topic;
-  Client                *_admin;
-  std::vector<Client *> _admins;
-  std::vector<Client *>  _members;
-  std::vector<Client *> _invited;
-  std::string           _key; 
-  unsigned int          _limit;
-  bool                  _i; // Set/remove Invite-only
-  bool                  _t; // Set/remove the restrictions of the TOPIC command to channel operators
-  bool                  _k; // Set/remove the channel key (password)
-  bool                  _l; // Set/remove the user limit to channel
-  bool                  _o;  // Give/take channel operator privilege
+	std::string           _channel_name;
+	std::string           _key;
+	std::string           _topic;
+	//   Client                *_admin;
+	std::vector<Client *> _admins;
+	std::vector<Client *>  _members;
+	std::vector<Client *> _invited;
+	unsigned int          _limit;
+	bool                  _i; // Set/remove Invite-only
+	bool                  _t; // Set/remove the restrictions of the TOPIC command to channel operators
+	bool                  _k; // Set/remove the channel key (password)
+	bool                  _l; // Set/remove the user limit to channel
+	bool                  _o;  // Give/take channel operator privilege
 
 public:
-  Channel();
-  // Channel(std::string& name, std::string& key, Client *admin);
-  ~Channel();
+	Channel();
+	Channel(std::string& name, std::string& key, Client *admin);
+	~Channel();
 
-  void add_client(Client* cli);
-  void addToInvited(Client* client);
-  // void remove_client(Client*);
-  // void remove_client(Client*);
-  void kick(Client *client, Client *target, const std::string& reason);
-  void broadcast(const std::string&);
+	void add_client(Client*);
+	void addToInvited(Client*);
 
-  std::string&           getChannelName();
-  std::vector<Client *>& getAdmins();
-  std::vector<Client *>& getMembers();
-  std::vector<Client *>& getInvited();
-  unsigned int           getLimit() const;
-  std::string            getKey() const;
-  std::string            getTopic() const;
-  unsigned int           getMaxMembers() const;
-  void            setKey(std::string&);
-  void            setTopic(std::string& topic);
-  void            setChannelName(std::string& name);
-  bool isInviteOnly();
-  bool isTopicForOperator();
-  bool isChannelKey();
-  bool isChannelLimit();
-  bool isOperatorAssignable();
-  bool isInvited(Client& clientToFind);
-  bool isThereTopic();
-  void broadcast(Client& sender, std::string& msg);
+	// getters
+	std::string&           	getChannelName();
+	std::vector<Client *>& 	getAdmins();
+	std::vector<Client *>& 	getMembers();
+	std::vector<Client *>& 	getInvited();
+	unsigned int           	getLimit() const;
+	std::string            	getKey() const;
+	std::string            	getTopic() const;
+	unsigned int           	getMaxMembers() const;
+
+	// setters
+	void            		setKey(std::string&);
+	void            		setTopic(std::string&);
+	void            		setChannelName(std::string&);
+
+	bool 					isInviteOnly();
+	bool 					isTopicForOperator();
+	bool 					isChannelKey();
+	bool 					isChannelLimit();
+	bool 					isOperatorAssignable();
+	bool 					isInvited(Client&);
+	bool 					isThereTopic();
+
+	void 					broadcast(Client&, std::string&);
 
 };
 

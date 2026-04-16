@@ -164,7 +164,8 @@ void CommandHandler::handlePrivMsg(Client& client, Message& msg, Server& server)
 
 /*TODO: check with Halloy if I need to sent RL_NOTOPIC if user joins canal without topic*/
 /*      broadcast when somebody is joining*/
-void CommandHandler::handleJoin(Client& client, Message& msg, Server& server) {
+void CommandHandler::handleJoin(Client& client, Message& msg, Server& server) 
+{
     std::string nickname = client.getNickname();
     std::string command = msg.command;
     if (msg.params.empty()) {
@@ -202,40 +203,8 @@ void CommandHandler::handleJoin(Client& client, Message& msg, Server& server) {
         }
         std::string reply = Replies::getReply(RPL_NOTOPIC, nickname, msg.params[0], ""); //in case of no topic, information about it is shown to client
         client.write_msg(reply);
+		server.respond(client);
     }
-}
-
-bool clientCanKICK(Channel *channel_obj, Client &client)
-{
-    std::vector<Client *> temp_members = channel_obj->getAdmins();
-    std::vector<Client*>::iterator it = temp_members.begin();
-    std::vector<Client*>::iterator it_end = temp_members.end();
-    while (it != it_end)
-    {
-        if (*it == &client)
-            return true;
-        ++it;
-    }
-    return false;
-}
-
-bool clientToBeKICKed(Channel *channel_obj, const std::string& client_to_kick)
-{
-    std::vector<Client *>& temp_members = channel_obj->getMembers();
-    std::vector<Client*>::iterator it = temp_members.begin();
-    std::vector<Client*>::iterator it_end = temp_members.end();
-
-    while (it != it_end)
-    {
-        Client * tmp_mem = *it;
-        if (tmp_mem->getNickname() == client_to_kick) {
-            temp_members.erase(it);
-            std::cout << "Found client to kick" << std::endl;
-            return true;
-        }
-        ++it;
-    }
-    return false;
 }
 
 void CommandHandler::handleKick(Client &client, Message &msg, Server &server)
@@ -248,18 +217,27 @@ void CommandHandler::handleKick(Client &client, Message &msg, Server &server)
     std::string nick = client.getNickname(); // nick of the KICKer
     std::string channel_name = msg.params[0];
     std::string client_to_kick = msg.params[1];
+	std::string reason = msg.params[2];
     std::cout << nick << " is looking to kick " << client_to_kick << std::endl;
     Channel *channel_obj = server.getChannel(channel_name);
     if (!channel_obj) {
         std::cout << Replies::getReply(ERR_NOSUCHCHANNEL, nick, channel_name, "");
         return;
     }
-    if (clientCanKICK(channel_obj, client))
+    if (Parser::clientCanKICK(channel_obj, client))
     {
-        if (clientToBeKICKed(channel_obj, client_to_kick))
+        if (Parser::clientToBeKICKed(channel_obj, client_to_kick))
+		{
+			// TODO: to entire channel that person has been kicked [reason]
             std::cout << nick << " kicked " << client_to_kick << " form " << channel_name << std::endl;
-        else
-         std::cout << Replies::getReply(ERR_USERNOTINCHANNEL, nick, channel_name, "");
+			std::string replay = ":" + nick + "!" + client.getRealName() 
+									+ "@" + "localhost" + " KICK " + channel_name 
+									+ client_to_kick + reason;
+			std::cout << replay; // <--this is test
+			channel_obj->broadcast(client, replay);
+        }
+		else
+        	std::cout << Replies::getReply(ERR_USERNOTINCHANNEL, nick, channel_name, "");
     }
     else
         std::cerr << Replies::getReply(ERR_CHANOPRIVSNEEDED, nick, channel_name, "");
@@ -378,5 +356,9 @@ void CommandHandler::handleCommand(Client& client, Message& msg, Server& server)
     if (it != commands.end())
         it->second(client, msg, server);
     else
+	{
+
+		std::cout << msg.command << std::endl;
         std::cerr << "ERR_COMMANDUNKNOWN - log" << std::endl;
+	}
 }

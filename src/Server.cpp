@@ -26,9 +26,12 @@ void Server::parseArg(int argc, char** argv) {
 }
 
 /* ------------------ belongs to Hubert ------------------*/
-void Server::executeMessage(Client& client, Message& msg, Server& server) {
-  switch (client.getState()) {
-    case CONNECTED: {
+void Server::executeMessage(Client& client, Message& msg, Server& server) 
+{
+  switch (client.getState()) 
+  {
+    case CONNECTED: 
+	{
       std::cout << "inside CONNECTED: " <<msg.command << std::endl;
       if (msg.command == "CAP" || msg.command == "PASS") {
         break ;
@@ -36,7 +39,8 @@ void Server::executeMessage(Client& client, Message& msg, Server& server) {
       std::cerr << "Login reguired: PASS" << std::endl;
       return ;
     }
-    case HANDSHAKE: {
+    case HANDSHAKE: 
+	{
       std::cout << "inside HANDSHAKE: " << msg.command << std::endl;
       if (msg.command == "NICK" || msg.command == "USER" || msg.command == "CAP") {
           break ;
@@ -46,7 +50,8 @@ void Server::executeMessage(Client& client, Message& msg, Server& server) {
         return ;
       }
     } break;
-    case REGISTERED: {
+    case REGISTERED: 
+	{
       std::cout << "inside REGISTERED: " <<msg.command << std::endl;
       if (msg.command == "PASS" || msg.command == "USER" || msg.command == "NICK") {
         std::cerr << "ERR_ALREADYREGISTERED - log" << std::endl;
@@ -90,7 +95,6 @@ void Server::addChannel(Channel& ch, std::string& chName) {
 }
 
 /* listener */
-
 int Server::create_socket() {
   struct protoent* proto = getprotobyname("tcp");
   int protocol_num = proto ? proto->p_proto : 0;
@@ -173,15 +177,21 @@ void Server::loop_epoll(int epoll_fd, Server& server) {
   struct epoll_event events[LIMIT];
   while (true) {
     int num_ready = epoll_wait(epoll_fd, events, LIMIT, TIMEOUT);
-    for (int i = 0; i < num_ready; i++) {
+    for (int i = 0; i < num_ready; i++) 
+	{
       int event_fd = events[i].data.fd;
-      if (event_fd == server.getSocketFd()) {
+      if (event_fd == server.getSocketFd()) 
+	  {
         process_connect(epoll_fd, event_fd, server._clients);
-      } else {
+      } 
+	  else 
+	  {
         std::map<int, Client>::iterator it = server._clients.find(event_fd);
-        if (it != server._clients.end()) {
+        if (it != server._clients.end()) 
+		{
           HandleResult res = process_request(epoll_fd, events[i].events, it->second);
-          if (res == DROP_CONNECTION) {
+          if (res == DROP_CONNECTION) 
+		  {
             std::cout << "Client disconnected" << std::endl;
             server._clients.erase(it);
             close(event_fd);
@@ -192,20 +202,23 @@ void Server::loop_epoll(int epoll_fd, Server& server) {
   }
 }
 
-void Server::register_client(int client_fd, std::string& hostname, std::map<int, Client>& clients) {
-  Client c(client_fd);
-  c.setHostname(hostname);
-  c.setState(CONNECTED);
-  clients.insert(std::make_pair(client_fd, c));
-  std::cout << "Client connected." << std::endl;
+void Server::register_client(int client_fd, std::string& hostname, std::map<int, Client>& clients) 
+{
+	Client c(client_fd);
+	c.setHostname(hostname);
+	c.setState(CONNECTED);
+	clients.insert(std::make_pair(client_fd, c));
+	std::cout << "Client connected" << std::endl;
 }
 
-void Server::process_connect(int epoll_fd, int socket_fd, std::map<int, Client>& clients) {
-  struct sockaddr_in addr;
-  socklen_t len = sizeof(addr);
+void Server::process_connect(int epoll_fd, int socket_fd, std::map<int, Client>& clients) 
+{
+	struct sockaddr_in addr;
+	socklen_t len = sizeof(addr);
 
-  int client_fd = accept(socket_fd, (struct sockaddr*)&addr, &len);
-  if (client_fd >= 0) {
+	int client_fd = accept(socket_fd, (struct sockaddr*)&addr, &len);
+	if (client_fd >= 0) 
+	{
     std::string hostname = inet_ntoa(addr.sin_addr);
     int flags = fcntl(client_fd, F_GETFL, 0);
     if (flags != -1) {
@@ -218,8 +231,8 @@ void Server::process_connect(int epoll_fd, int socket_fd, std::map<int, Client>&
     register_client(client_fd, hostname, clients);
   } 
 }
-
 /* multiplexer */
+
 /* request_handler */
 bool Server::process_message(Client& client) {
   size_t end_pos = client.getRequestBuffer().find(READ_END);
@@ -267,32 +280,37 @@ void Server::schedule_epollin(int epoll_fd, Client& client) {
   epoll_ctl(epoll_fd, EPOLL_CTL_MOD, client.getFd(), &event);
 }
 
-HandleResult Server::process_request(int epoll_fd, uint32_t events,
-                                              Client& client) {
+HandleResult Server::process_request(int epoll_fd, uint32_t events, Client& client) 
+{
   if (events & EPOLLIN) {
     if (read_chunk(client) == DROP_CONNECTION) {
       return DROP_CONNECTION;
     }
   }
 
-  while (1) {
+  while (1) 
+  {
     switch (client.getStatus()) {
-      case READING: {
+      case READING: 
+	  {
         if (!process_message(client)) {
           if (events & EPOLLOUT) schedule_epollin(epoll_fd, client);
           return KEEP_CONNECTION;
         }
-      }
-        // fall through
-      case READY_TO_RESPOND: {
-        if (events & EPOLLOUT) {
+      } // fall through
+      case READY_TO_RESPOND: 
+	  {
+        if (events & EPOLLOUT) 
+		{
           if (respond(client) == DROP_CONNECTION)
             return DROP_CONNECTION;
           if (client.getResponseBuffer().empty())
             client.reset();
           else
             return KEEP_CONNECTION;
-        } else {
+        } 
+		else 
+		{
           schedule_epollout(epoll_fd, client);
           return KEEP_CONNECTION;
         }
@@ -303,12 +321,14 @@ HandleResult Server::process_request(int epoll_fd, uint32_t events,
 /* request_handler */
 
 /* response stuff */
-HandleResult Server::respond(Client& client) {
+HandleResult Server::respond(Client& client) 
+{
   if (client.getResponseBuffer().empty()) {
     return KEEP_CONNECTION;
   }
 
   const std::string& buf = client.getResponseBuffer();
+  // in loop?
   ssize_t sent = send(client.getFd(), buf.c_str(), buf.size(), 0);
 
   if (sent <= 0) {

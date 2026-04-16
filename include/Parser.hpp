@@ -10,7 +10,8 @@ class Server;
 class Client;
 class Channel;
 
-namespace Parser {
+namespace Parser 
+{
   void parseToStruct(const std::string& rawMessage, Message& msg);
   void extractParams(std::string line, Message& msg);
   bool isValidNickname(std::string& nick);
@@ -20,6 +21,9 @@ namespace Parser {
   bool isUserInChannel(Server& server, Client& client); 
   bool isInviteeInChannel(Server& server, Message& msg);
   bool isClientAdmin(Server& server, Client& client, std::string& chName);
+  // KICK utils
+  bool clientCanKICK(Channel *channel_obj, Client &client);
+  bool clientToBeKICKed(Channel *channel_obj, const std::string& client_to_kick);
 };
 
 #endif

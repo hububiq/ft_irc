@@ -115,7 +115,7 @@ void Channel::setFlagOn(Server& serv, Client& client, Message msg) {
         //:{admin nickname}!{user}@{host} MODE {channel} +{flag} {parameter}
       }
     }
-    else if (flagStr[i] == 'o') {
+    else if (flagStr[i] == 'o') { //SOMETHING WRONG HERE, SHOULDNT CHECK THIS FLAG?
       if (!this->isOperatorAssignable()) {
         if (msg.params.size() < 3 || msg.params[2].empty()) {
           std::string reply = Replies::getReply(ERR_NEEDMOREPARAMS, nickname, command, "");

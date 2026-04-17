@@ -1,11 +1,24 @@
 #ifndef CLIENTSTATUS_HPP
 #define CLIENTSTATUS_HPP
 
-enum ClientStatus { READING, READY_TO_RESPOND };
+enum ClientStatus
+{
+	READING,
+	READY_TO_RESPOND
+};
 
-enum ClientState { CONNECTED, HANDSHAKE, REGISTERED };
+enum ClientState
+{
+	CONNECTED,
+	HANDSHAKE,
+	REGISTERED
+};
 
-enum HandleResult { KEEP_CONNECTION, DROP_CONNECTION };
+enum HandleResult
+{
+	KEEP_CONNECTION,
+	DROP_CONNECTION
+};
 
 const std::string READ_END = "\r\n";
 

@@ -15,7 +15,9 @@ namespace CommandHandler
     void handleKick(Client& client, Message& msg, Server& server);
     void handleInvite(Client& client, Message& msg, Server& server);
     void handlePing(Client& client, Message& msg, Server& server);
-    void handleCap(Client&, Message&, Server&);    void handleTopic(Client& client, Message& msg, Server& server);
+    void handleCap(Client&, Message&, Server&);
+    void handleTopic(Client& client, Message& msg, Server& server);
+    void handleMode(Client& client, Message& msg, Server& server);
 
 
     // void handleQuit(Client& client, Message& msg, Server& server);

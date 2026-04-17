@@ -12,6 +12,31 @@
 #include <cctype>
 #include <algorithm>
 
+void CommandHandler::handleMode(Client& client, Message& msg, Server& server)
+{
+    std::string nickname = client.getNickname();
+    std::string command = msg.command;
+    if (msg.params.empty()) {
+        std::string reply = Replies::getReply(ERR_NEEDMOREPARAMS, nickname, command, "");
+        client.write_msg(reply);
+        return ;
+    }
+    else if (msg.params.size() >= 2) { //2 params: MODE +o user  OR MORE params MODE +ol user 50
+        Channel* chanForMode = server.getChannel(msg.params[0]);
+        if (!chanForMode) {
+            std::string reply = Replies::getReply(ERR_NOSUCHCHANNEL, nickname, msg.params[0], "");
+            client.write_msg(reply);
+            return ;
+        }
+        //check if client is admin
+        //jesli pierwszy znak w msg.params[1] czyli we flagach to +, to wywolaj funkcje setFlagOn
+        //jesli pierwszy znak w msg.params[1] czyli we flagach to -, to wywolaj funkcje setFlagOff
+        //jesli to zaden z nich, report UNKNOWNMODE
+    }
+    
+
+}
+
 void CommandHandler::handleTopic(Client& client, Message& msg, Server& server)
 {
     std::string nickname = client.getNickname();
@@ -24,7 +49,7 @@ void CommandHandler::handleTopic(Client& client, Message& msg, Server& server)
     }
     Channel* chan = server.getChannel(msg.params[0]);
     if (!chan) {
-        std::string reply = Replies::getReply(ERR_NOTONCHANNEL, nickname, msg.params[0], "");
+        std::string reply = Replies::getReply(ERR_NOSUCHCHANNEL, nickname, msg.params[0], "");
         client.write_msg(reply);
         return ;
     }
@@ -257,6 +282,8 @@ void CommandHandler::handleKick(Client &client, Message &msg, Server &server)
     if (clientCanKICK(channel_obj, client))
     {
         if (clientToBeKICKed(channel_obj, client_to_kick))
+        //TODO: must broadcast to the entire channel that person has been kicked
+        //TODO: reason must be displayed !!!
             std::cout << nick << " kicked " << client_to_kick << " form " << channel_name << std::endl;
         else
          std::cout << Replies::getReply(ERR_USERNOTINCHANNEL, nick, channel_name, "");
@@ -371,6 +398,7 @@ void CommandHandler::handleCommand(Client& client, Message& msg, Server& server)
         commands["PING"] = handlePing;
         commands["CAP"] = handleCap;
         commands["TOPIC"] = handleTopic;
+        commands["MODE"] = handleMode;
         // commands["QUIT"] = handleQuit;
     
     };

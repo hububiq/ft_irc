@@ -1,35 +1,42 @@
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
 
-#include "Client.hpp"
+// #include "Client.hpp"
 
 #include <string>
 #include <vector>
+
+class Client;
+struct Message;
 
 class Channel
 {
 private:
   std::string           _channel_name;
   std::string           _topic;
-  Client                *_admin;
   std::vector<Client *> _admins;
   std::vector<Client *>  _members;
   std::vector<Client *> _invited;
+  std::vector<char>     _chanFlags;
   std::string           _key; 
   unsigned int          _limit;
-  bool                  _i; // Set/remove Invite-only
-  bool                  _t; // Set/remove the restrictions of the TOPIC command to channel operators
-  bool                  _k; // Set/remove the channel key (password)
-  bool                  _l; // Set/remove the user limit to channel
-  bool                  _o;  // Give/take channel operator privilege
+  bool                  _i;
+  bool                  _t;
+  bool                  _k;
+  bool                  _l;
+  bool                  _o;
+
+  //implement CHANNELMODEIS and somehow print all the flags
 
 public:
   Channel();
-  // Channel(std::string& name, std::string& key, Client *admin);
   ~Channel();
 
   void add_client(Client* cli);
   void addToInvited(Client* client);
+  void addToChanFlags(char flag);
+  void addToAdmins(Server& serv, Client& cli, std::string& newAdmin);
+  void removeFromFlags(char flag);
   // void remove_client(Client*);
   // void remove_client(Client*);
   void kick(Client *client, Client *target, const std::string& reason);
@@ -39,13 +46,20 @@ public:
   std::vector<Client *>& getAdmins();
   std::vector<Client *>& getMembers();
   std::vector<Client *>& getInvited();
+  std::vector<char>&     getChanFlags();
   unsigned int           getLimit() const;
   std::string            getKey() const;
   std::string            getTopic() const;
   unsigned int           getMaxMembers() const;
-  void            setKey(std::string&);
+  void            setKey(std::string& key);
   void            setTopic(std::string& topic);
   void            setChannelName(std::string& name);
+  void            setLimit(unsigned int l);
+
+  void            setFlagOn(Client &client, Message msg);
+  // void            setFlagOff(Client &client, Message msg);
+  void            toggleParticularFlag(bool& flag);
+
   bool isInviteOnly();
   bool isTopicForOperator();
   bool isChannelKey();

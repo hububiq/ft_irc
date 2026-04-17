@@ -177,26 +177,27 @@ void Server::loop_epoll(int epoll_fd, Server& server) {
   struct epoll_event events[LIMIT];
   while (true) {
     int num_ready = epoll_wait(epoll_fd, events, LIMIT, TIMEOUT);
-    for (int i = 0; i < num_ready; i++) 
-	{
+    for (int i = 0; i < num_ready; i++) {
       int event_fd = events[i].data.fd;
-      if (event_fd == server.getSocketFd()) 
-	  {
+      if (event_fd == server.getSocketFd()) {
         process_connect(epoll_fd, event_fd, server._clients);
       } 
-	  else 
-	  {
+	  else {
         std::map<int, Client>::iterator it = server._clients.find(event_fd);
-        if (it != server._clients.end()) 
-		{
+        if (it != server._clients.end()) {
           HandleResult res = process_request(epoll_fd, events[i].events, it->second);
-          if (res == DROP_CONNECTION) 
-		  {
+          if (res == DROP_CONNECTION) {
             std::cout << "Client disconnected" << std::endl;
             server._clients.erase(it);
             close(event_fd);
           }
         }
+      }
+    }
+
+    for (std::map<int, Client>::iterator it = server._clients.begin(); it != server._clients.end(); ++it) {
+      if (it->second.getStatus() == READY_TO_RESPOND) {
+        server.schedule_epollout(epoll_fd, it->second);
       }
     }
   }
@@ -244,13 +245,6 @@ bool Server::process_message(Client& client) {
         Parser::parseToStruct(messageLine, msg);
         this->executeMessage(client, msg, *this);
       }
-
-      // Szymon - Response format unclear, for now it's just a string.
-      // In the future create an object, set it in client, and parse it to a
-      // string response in the responder
-      // client.getResponseBuffer().append(
-      //     ":irc-server NOTICE * :*** Received your command: " + messageLine +
-      //     "\r\n");
     client.setStatus(READY_TO_RESPOND);
     return true;
   }
@@ -282,36 +276,31 @@ void Server::schedule_epollin(int epoll_fd, Client& client) {
 
 HandleResult Server::process_request(int epoll_fd, uint32_t events, Client& client) 
 {
-  if (events & EPOLLIN) {
+  if (events & EPOLLIN && (!(events & EPOLLOUT))) {
     if (read_chunk(client) == DROP_CONNECTION) {
       return DROP_CONNECTION;
     }
   }
 
-  while (1) 
-  {
+  while (1) {
     switch (client.getStatus()) {
-      case READING: 
-	  {
+      case READING: {
         if (!process_message(client)) {
           if (events & EPOLLOUT) schedule_epollin(epoll_fd, client);
           return KEEP_CONNECTION;
         }
-      } // fall through
-      case READY_TO_RESPOND: 
-	  {
-        if (events & EPOLLOUT) 
-		{
+      } 
+      // fall through
+      case READY_TO_RESPOND: {
+        if (events & EPOLLOUT) {
           if (respond(client) == DROP_CONNECTION)
             return DROP_CONNECTION;
           if (client.getResponseBuffer().empty())
             client.reset();
           else
             return KEEP_CONNECTION;
-        } 
-		else 
-		{
-          schedule_epollout(epoll_fd, client);
+        }
+        else {
           return KEEP_CONNECTION;
         }
       }

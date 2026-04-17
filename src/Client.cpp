@@ -1,10 +1,13 @@
 //#include "Client.hpp"
 #include "../include/Client.hpp"
-#include <string>
-#include <sys/socket.h>
-#include <iostream>
 
-Client::Client(int fd): _fd(fd), _status(READING), _isRegistered(false), _isAuthent(false) {}
+#include <sys/socket.h>
+
+#include <iostream>
+#include <string>
+
+Client::Client(int fd)
+    : _fd(fd), _status(READING), _isRegistered(false), _isAuthent(false) {}
 
 int Client::getFd() const { return this->_fd; }
 
@@ -44,17 +47,15 @@ void Client::setUsername(std::string usname) { this->_username = usname; }
 
 void Client::setRealName(std::string rname) { this->_realname = rname; }
 
-void Client::reset() 
-{
+void Client::reset() {
   this->_status = READING;
   // this->_buffer could be cleared if needed, but since we parsed lines we
   // don't clear right now
 }
 
-void Client::write_msg(std::string& message) //send() goes through the socket to client's terminal with the message.
+void Client::write_msg(
+    std::string& message)  // queue message and let state machine handle send
 {
-    std::string buf = message;
-    if (send(this->_fd, buf.c_str(), buf.length(), MSG_DONTWAIT) == -1)
-      std::cout << "Error: send()" << std::endl;
-	// [ ] [ ] [ ] [ ] \r\n
+  this->_response_buffer += message;
+  this->_status = READY_TO_RESPOND;
 }

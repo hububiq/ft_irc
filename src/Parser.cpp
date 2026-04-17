@@ -1,102 +1,95 @@
 #include "Parser.hpp"
-#include "Client.hpp"
-#include "Server.hpp"
-#include "Channel.hpp"
-
 
 #include <algorithm>
-#include <sstream>
 #include <cctype>
 #include <iostream>
+#include <sstream>
 
-bool Parser::isClientAdmin(Server& server, Client& client, std::string& chName)
-{
-  std::vector<Client *> admins = server.getChannel(chName)->getAdmins(); //wektor pointerow
+#include "Channel.hpp"
+#include "Client.hpp"
+#include "Server.hpp"
+
+bool Parser::isClientAdmin(Server& server, Client& client,
+                           std::string& chName) {
+  std::vector<Client*> admins =
+      server.getChannel(chName)->getAdmins();  // wektor pointerow
   std::string nick = client.getNickname();
   for (size_t i = 0; i < admins.size(); i++) {
-    if (admins[i]->getNickname() == nick)
-      return true;
+    if (admins[i]->getNickname() == nick) return true;
   }
   return false;
 }
 
-bool Parser::isInviteeInChannel(Server& server, Message& msg)
-{
+bool Parser::isInviteeInChannel(Server& server, Message& msg) {
   const std::string& nick = msg.params[0];
   std::map<std::string, Channel> chanls = server.getChannels();
   std::map<std::string, Channel>::iterator it;
-  for (it = chanls.begin(); it != chanls.end(); it++) { //inefficient when big number of channels
-    std::vector<Client *> memb = it->second.getMembers();
+  for (it = chanls.begin(); it != chanls.end();
+       it++) {  // inefficient when big number of channels
+    std::vector<Client*> memb = it->second.getMembers();
     for (size_t i = 0; i < memb.size(); i++) {
-      if (memb[i]->getNickname() == nick)
-        return true;
+      if (memb[i]->getNickname() == nick) return true;
     }
   }
   return false;
 }
 
-bool Parser::isUserInChannel(Server& server, Client& client)
-{
+bool Parser::isUserInChannel(Server& server, Client& client) {
   const std::string& nick = client.getNickname();
   std::map<std::string, Channel> chanls = server.getChannels();
   std::map<std::string, Channel>::iterator it;
   for (it = chanls.begin(); it != chanls.end(); it++) {
-   std::vector<Client *> memb = it->second.getMembers();
-   for (size_t i = 0; i < memb.size(); i++) {
-     if (memb[i]->getNickname() == nick)
-       return true;
+    std::vector<Client*> memb = it->second.getMembers();
+    for (size_t i = 0; i < memb.size(); i++) {
+      if (memb[i]->getNickname() == nick) return true;
     }
   }
   return false;
 }
 
-bool Parser::findClient(std::map<int, Client>& cliMap, std::string& name)
-{
+bool Parser::findClient(std::map<int, Client>& cliMap, std::string& name) {
   std::map<int, Client>::iterator it;
   for (it = cliMap.begin(); it != cliMap.end(); it++) {
-    if (it->second.getNickname() == name)
-      return true;
+    if (it->second.getNickname() == name) return true;
   }
   return false;
 }
 
 bool Parser::modeGuardChecks(Channel* ch, Message& msg, Client& client) {
   if (ch->isInviteOnly() && !ch->isInvited(client)) {
-      std::cerr << "ERR_INVITEONLYCHAN - log" << std::endl;
+    std::cerr << "ERR_INVITEONLYCHAN - log" << std::endl;
+    return true;
+  }
+  if (ch->isChannelKey()) {
+    if (msg.params.size() < 2 || msg.params[1].empty()) {
+      std::cerr << "ERR_BADCHANNELKEY - log" << std::endl;
       return true;
     }
-  if (ch->isChannelKey()) {
-       if (msg.params.size() < 2 || msg.params[1].empty()) {
-          std::cerr << "ERR_BADCHANNELKEY - log" << std::endl;
-          return true;
-      }
-      if (msg.params[1].empty()) {
-          std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl;
-          return true;
-      }
-      else if (msg.params[1] != ch->getKey()) {
-          std::cerr << "ERR_BADCHANNELKEY - log" << std::endl;
-          return true;
-      }
+    if (msg.params[1].empty()) {
+      std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl;
+      return true;
+    } else if (msg.params[1] != ch->getKey()) {
+      std::cerr << "ERR_BADCHANNELKEY - log" << std::endl;
+      return true;
+    }
   }
   if (ch->isChannelLimit()) {
-      if (ch->getMembers().size() == ch->getLimit()) {
-          std::cerr << "ERR_CHANNELISFULL - log" << std::endl;
-          return true;
-      }
+    if (ch->getMembers().size() == ch->getLimit()) {
+      std::cerr << "ERR_CHANNELISFULL - log" << std::endl;
+      return true;
+    }
   }
   return false;
 }
 
 bool Parser::isValidChannelName(std::string& channName) {
-	if (channName.size() < 2 || channName[0] != '#' || channName.size() > 200 )
+  if (channName.size() < 2 || channName[0] != '#' || channName.size() > 200)
     return false;
-	for (size_t i = 1; i < channName.size(); i++)
-	{
-		char c = channName[i];
-		if (c == ' ' || c == '\0' || c == '\r' || c == '\n' || c == ',')
+  for (size_t i = 1; i < channName.size(); i++) {
+    char c = channName[i];
+    if (c == ' ' || c == '\0' || c == '\r' || c == '\n' || c == ',')
       return false;
-	}
+  }
   return true;
 }
 
@@ -107,7 +100,8 @@ bool Parser::isValidNickname(std::string& nick) {
     return false;
   }
   for (size_t i = 1; i < nick.size(); i++) {
-    if (!isalpha(nick[i]) && !isdigit(nick[i]) && specials.find(nick[i]) == std::string::npos) {
+    if (!isalpha(nick[i]) && !isdigit(nick[i]) &&
+        specials.find(nick[i]) == std::string::npos) {
       std::cerr << "ERR_ERRONEUSNICKNAME - log" << std::endl;
       return false;
     }
@@ -132,7 +126,7 @@ void Parser::extractParams(std::string line, Message& msg) {
 
 void Parser::parseToStruct(const std::string& rawMessage, Message& msg) {
   std::string line = rawMessage;  // there are 510 characters maximum allowed by
-                                  // protocol - should I handle it?	
+                                  // protocol - should I handle it?
   if (line[0] == ':') {
     size_t prefixEnd = line.find(' ');
     if (prefixEnd == std::string::npos)
@@ -161,35 +155,31 @@ void Parser::parseToStruct(const std::string& rawMessage, Message& msg) {
 
 // KICK utils
 
-bool Parser::clientCanKICK(Channel *channel_obj, Client &client)
-{
-    std::vector<Client *> temp_members = channel_obj->getAdmins();
-    std::vector<Client*>::iterator it = temp_members.begin();
-    std::vector<Client*>::iterator it_end = temp_members.end();
-    while (it != it_end)
-    {
-        if (*it == &client)
-            return true;
-        ++it;
-    }
-    return false;
+bool Parser::clientCanKICK(Channel* channel_obj, Client& client) {
+  std::vector<Client*> temp_members = channel_obj->getAdmins();
+  std::vector<Client*>::iterator it = temp_members.begin();
+  std::vector<Client*>::iterator it_end = temp_members.end();
+  while (it != it_end) {
+    if (*it == &client) return true;
+    ++it;
+  }
+  return false;
 }
 
-bool Parser::clientToBeKICKed(Channel *channel_obj, const std::string& client_to_kick)
-{
-    std::vector<Client *>& temp_members = channel_obj->getMembers();
-    std::vector<Client*>::iterator it = temp_members.begin();
-    std::vector<Client*>::iterator it_end = temp_members.end();
+bool Parser::clientToBeKICKed(Channel* channel_obj,
+                              const std::string& client_to_kick) {
+  std::vector<Client*>& temp_members = channel_obj->getMembers();
+  std::vector<Client*>::iterator it = temp_members.begin();
+  std::vector<Client*>::iterator it_end = temp_members.end();
 
-    while (it != it_end)
-    {
-        Client * tmp_mem = *it;
-        if (tmp_mem->getNickname() == client_to_kick) {
-            temp_members.erase(it);
-            std::cout << "Found client to kick" << std::endl;
-            return true;
-        }
-        ++it;
+  while (it != it_end) {
+    Client* tmp_mem = *it;
+    if (tmp_mem->getNickname() == client_to_kick) {
+      temp_members.erase(it);
+      std::cout << "Found client to kick" << std::endl;
+      return true;
     }
-    return false;
+    ++it;
+  }
+  return false;
 }

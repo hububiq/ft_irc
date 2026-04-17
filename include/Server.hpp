@@ -16,6 +16,7 @@
 #include <map>
 #include <sstream>
 #include <vector>
+#include <csignal>
 
 #include "Channel.hpp"
 #include "Client.hpp"

@@ -1,7 +1,9 @@
 #include "Server.hpp"
 #include "CommandHandler.hpp"
 
-Server::Server(int argc, char** argv) { parseArg(argc, argv); }
+extern volatile sig_atomic_t g_running;
+
+Server::Server(int argc, char** argv) : _socket_fd(-1) { parseArg(argc, argv); }
 
 uint16_t Server::parse_string_port(const char* port_str) {
   char* endptr;
@@ -67,10 +69,17 @@ void Server::run() {
   init_socket(*this);
   int epoll_fd = init_epoll(*this);
   loop_epoll(epoll_fd, *this);
+  close(epoll_fd);
 }
 
 Server::~Server() {
-  // cleaning
+  if (_socket_fd != -1) {
+    close(_socket_fd);
+  }
+  for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); ++it) {
+    close(it->first);
+  }
+  _clients.clear();
 }
 
 uint32_t Server::getHostIp() const { return this->_host_ip; }
@@ -175,7 +184,7 @@ int Server::init_epoll(Server& server) {
 
 void Server::loop_epoll(int epoll_fd, Server& server) {
   struct epoll_event events[LIMIT];
-  while (true) {
+  while (g_running) {
     int num_ready = epoll_wait(epoll_fd, events, LIMIT, TIMEOUT);
     for (int i = 0; i < num_ready; i++) {
       int event_fd = events[i].data.fd;
@@ -201,6 +210,7 @@ void Server::loop_epoll(int epoll_fd, Server& server) {
       }
     }
   }
+  
 }
 
 void Server::register_client(int client_fd, std::string& hostname, std::map<int, Client>& clients) 

@@ -7,6 +7,7 @@
 #include <vector>
 
 class Client;
+class Server;
 struct Message;
 
 class Channel
@@ -24,9 +25,8 @@ private:
   bool                  _t;
   bool                  _k;
   bool                  _l;
-  bool                  _o;
 
-  //implement CHANNELMODEIS and somehow print all the flags
+  //implement CHANNELMODEIS and print all the flags
 
 public:
   Channel();
@@ -55,8 +55,14 @@ public:
   void            setTopic(std::string& topic);
   void            setChannelName(std::string& name);
   void            setLimit(unsigned int l);
-
-  void            setFlagOn(Client &client, Message msg);
+  
+  void            handleTurnL(Client& client, std::string& flagStr, int i, Message& msg);
+  void            handleTurnO(Client& client, Server& serv, Message& msg);
+  void            handleTurnK(Client& client, std::string& flagStr, int i, Message& msg);
+  void            handleTurnT(Client& client, std::string& flagStr, int i);
+  void            handleTurnI(Client& client, std::string& flagStr, int i);
+  bool            hasEnoughParams(Client& client, Message& msg);
+  void            setFlagOn(Server& serv, Client& client, Message msg);
   // void            setFlagOff(Client &client, Message msg);
   void            toggleParticularFlag(bool& flag);
 
@@ -64,9 +70,9 @@ public:
   bool isTopicForOperator();
   bool isChannelKey();
   bool isChannelLimit();
-  bool isOperatorAssignable();
   bool isInvited(Client& clientToFind);
   bool isThereTopic();
+  bool isNicknameInChannel(std::string& nick);
   void broadcast(Client& sender, std::string& msg);
 
 };

@@ -11,7 +11,7 @@
 
 bool Parser::isClientAdmin(Server& server, Client& client, std::string& chName)
 {
-  std::vector<Client *> admins = server.getChannel(chName)->getAdmins(); //wektor pointerow
+  std::vector<Client *> admins = server.getChannel(chName)->getAdmins();
   std::string nick = client.getNickname();
   for (size_t i = 0; i < admins.size(); i++) {
     if (admins[i]->getNickname() == nick)

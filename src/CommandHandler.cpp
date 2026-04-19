@@ -16,25 +16,34 @@ void CommandHandler::handleMode(Client& client, Message& msg, Server& server)
 {
     std::string nickname = client.getNickname();
     std::string command = msg.command;
-    if (msg.params.empty()) {
+    if (msg.params.empty() || msg.params.size() < 2) {
         std::string reply = Replies::getReply(ERR_NEEDMOREPARAMS, nickname, command, "");
         client.write_msg(reply);
         return ;
     }
-    else if (msg.params.size() >= 2) { //2 params: MODE +o user  OR MORE params MODE +ol user 50
+    else if (msg.params.size() >= 2) {
         Channel* chanForMode = server.getChannel(msg.params[0]);
         if (!chanForMode) {
             std::string reply = Replies::getReply(ERR_NOSUCHCHANNEL, nickname, msg.params[0], "");
             client.write_msg(reply);
             return ;
         }
-        //check if client is admin
-        //jesli pierwszy znak w msg.params[1] czyli we flagach to +, to wywolaj funkcje setFlagOn
-        //jesli pierwszy znak w msg.params[1] czyli we flagach to -, to wywolaj funkcje setFlagOff
-        //jesli to zaden z nich, report UNKNOWNMODE
+        std::string& chName = chanForMode->getChannelName();
+        if (Parser::isClientAdmin(server, client, chName)) {
+            if (msg.params[1][0] == '+')
+                chanForMode->setFlagOn(server, client, msg);
+            // else if (msg.params[1][0] == '-')
+            //     chanForMode->setFlagOff(server, client, msg)
+            else {
+                std::string reply = Replies::getReply(ERR_UNKNOWNMODE, nickname, std::string(1, msg.params[1][0]), "");
+                client.write_msg(reply);
+            }
+        }
+        else {
+            std::string reply = Replies::getReply(ERR_CHANOPRIVSNEEDED, nickname, chName, "");
+            client.write_msg(reply);
+        }
     }
-    
-
 }
 
 void CommandHandler::handleTopic(Client& client, Message& msg, Server& server)
@@ -87,7 +96,7 @@ void CommandHandler::handleTopic(Client& client, Message& msg, Server& server)
                 tempChan->setTopic(msg.params[1]);
         if (!tempChan->getTopic().empty()) {
             std::string reply = ":" + client.getNickname() + "!" + client.getUsername()
-                + "@" + client.getHostname() + " TOPIC " + tempChan->getChannelName() + " :" + tempChan->getTopic() + "\r\n";
+                + "@" + client.getHostname() + " TOPIC " + tempChan->getChannelName() + " " + tempChan->getTopic() + "\r\n";
             tempChan->broadcast(client, reply);
             client.write_msg(reply); //needed - TOPIC is also viewed for user-setter
         }
@@ -148,7 +157,7 @@ void CommandHandler::handleInvite(Client& client, Message& msg, Server& server)
     std::string prefix = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname();
     for (it = cl.begin(); it != cl.end(); it++) {
         if (it->second.getNickname() == msg.params[0]) {
-            std::string reply = prefix + " " + command + " " + it->second.getNickname() + " :" + msg.params[1] + "\r\n";
+            std::string reply = prefix + " INVITE " + it->second.getNickname() + " :" + msg.params[1] + "\r\n";
             it->second.write_msg(reply);
         }
     }
@@ -216,7 +225,7 @@ void CommandHandler::handleJoin(Client& client, Message& msg, Server& server) {
             return ;
         ch->add_client(&client);
         std::string joinReply = ":" + client.getNickname() + "!" + client.getUsername()
-                + "@" + client.getHostname() + " JOIN " + " :" + ch->getChannelName() + "\r\n";
+                + "@" + client.getHostname() + " JOIN " + ch->getChannelName() + "\r\n";
         ch->broadcast(client, joinReply);
         client.write_msg(joinReply);
         //ch->broadcast(client, reply) TODO here: add reply about joining to entire chanel

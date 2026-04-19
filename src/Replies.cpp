@@ -44,9 +44,9 @@ std::string Replies::getReply(ReplyCode code, const std::string& userNick,
         case RPL_INVITING:
             return prefix + "341 " + userNick + " " + arg1 + " " + arg2;
 
-        case RPL_CHANNELMODEIS:
-        //  324    "<channel> <mode> <mode params>"
-            return prefix + "324" 
+        // case RPL_CHANNELMODEIS:
+        // //  324    "<channel> <mode> <mode params>"
+        //     return prefix + "324" 
 
         // ==========================================
         // SYNTAX & COMMAND ERRORS
@@ -93,8 +93,8 @@ std::string Replies::getReply(ReplyCode code, const std::string& userNick,
         // ==========================================
         // CHANNEL PRESENCE ERRORS
         // ==========================================
-        // case ERR_USERNOTINCHANNEL:
-        //     return prefix + "441 " + userNick + " " + arg1 + " :They aren't on that channel\r\n";
+        case ERR_USERNOTINCHANNEL:
+            return prefix + "441 " + userNick + " " + arg1 + " :They aren't on that channel\r\n";
 
         case ERR_NOTONCHANNEL:
             return prefix + "442 " + arg1 + " :You're not on that channel\r\n";
@@ -132,7 +132,7 @@ std::string Replies::getReply(ReplyCode code, const std::string& userNick,
             return prefix + "472 " + userNick + " " + arg1 + " :is unknown mode char to me\r\n";
 
         case ERR_KEYSET:
-            return prefix + 
+            return prefix + "467 " + userNick + " " + arg1 + " :Channel key already set\r\n";
 
         case ERR_INVITEONLYCHAN:
             // arg1: channel name
@@ -145,9 +145,6 @@ std::string Replies::getReply(ReplyCode code, const std::string& userNick,
         case ERR_BADCHANNELKEY:
             // arg1: channel name
             return prefix + "475 " + userNick + " " + arg1 + " :Cannot join channel (+k)\r\n";
-
-        case ERR_KEYSET:
-            return prefix +
 
         // case ERR_NOPRIVILEGES:
         //     return prefix + "481 " + userNick + " :Permission Denied- You're not an IRC operator\r\n";

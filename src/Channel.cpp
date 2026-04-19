@@ -3,12 +3,15 @@
 #include "../include/Channel.hpp"
 #include "../include/Client.hpp"
 #include "../include/Message.hpp"
+#include "../include/Server.hpp"
+#include "../include/Replies.hpp"
+#include "../include/Parser.hpp"
 #include <algorithm>
 #include <cstdlib>
 
 Channel::Channel(): //PRIMITIVES dont initialise to 0 automatically
   _limit(0), _i(false), _t(false),
-  _k(false), _l(false), _o(false) {}
+  _k(false), _l(false) {}
 
 // ------ NOTE TO MYSELF------need to use this constructor to make handleJoin cleaner!!------
 // Channel::Channel(std::string& name, std::string& key, Client *admin)
@@ -27,7 +30,9 @@ void  Channel::addToInvited(Client* client) {
   this->_invited.push_back(client); 
 }
 void Channel::addToChanFlags(char flag) {
-  this->chanFlags.push_back(flag);
+  std::vector<char>::iterator it = std::find(_chanFlags.begin(), _chanFlags.end(), flag);
+  if (it != _chanFlags.end())
+    this->_chanFlags.push_back(flag);
 }
 
 void Channel::addToAdmins(Server& serv, Client& cli, std::string& newAdmin) {
@@ -40,8 +45,9 @@ void Channel::addToAdmins(Server& serv, Client& cli, std::string& newAdmin) {
     }
     it++;
   }
+  std::string reply = Replies::getReply(ERR_NOSUCHNICK, cli.getNickname(), newAdmin, "");
+  cli.write_msg(reply);
 }
-
 
 void Channel::removeFromFlags(char flag) {
   std::vector<char>& flagVec = this->getChanFlags();
@@ -68,93 +74,109 @@ void Channel::setTopic(std::string& topic) { this->_topic = topic; }
 void Channel::setChannelName(std::string& name) { this->_channel_name = name; }
 void Channel::setLimit(unsigned int l) { this->_limit = l; }
 
+void Channel::handleTurnL(Client& client, std::string& flagStr, int i, Message& msg) {
+  if (!this->isChannelLimit() )
+    this->toggleParticularFlag(this->_l);
+  this->addToChanFlags(flagStr[i]);
+  this->setLimit(std::atoi(msg.params[2].c_str()));
+  std::string reply = ":" + client.getNickname() + "!" + client.getUsername()
+    + "@" + client.getHostname() + " MODE " + this->getChannelName() + " +l " + msg.params[2] + "\r\n";
+  this->broadcast(client, reply);
+  client.write_msg(reply);
+  if (msg.params.size() > 2)
+    msg.params.erase(msg.params.begin() + 2);
+}
+
+void Channel::handleTurnO(Client& client, Server& serv, Message& msg) {
+  this->addToAdmins(serv, client, msg.params[2]);
+  std::string reply = ":" + client.getNickname() + "!" + client.getUsername()
+  + "@" + client.getHostname() + " MODE " + this->getChannelName() + " +o " + msg.params[2] + "\r\n";
+  this->broadcast(client, reply);
+  client.write_msg(reply);
+  if (msg.params.size() > 2)
+    msg.params.erase(msg.params.begin() + 2);
+}
+
+void Channel::handleTurnK(Client& client, std::string& flagStr, int i, Message& msg) {
+  this->toggleParticularFlag(this->_k);
+  this->addToChanFlags(flagStr[i]);
+  this->setKey(msg.params[2]);
+  std::string reply = ":" + client.getNickname() + "!" + client.getUsername()
+  + "@" + client.getHostname() + " MODE " + this->getChannelName() + " +k " + msg.params[2] + "\r\n";
+  this->broadcast(client, reply);
+  client.write_msg(reply);
+}
+
+void Channel::handleTurnT(Client& client, std::string& flagStr, int i) {
+  this->toggleParticularFlag(this->_t);
+  this->addToChanFlags(flagStr[i]);
+  std::string reply = ":" + client.getNickname() + "!" + client.getUsername()
+        + "@" + client.getHostname() + " MODE " + this->getChannelName() + " +t\r\n";
+  this->broadcast(client, reply);
+  client.write_msg(reply);
+}
+
+void Channel::handleTurnI(Client& client, std::string& flagStr, int i) {
+  this->toggleParticularFlag(this->_i);
+  this->addToChanFlags(flagStr[i]);
+  std::string reply = ":" + client.getNickname() + "!" + client.getUsername()
+        + "@" + client.getHostname() + " MODE " + this->getChannelName() + " +i\r\n";
+  this->broadcast(client, reply);
+  client.write_msg(reply);
+}
+
+bool Channel::hasEnoughParams(Client& client, Message& msg) {
+   if ( msg.params.size() < 3 || msg.params[2].empty()) {
+      std::string reply = Replies::getReply(ERR_NEEDMOREPARAMS, client.getNickname(), msg.command, "");
+      client.write_msg(reply);
+      return false;
+   }
+   return true;
+}
 
 void Channel::setFlagOn(Server& serv, Client& client, Message msg) {
-  std::string nickname = client.getNickname();
-  std::string command = msg.command;
   std::string flagStr = msg.params[1];
-  int i = 0;
-
-  while (i < flagStr.size()) {
+  for (size_t i = 1; i < flagStr.size(); ++i) { //doesnt delete corresponding parameter if given to wrong flag
     if (std::string("itklo").find(flagStr[i]) == std::string::npos) {
-      std::string reply = Replies::getReply(ERR_UNKNOWNMODE, client.getNickname(), flagStr[i], "");
+      std::string reply = Replies::getReply(ERR_UNKNOWNMODE, client.getNickname(), std::string(1, flagStr[i]), "");
       client.write_msg(reply);
-      i++;
       continue;
     }
     if (flagStr[i] == 'i') {
-      if (!this->isInviteOnly()) {
-        this->toggleParticularFlag(this->_i);
-        this->addToChanFlags(flagStr[i]);
-        //broadcast to all, including sender
-        //:{admin nickname}!{user}@{host} MODE {channel} +{flag} {parameter}
-      }
+      if (!this->isInviteOnly()) this->handleTurnI(client, flagStr, i);
     }
     else if (flagStr[i] == 't') {
-      if (!this->isTopicForOperator()) {
-        this->toggleParticularFlag(this->_t);
-        this->addToChanFlags(flagStr[i]);
-        //broadcast to all, including sender
-        //:{admin nickname}!{user}@{host} MODE {channel} +{flag} {parameter}
-      }
+      if (!this->isTopicForOperator()) this->handleTurnT(client, flagStr, i);
     }
     else if (flagStr[i] == 'k') {
       if (!this->isChannelKey()) {
-        if ( msg.params.size() < 3 || msg.params[2].empty()) {
-          std::string reply = Replies::getReply(ERR_NEEDMOREPARAMS, nickname, command, "");
-          client.write_msg(reply);
-          i++;
-          continue ;
-        }
-        this->toggleParticularFlag(this->_k);
-        this->addToChanFlags(flagStr[i]);
-        this->setKey(msg.params[2]);
-        if (msg.params.size() > 2)
-          msg.params.erase(msg.params.begin() + 2); //parameter for next flag when they are in the row are moving to the left now
-        //broadcast to all, including sender
-        //:{admin nickname}!{user}@{host} MODE {channel} +{flag} {parameter}
+        if (!hasEnoughParams(client, msg)) continue ;
+        this->handleTurnK(client, flagStr, i, msg);
       }
+      else {
+        std::string reply = Replies::getReply(ERR_KEYSET, client.getNickname(), this->getChannelName(), "");
+        client.write_msg(reply);
+      }
+      if (msg.params.size() > 2) msg.params.erase(msg.params.begin() + 2);
     }
-    else if (flagStr[i] == 'o') { //SOMETHING WRONG HERE, SHOULDNT CHECK THIS FLAG?
-      if (!this->isOperatorAssignable()) {
-        if (msg.params.size() < 3 || msg.params[2].empty()) {
-          std::string reply = Replies::getReply(ERR_NEEDMOREPARAMS, nickname, command, "");
-          client.write_msg(reply);
-          i++;
-          continue ;
-        }
-        this->toggleParticularFlag(this->_o);
-        this->addToChanFlags(flagStr[i]);
-        this->addToAdmins(serv, client, msg.params[2]);
-        if (msg.params.size() > 2)
-          msg.params.erase(msg.params.begin() + 2);
-        //broadcast to all, including sender
-        //:{admin nickname}!{user}@{host} MODE {channel} +{flag} {parameter}
+    else if (flagStr[i] == 'o') {
+      if (!hasEnoughParams(client, msg)) continue ;
+      if (!this->isNicknameInChannel(msg.params[2])) {
+        std::string reply = Replies::getReply(ERR_USERNOTINCHANNEL, client.getNickname(), msg.params[2], this->getChannelName());
+        client.write_msg(reply);
+        if (msg.params.size() > 2) msg.params.erase(msg.params.begin() + 2);
+        continue;
       }
+      this->handleTurnO(client, serv, msg);
     }
     else if (flagStr[i] == 'l') {
-      if (!this->isChannelLimit()) {
-        if ( msg.params.size() < 3 || msg.params[2].empty()) {
-          std::string reply = Replies::getReply(ERR_NEEDMOREPARAMS, nickname, command, "");
-          client.write_msg(reply);
-          i++;
-          continue ;
-        }
-        // the way to check if its a number \/ limit must be proper number.
-        if (!msg.params[2].empty() && msg.params[2].find_first_not_of("0123456789") != std::string::npos) {
-          i++;
-          continue;
-        }
-        this->toggleParticularFlag(this->_l);
-        this->addToChanFlags(flagStr[i]);
-        this->setLimit(std::atoi(msg.params[2].c_str()));
-        if (msg.params.size() > 2)
-          msg.params.erase(msg.params.begin() + 2);
-        //broadcast to all, including sender
-        //:{admin nickname}!{user}@{host} MODE {channel} +{flag} {parameter}
+      if (!hasEnoughParams(client, msg)) continue;
+      if (!msg.params[2].empty() && msg.params[2].find_first_not_of("0123456789") != std::string::npos) {
+        if (msg.params.size() > 2) msg.params.erase(msg.params.begin() + 2);
+        continue;
       }
+      this->handleTurnL(client, flagStr, i, msg);
     }
-    i++;
   }
 }
 
@@ -202,7 +224,6 @@ bool Channel::isInviteOnly() { return this->_i; }
 bool Channel::isTopicForOperator() { return this->_t; }
 bool Channel::isChannelKey() { return this->_k; }
 bool Channel::isChannelLimit() { return this->_l; }
-bool Channel::isOperatorAssignable() { return this->_o; }
 
 bool Channel::isInvited(Client& clientToFind) {
   for (size_t i = 0; i < this->getInvited().size(); i++) {
@@ -215,6 +236,16 @@ bool Channel::isInvited(Client& clientToFind) {
 bool Channel::isThereTopic() {
   if (this->_topic.size() != 0)
     return true;
+  return false;
+}
+
+bool Channel::isNicknameInChannel(std::string& nick) {
+  std::vector<Client *>& members = this->getMembers();
+  std::vector<Client *>::iterator it;
+  for (it = members.begin(); it != members.end(); it++) {
+    if ((*it)->getNickname() == nick)
+      return true;
+  }
   return false;
 }
 

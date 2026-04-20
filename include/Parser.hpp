@@ -20,6 +20,7 @@ namespace Parser {
   bool isUserInChannel(Server& server, Client& client); 
   bool isInviteeInChannel(Server& server, Message& msg);
   bool isClientAdmin(Server& server, Client& client, std::string& chName);
+  void loopOnFlags(std::string chName, Server& server, Client& cli);
 };
 
 #endif

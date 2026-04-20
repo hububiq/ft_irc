@@ -42,11 +42,10 @@ std::string Replies::getReply(ReplyCode code, const std::string& userNick,
         // COMMAND RENSPONSES
         // ==========================================
         case RPL_INVITING:
-            return prefix + "341 " + userNick + " " + arg1 + " " + arg2;
+            return prefix + "341 " + userNick + " " + arg1 + " " + arg2 + "\r\n";
 
-        // case RPL_CHANNELMODEIS:
-        // //  324    "<channel> <mode> <mode params>"
-        //     return prefix + "324" 
+        case RPL_CHANNELMODEIS:
+            return prefix + "324 " + userNick + " " + arg1 + " " + arg2 + "\r\n";
 
         // ==========================================
         // SYNTAX & COMMAND ERRORS

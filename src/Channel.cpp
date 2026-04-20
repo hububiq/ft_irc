@@ -9,18 +9,10 @@
 #include <algorithm>
 #include <cstdlib>
 
-Channel::Channel(): //PRIMITIVES dont initialise to 0 automatically
+Channel::Channel():
   _limit(0), _i(false), _t(false),
   _k(false), _l(false) {}
 
-// ------ NOTE TO MYSELF------need to use this constructor to make handleJoin cleaner!!------
-// Channel::Channel(std::string& name, std::string& key, Client *admin)
-// {
-//   this->_channel_name = name;
-//   this->_k = key;
-//   this->_admin = admin;
-//   this->_l = 0;
-// }
 Channel::~Channel() {}
 
 void Channel::add_client(Client* cli) {
@@ -28,10 +20,11 @@ void Channel::add_client(Client* cli) {
 }
 void  Channel::addToInvited(Client* client) { 
   this->_invited.push_back(client); 
+  //dac w sygnaturze std::string nick  i wyszukiwac po nicku w mapie klientow serwera?
 }
 void Channel::addToChanFlags(char flag) {
   std::vector<char>::iterator it = std::find(_chanFlags.begin(), _chanFlags.end(), flag);
-  if (it != _chanFlags.end())
+  if (it == _chanFlags.end())
     this->_chanFlags.push_back(flag);
 }
 
@@ -69,11 +62,14 @@ unsigned int Channel::getLimit() const { return this->_limit; }
 std::string Channel::getKey() const { return this->_key; }
 std::string Channel::getTopic() const { return this->_topic; }
 unsigned int Channel::getMaxMembers() const { return this->_limit; }
-void Channel::setKey(std::string& key) { _key = key; } //check is the password is valid should be performed? Password should normally go without spaces
+void Channel::setKey(std::string& key) { _key = key; }
 void Channel::setTopic(std::string& topic) { this->_topic = topic; }
 void Channel::setChannelName(std::string& name) { this->_channel_name = name; }
 void Channel::setLimit(unsigned int l) { this->_limit = l; }
 
+
+
+/*turning on the flags*/
 void Channel::handleTurnL(Client& client, std::string& flagStr, int i, Message& msg) {
   if (!this->isChannelLimit() )
     this->toggleParticularFlag(this->_l);
@@ -136,7 +132,7 @@ bool Channel::hasEnoughParams(Client& client, Message& msg) {
 
 void Channel::setFlagOn(Server& serv, Client& client, Message msg) {
   std::string flagStr = msg.params[1];
-  for (size_t i = 1; i < flagStr.size(); ++i) { //doesnt delete corresponding parameter if given to wrong flag
+  for (size_t i = 1; i < flagStr.size(); ++i) { //doesnt delete corresponding parameter if its given to wrong flag
     if (std::string("itklo").find(flagStr[i]) == std::string::npos) {
       std::string reply = Replies::getReply(ERR_UNKNOWNMODE, client.getNickname(), std::string(1, flagStr[i]), "");
       client.write_msg(reply);
@@ -179,43 +175,98 @@ void Channel::setFlagOn(Server& serv, Client& client, Message msg) {
     }
   }
 }
+/*turning on the flags*/
 
-// void Channel::setFlagOff(Client& client, Message msg) {
-//   std::String flagStr = msg.params[1]; //segfault check was made in top level function
-//   int i = 0;
-//   while (i < flagStr.size()) {
-//     if (flagStr[i] == "i" && !this->isInviteOnly()) {
-//       this->toggleParticularFlag(this->_i);
-//     //erase from vector with flags
-//     //broadcast about switching off
-//     }
-//     else if (flagStr[i] == "t" && !this->isTopicForOperator()) {
-//       this->toggleParticularFlag(this->_t);
-//       //erase from vector with flags
-//     //broadcast about switching off
-//     }
-//     else if (flagStr[i] == "k" && !this->isChannelKey()) {
-//       this->toggleParticularFlag(this->_k);
-//       //erase from vector with flags
-//     //broadcast about switching off
-//     }
-//     else if (flagStr[i] == "o" && !this->isOperatorAssignable()) {
-//       this->toggleParticularFlag(this->_o);
-//       //erase from vector with flags
-//     //broadcast about switching off
-//     }
-//     else if (flagStr[i] == "l" && !this->isChannelLimit()) {
-//       this->toggleParticularFlag(this->_l);
-//       // erase from vector with flags
-//       // broadcast about switching off
-//     }
-//     else {
-//         std::string reply = Replies::getReply(ERR_UNKNOWNMODE, client.getNickname(), flagStr[i], "");
-//         client.write_msg(reply);
-//     }
-//     i++;
-//   }
-// }
+/*turning off the flags*/
+void Channel::handleTurnOffI(Client& client) {
+  this->toggleParticularFlag(this->_i);
+  this->removeFromFlags('i');
+  std::string reply = ":" + client.getNickname() + "!" + client.getUsername()
+      + "@" + client.getHostname() + " MODE " + this->getChannelName() + " -i\r\n";
+  this->broadcast(client, reply);
+  client.write_msg(reply);
+}
+
+void Channel::handleTurnOffT(Client& client) {
+  this->toggleParticularFlag(this->_t);
+  this->removeFromFlags('t');
+  std::string reply = ":" + client.getNickname() + "!" + client.getUsername()
+      + "@" + client.getHostname() + " MODE " + this->getChannelName() + " -t\r\n";
+  this->broadcast(client, reply);
+  client.write_msg(reply);
+}
+
+void Channel::handleTurnOffK(Client& client) {
+  this->toggleParticularFlag(this->_k);
+  this->removeFromFlags('k');
+  this->_key.clear();
+  std::string reply = ":" + client.getNickname() + "!" + client.getUsername()
+      + "@" + client.getHostname() + " MODE " + this->getChannelName() + " -k\r\n";
+  this->broadcast(client, reply);
+  client.write_msg(reply);
+}
+
+void Channel::handleTurnOffL(Client& client) {
+  this->toggleParticularFlag(this->_l);
+  this->removeFromFlags('l');
+  this->_limit = 0;
+  std::string reply = ":" + client.getNickname() + "!" + client.getUsername()
+      + "@" + client.getHostname() + " MODE " + this->getChannelName() + " -l\r\n";
+  this->broadcast(client, reply);
+  client.write_msg(reply);
+}
+
+void Channel::handleTurnOffO(Client& client, Message& msg) {
+  std::string& targetNick = msg.params[2];
+  std::vector<Client*>::iterator it;
+  for (it = this->_admins.begin(); it != this->_admins.end(); it++) {
+    if ((*it)->getNickname() == targetNick) {
+      this->_admins.erase(it);
+      break;
+    }
+  }
+  std::string reply = ":" + client.getNickname() + "!" + client.getUsername()
+      + "@" + client.getHostname() + " MODE " + this->getChannelName() + " -o " + targetNick + "\r\n";
+  this->broadcast(client, reply);
+  client.write_msg(reply);
+  if (msg.params.size() > 2)
+      msg.params.erase(msg.params.begin() + 2);
+}
+
+void Channel::setFlagOff(Client& client, Message msg) {
+  std::string flagStr = msg.params[1];
+  for (size_t i = 1; i < flagStr.size(); ++i) {
+    if (std::string("itklo").find(flagStr[i]) == std::string::npos) {
+      std::string reply = Replies::getReply(ERR_UNKNOWNMODE, client.getNickname(), std::string(1, flagStr[i]), "");
+      client.write_msg(reply);
+      continue;
+    }
+    if (flagStr[i] == 'i') {
+      if (this->isInviteOnly()) this->handleTurnOffI(client);
+    }
+    else if (flagStr[i] == 't') {
+      if (this->isTopicForOperator()) this->handleTurnOffT(client);
+    }
+    else if (flagStr[i] == 'k') {
+      if (this->isChannelKey()) this->handleTurnOffK(client);
+      if (msg.params.size() > 2) msg.params.erase(msg.params.begin() + 2);
+    }
+    else if (flagStr[i] == 'o') {
+      if (!hasEnoughParams(client, msg)) continue;
+      if (!this->isNicknameInChannel(msg.params[2])) {
+          std::string reply = Replies::getReply(ERR_USERNOTINCHANNEL, client.getNickname(), msg.params[2], this->getChannelName());
+          client.write_msg(reply);
+          if (msg.params.size() > 2) msg.params.erase(msg.params.begin() + 2);
+          continue;
+      }
+      this->handleTurnOffO(client, msg);
+    }
+    else if (flagStr[i] == 'l') {
+      if (this->isChannelLimit()) this->handleTurnOffL(client);
+    }
+  }
+}
+/*turning off the flags*/
 
 void Channel::toggleParticularFlag(bool& flag) {
   flag = !flag;

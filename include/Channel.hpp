@@ -17,7 +17,7 @@ private:
   std::string           _topic;
   std::vector<Client *> _admins;
   std::vector<Client *>  _members;
-  std::vector<Client *> _invited;
+  std::vector<Client *> _invited; //zmienic to na vector stringow chyba
   std::vector<char>     _chanFlags;
   std::string           _key; 
   unsigned int          _limit;
@@ -56,14 +56,19 @@ public:
   void            setChannelName(std::string& name);
   void            setLimit(unsigned int l);
   
+  void            handleTurnOffI(Client& client);
+  void            handleTurnOffT(Client& client);
+  void            handleTurnOffK(Client& client);
+  void            handleTurnOffL(Client& client);
+  void            handleTurnOffO(Client& client, Message& msg);
+  void            setFlagOff(Client& client, Message msg);
+  bool            hasEnoughParams(Client& client, Message& msg);
   void            handleTurnL(Client& client, std::string& flagStr, int i, Message& msg);
   void            handleTurnO(Client& client, Server& serv, Message& msg);
   void            handleTurnK(Client& client, std::string& flagStr, int i, Message& msg);
   void            handleTurnT(Client& client, std::string& flagStr, int i);
   void            handleTurnI(Client& client, std::string& flagStr, int i);
-  bool            hasEnoughParams(Client& client, Message& msg);
   void            setFlagOn(Server& serv, Client& client, Message msg);
-  // void            setFlagOff(Client &client, Message msg);
   void            toggleParticularFlag(bool& flag);
 
   bool isInviteOnly();

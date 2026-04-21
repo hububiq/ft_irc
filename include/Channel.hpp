@@ -17,7 +17,7 @@ private:
   std::string           _topic;
   std::vector<Client *> _admins;
   std::vector<Client *>  _members;
-  std::vector<Client *> _invited; //zmienic to na vector stringow chyba
+  std::vector<std::string> _invited; //zmienic to na vector stringow chyba
   std::vector<char>     _chanFlags;
   std::string           _key; 
   unsigned int          _limit;
@@ -33,7 +33,7 @@ public:
   ~Channel();
 
   void add_client(Client* cli);
-  void addToInvited(Client* client);
+  void addToInvited(std::string clientName);
   void addToChanFlags(char flag);
   void addToAdmins(Server& serv, Client& cli, std::string& newAdmin);
   void removeFromFlags(char flag);
@@ -45,14 +45,14 @@ public:
   std::string&           getChannelName();
   std::vector<Client *>& getAdmins();
   std::vector<Client *>& getMembers();
-  std::vector<Client *>& getInvited();
+  std::vector<std::string>& getInvited();
   std::vector<char>&     getChanFlags();
   unsigned int           getLimit() const;
   std::string            getKey() const;
   std::string            getTopic() const;
   unsigned int           getMaxMembers() const;
   void            setKey(std::string& key);
-  void            setTopic(std::string& topic);
+  void            setTopic(std::string topic);
   void            setChannelName(std::string& name);
   void            setLimit(unsigned int l);
   
@@ -75,7 +75,7 @@ public:
   bool isTopicForOperator();
   bool isChannelKey();
   bool isChannelLimit();
-  bool isInvited(Client& clientToFind);
+  bool isInvited(std::string clientToFind);
   bool isThereTopic();
   bool isNicknameInChannel(std::string& nick);
   void broadcast(Client& sender, std::string& msg);

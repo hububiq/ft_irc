@@ -15,11 +15,11 @@ Channel::Channel():
 
 Channel::~Channel() {}
 
-void Channel::add_client(Client* cli) {
+void Channel::add_client(Client* cli) { ///tu teraz zmienic
   this->_members.push_back(cli);
 }
-void  Channel::addToInvited(Client* client) { 
-  this->_invited.push_back(client); 
+void  Channel::addToInvited(std::string clientName) { 
+  this->_invited.push_back(clientName); 
   //dac w sygnaturze std::string nick  i wyszukiwac po nicku w mapie klientow serwera?
 }
 void Channel::addToChanFlags(char flag) {
@@ -56,14 +56,14 @@ void Channel::removeFromFlags(char flag) {
 std::string& Channel::getChannelName() { return this->_channel_name; }
 std::vector<Client *>& Channel::getAdmins() { return this->_admins; }
 std::vector<Client *>& Channel::getMembers() { return this->_members; }
-std::vector<Client *>& Channel::getInvited() { return this->_invited; }
+std::vector<std::string>& Channel::getInvited() { return this->_invited; }
 std::vector<char>& Channel::getChanFlags() { return this->_chanFlags; }
 unsigned int Channel::getLimit() const { return this->_limit; }
 std::string Channel::getKey() const { return this->_key; }
 std::string Channel::getTopic() const { return this->_topic; }
 unsigned int Channel::getMaxMembers() const { return this->_limit; }
 void Channel::setKey(std::string& key) { _key = key; }
-void Channel::setTopic(std::string& topic) { this->_topic = topic; }
+void Channel::setTopic(std::string topic) { this->_topic = topic; }
 void Channel::setChannelName(std::string& name) { this->_channel_name = name; }
 void Channel::setLimit(unsigned int l) { this->_limit = l; }
 
@@ -276,9 +276,9 @@ bool Channel::isTopicForOperator() { return this->_t; }
 bool Channel::isChannelKey() { return this->_k; }
 bool Channel::isChannelLimit() { return this->_l; }
 
-bool Channel::isInvited(Client& clientToFind) {
+bool Channel::isInvited(std::string clientToFind) {
   for (size_t i = 0; i < this->getInvited().size(); i++) {
-    if (this->getInvited()[i]->getNickname() == clientToFind.getNickname())
+    if (this->getInvited()[i] == clientToFind)
       return true;
   }
   return false;

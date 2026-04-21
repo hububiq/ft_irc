@@ -21,7 +21,7 @@ void CommandHandler::handleMode(Client& client, Message& msg, Server& server)
         client.write_msg(reply);
         return ;
     }
-    if (msg.params.size() == 1) { //should output no such channel?
+    if (msg.params.size() == 1) {
         if (server.getChannel(msg.params[0]) == NULL) {
             std::string reply = Replies::getReply(ERR_NOSUCHCHANNEL, nickname, msg.params[0], "");
             client.write_msg(reply);
@@ -64,7 +64,6 @@ void CommandHandler::handleTopic(Client& client, Message& msg, Server& server)
 {
     std::string nickname = client.getNickname();
     std::string command = msg.command;
-    bool isUserInChan = Parser::isUserInChannel(server, client);
     if (msg.params.empty()) {
         std::string reply = Replies::getReply(ERR_NEEDMOREPARAMS, nickname, command, "");
         client.write_msg(reply);
@@ -76,12 +75,13 @@ void CommandHandler::handleTopic(Client& client, Message& msg, Server& server)
         client.write_msg(reply);
         return ;
     }
+    bool isUserInChan = Parser::isUserInChannel(server, client, chan->getChannelName());
     if (!isUserInChan) {
         std::string reply = Replies::getReply(ERR_NOTONCHANNEL, nickname, msg.params[0], "");
         client.write_msg(reply);
         return ;
     }
-    if (chan && isUserInChan && msg.params.size() == 1) { //there is only one parameter and user is in channel
+    if (chan && isUserInChan && msg.params.size() == 1) {
         if (chan->isThereTopic()) {
             std::string reply = Replies::getReply(RPL_TOPIC, nickname, msg.params[0], chan->getTopic());
             client.write_msg(reply);
@@ -104,15 +104,19 @@ void CommandHandler::handleTopic(Client& client, Message& msg, Server& server)
             client.write_msg(reply);
             return ;
         }
-        
-        //no flag "topic only by operators" - everybody can assign topic if its not empty
-        if (tempChan && !msg.params[1].empty())
-                tempChan->setTopic(msg.params[1]);
+        if (tempChan && (msg.params[1].empty() || msg.params[1] == ":")) {
+            tempChan->setTopic("");
+            std::string reply = Replies::getReply(RPL_NOTOPIC, nickname, msg.params[0], "");
+            tempChan->broadcast(client, reply);
+            client.write_msg(reply);
+            return;
+        }
+        tempChan->setTopic(msg.params[1]);
         if (!tempChan->getTopic().empty()) {
             std::string reply = ":" + client.getNickname() + "!" + client.getUsername()
                 + "@" + client.getHostname() + " TOPIC " + tempChan->getChannelName() + " " + tempChan->getTopic() + "\r\n";
             tempChan->broadcast(client, reply);
-            client.write_msg(reply); //needed - TOPIC is also viewed for user-setter
+            client.write_msg(reply);
         }
     }
 }
@@ -140,12 +144,18 @@ void CommandHandler::handleInvite(Client& client, Message& msg, Server& server)
         client.write_msg(reply);
         return ;
     }
-    if (!Parser::isUserInChannel(server, client)) {
+    Channel* ch = server.getChannel(msg.params[1]);
+    if (!ch) {
+        std::string reply = Replies::getReply(ERR_NOSUCHCHANNEL, nickname, msg.params[0], msg.params[1]);
+        client.write_msg(reply);
+        return ;
+    }
+    if (ch && !Parser::isUserInChannel(server, client, ch->getChannelName())) {
         std::string reply = Replies::getReply(ERR_NOTONCHANNEL, nickname, msg.params[1], "");
         client.write_msg(reply);
         return ;
     }
-    if (Parser::isInviteeInChannel(server, msg)) {
+    if (ch && Parser::isInviteeInChannel(server, msg, ch->getChannelName())) {
         std::string reply = Replies::getReply(ERR_USERONCHANNEL, nickname, msg.params[0], msg.params[1]);
         client.write_msg(reply);
         return ;
@@ -155,7 +165,6 @@ void CommandHandler::handleInvite(Client& client, Message& msg, Server& server)
         client.write_msg(reply);
         return ;
     }
-    Channel* ch = server.getChannel(msg.params[1]);
     if (ch && ch->isInviteOnly()) {
         if (!Parser::isClientAdmin(server, client, msg.params[1])) {
             std::string reply = Replies::getReply(ERR_CHANOPRIVSNEEDED, nickname, msg.params[0], "");
@@ -163,7 +172,7 @@ void CommandHandler::handleInvite(Client& client, Message& msg, Server& server)
             return ;
         }
     }
-    ch->addToInvited(&client); //FIX TODO ------ zapraszam zapraszajacego, zamiast nickname z parametrow!!
+    ch->addToInvited(msg.params[0]);
     std::string reply = Replies::getReply(RPL_INVITING, nickname, msg.params[0], msg.params[1]);
     client.write_msg(reply);
     std::map<int, Client>& cl = server.getClients();
@@ -180,25 +189,25 @@ void CommandHandler::handleInvite(Client& client, Message& msg, Server& server)
 void CommandHandler::handlePrivMsg(Client& client, Message& msg, Server& server)
 {
     if (msg.params.empty() || msg.params[0].empty()) {
-        std::cerr << "ERR_NORECIPIENT- log" << std::endl;
+        std::cerr << "ERR_NORECIPIENT- log" << std::endl; //-----------------
         return ;
     }
     if (msg.params.size() < 2 || msg.params[1].empty() || msg.params[1][0] != ':') {
-        std::cerr << "ERR_NOTEXTTOSEND- log" << std::endl;
+        std::cerr << "ERR_NOTEXTTOSEND- log" << std::endl; //-----------------
         return ;
     }
     Channel* channForMsg = server.getChannel(msg.params[0]); 
     if (channForMsg == NULL 
         && !Parser::findClient(server.getClients(), msg.params[0])) {
-        std::cerr << "ERR_NOSUCHNICK - log" << std::endl;
+        std::cerr << "ERR_NOSUCHNICK - log" << std::endl; //-----------------
         return ;
     }
     std::string prefix = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname();
-    if (channForMsg != NULL) {    //PRIVMSG to channel
+    if (channForMsg != NULL) {
         std::string reply = prefix + " PRIVMSG " + channForMsg->getChannelName() + " " + msg.params[1] + "\r\n";
         channForMsg->broadcast(client, reply);
     }
-    else if (msg.params[0][0] != '#') { //PRIVMSG to client
+    else if (msg.params[0][0] != '#') {
         std::map<int, Client>& cl = server.getClients();
         std::map<int, Client>::iterator it;
         for (it = cl.begin(); it != cl.end(); it++) {
@@ -211,25 +220,24 @@ void CommandHandler::handlePrivMsg(Client& client, Message& msg, Server& server)
 }
 
 /*TODO: check with Halloy if I need to sent RL_NOTOPIC if user joins canal without topic*/
-/*      broadcast when somebody is joining*/
 void CommandHandler::handleJoin(Client& client, Message& msg, Server& server) {
     std::string nickname = client.getNickname();
     std::string command = msg.command;
     if (msg.params.empty()) {
-        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl;
+        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl; //-----------------
         return ;
     }
     std::string& channelName = msg.params[0];
     if (!Parser::isValidChannelName(channelName)) {
-        std::cerr << "ERR_NOSUCHCHANNEL - log" << std::endl;
+        std::cerr << "ERR_NOSUCHCHANNEL - log" << std::endl; //-----------------
         return ;
     }
     Channel* ch = server.getChannel(channelName);
-    if (ch && Parser::isUserInChannel(server, client)) {
-        return; // case where user is on the channel - just ignore JOIN command
+    if (ch && Parser::isUserInChannel(server, client, ch->getChannelName())) {
+        return;
     }
-    if (ch == NULL) { //channel will be freshly made so it has no topic - we dont send anythin to client which is joining
-        Channel channel = Channel(); //could be refactored with parametrised constructor
+    if (ch == NULL) {
+        Channel channel = Channel();
         server.addChannel(channel, channelName);
         server.getChannel(channelName)->getAdmins().push_back(&client);
         server.getChannel(channelName)->add_client(&client);
@@ -242,12 +250,12 @@ void CommandHandler::handleJoin(Client& client, Message& msg, Server& server) {
                 + "@" + client.getHostname() + " JOIN " + ch->getChannelName() + "\r\n";
         ch->broadcast(client, joinReply);
         client.write_msg(joinReply);
-        if (ch->isThereTopic()) { //client succesfully joined, passed key if any set, now he will have viewed the channel topic
+        if (ch->isThereTopic()) {
             std::string reply = Replies::getReply(RPL_TOPIC, nickname, msg.params[0], ch->getTopic());
             client.write_msg(reply);
             return ;
         }
-        std::string reply = Replies::getReply(RPL_NOTOPIC, nickname, msg.params[0], ""); //in case of no topic, information about it is shown to client
+        std::string reply = Replies::getReply(RPL_NOTOPIC, nickname, msg.params[0], "");
         client.write_msg(reply);
     }
 }
@@ -318,7 +326,7 @@ void CommandHandler::handleUser(Client& client, Message& msg, Server& server)
 {
     (void)server;
     if (msg.params.size() < 2) {
-        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl;
+        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl; //-----------------
         return ;
     }
     std::string username = msg.params[0];
@@ -327,7 +335,7 @@ void CommandHandler::handleUser(Client& client, Message& msg, Server& server)
         || username.find_first_of(std::string(" \r\n\0", 5)) != std::string::npos
         || realname[0] != ':'
         || realname.find_first_of(std::string("\0\r\n", 4)) != std::string::npos) {
-        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl;
+        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl; //-----------------
         return ;
     }
     client.setUsername(username);
@@ -341,18 +349,18 @@ void CommandHandler::handleUser(Client& client, Message& msg, Server& server)
 void CommandHandler::handleNick(Client& client, Message& msg, Server& server)
 {
     if (msg.params.empty()) {
-        std::cerr << "ERR_NONICKNAMEGIVEN - log" << std::endl; 
+        std::cerr << "ERR_NONICKNAMEGIVEN - log" << std::endl;  //-----------------
         return ;
     }
     if (!Parser::isValidNickname(msg.params[0])) {
-        std::cerr << "ERR_ERRONEUSNICKNAME - log" << std::endl;
+        std::cerr << "ERR_ERRONEUSNICKNAME - log" << std::endl; //-----------------
         return ;
     }
     std::map<int, Client >& cliMap = server.getClients();
     std::map<int, Client >::iterator it;
     for (it = cliMap.begin(); it != cliMap.end(); it++) {
         if (it->second.getNickname() == msg.params[0]) {
-            std::cerr << "ERR_NICKNAMEINUSE - log" << std::endl;
+            std::cerr << "ERR_NICKNAMEINUSE - log" << std::endl; //-----------------
             return ;
         }
     }
@@ -362,16 +370,16 @@ void CommandHandler::handleNick(Client& client, Message& msg, Server& server)
 void CommandHandler::handlePass(Client& client, Message& msg, Server& server)
 {
     if (msg.params.empty()) {
-        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl; 
+        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl;  //-----------------
         return ;
     }
     if ((msg.params[0] != server.getPassword())) {
-        std::cerr << "ERR_PASSWDMISMATCH - log" << std::endl;
+        std::cerr << "ERR_PASSWDMISMATCH - log" << std::endl; //-----------------
         return ;
     }
     if (client.getAuthInfo()) {
 		std::cout << client.getAuthInfo() << std::endl; 
-        std::cerr << "462 ERR_ALREADYREGISTERED DUPA - log" << std::endl;
+        std::cerr << "462 ERR_ALREADYREGISTERED DUPA - log" << std::endl; //-----------------
         return;
     }
     client.setAuth();
@@ -381,7 +389,7 @@ void CommandHandler::handlePass(Client& client, Message& msg, Server& server)
 void CommandHandler::handlePing(Client &client, Message &msg, Server& server)
 {
     if (msg.params.empty()) {
-        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl; 
+        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl;  //-----------------
         return ;
     }
     (void)server;
@@ -428,5 +436,5 @@ void CommandHandler::handleCommand(Client& client, Message& msg, Server& server)
     if (it != commands.end())
         it->second(client, msg, server);
     else
-        std::cerr << "ERR_COMMANDUNKNOWN - log" << std::endl;
+        std::cerr << "ERR_COMMANDUNKNOWN - log" << std::endl; //-----------------
 }

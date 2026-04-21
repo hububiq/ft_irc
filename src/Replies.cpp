@@ -96,7 +96,7 @@ std::string Replies::getReply(ReplyCode code, const std::string& userNick,
             return prefix + "441 " + userNick + " " + arg1 + " :They aren't on that channel\r\n";
 
         case ERR_NOTONCHANNEL:
-            return prefix + "442 " + arg1 + " :You're not on that channel\r\n";
+            return prefix + "442 " + userNick + " " + arg1 + " " + arg2 + " :You're not on that channel\r\n";
             
         case ERR_USERONCHANNEL:
             // argv 1 = invited user

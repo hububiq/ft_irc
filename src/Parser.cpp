@@ -44,35 +44,32 @@ bool Parser::isClientAdmin(Server& server, Client& client, std::string& chName)
   return false;
 }
 
-bool Parser::isInviteeInChannel(Server& server, Message& msg)
+bool Parser::isInviteeInChannel(Server& server, Message& msg, const std::string& channelName)
 {
-  const std::string& nick = msg.params[0];
-  std::map<std::string, Channel> chanls = server.getChannels();
-  std::map<std::string, Channel>::iterator it;
-  for (it = chanls.begin(); it != chanls.end(); it++) { //inefficient when big number of channels
-    std::vector<Client *> memb = it->second.getMembers();
-    for (size_t i = 0; i < memb.size(); i++) {
-      if (memb[i]->getNickname() == nick)
-        return true;
-    }
+  Channel* ch = server.getChannel(channelName);
+  if (!ch)
+    return false;
+  std::vector<Client *> memb = ch->getMembers();
+  for (size_t i = 0; i < memb.size(); i++) {
+    if (memb[i]->getNickname() == msg.params[0])
+      return true;
   }
   return false;
 }
 
-bool Parser::isUserInChannel(Server& server, Client& client)
+bool Parser::isUserInChannel(Server& server, Client& client, const std::string& channelName)
 {
-  const std::string& nick = client.getNickname();
-  std::map<std::string, Channel> chanls = server.getChannels();
-  std::map<std::string, Channel>::iterator it;
-  for (it = chanls.begin(); it != chanls.end(); it++) {
-   std::vector<Client *> memb = it->second.getMembers();
-   for (size_t i = 0; i < memb.size(); i++) {
-     if (memb[i]->getNickname() == nick)
-       return true;
+    Channel* ch = server.getChannel(channelName);
+    if (!ch)
+      return false;
+    std::vector<Client *>& memb = ch->getMembers();
+    for (size_t i = 0; i < memb.size(); i++) {
+        if (memb[i]->getNickname() == client.getNickname())
+          return true;
     }
-  }
-  return false;
+    return false;
 }
+
 
 bool Parser::findClient(std::map<int, Client>& cliMap, std::string& name)
 {
@@ -85,28 +82,34 @@ bool Parser::findClient(std::map<int, Client>& cliMap, std::string& name)
 }
 
 bool Parser::modeGuardChecks(Channel* ch, Message& msg, Client& client) {
-  if (ch->isInviteOnly() && !ch->isInvited(client)) {
-      std::cerr << "ERR_INVITEONLYCHAN - log" << std::endl;
+  if (ch->isInviteOnly() && !ch->isInvited(client.getNickname())) {
+      std::string reply = Replies::getReply(ERR_INVITEONLYCHAN, client.getNickname(), msg.params[0], "");
+      client.write_msg(reply);
       return true;
     }
+
   if (ch->isChannelKey()) {
        if (msg.params.size() < 2 || msg.params[1].empty()) {
-          std::cerr << "ERR_BADCHANNELKEY - log" << std::endl;
-          return true;
+        std::string reply = Replies::getReply(ERR_BADCHANNELKEY, client.getNickname(), msg.params[0], "");
+        client.write_msg(reply);
+        return true;
       }
       if (msg.params[1].empty()) {
-          std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl;
-          return true;
+        std::string reply = Replies::getReply(ERR_NEEDMOREPARAMS, client.getNickname(), msg.command, "");
+        client.write_msg(reply);
+        return true;
       }
       else if (msg.params[1] != ch->getKey()) {
-          std::cerr << "ERR_BADCHANNELKEY - log" << std::endl;
-          return true;
+        std::string reply = Replies::getReply(ERR_BADCHANNELKEY, client.getNickname(), msg.params[0], "");
+        client.write_msg(reply);
+        return true;
       }
   }
   if (ch->isChannelLimit()) {
       if (ch->getMembers().size() == ch->getLimit()) {
-          std::cerr << "ERR_CHANNELISFULL - log" << std::endl;
-          return true;
+        std::string reply = Replies::getReply(ERR_CHANNELISFULL, client.getNickname(), msg.params[0], "");
+        client.write_msg(reply);
+        return true;
       }
   }
   return false;
@@ -127,12 +130,12 @@ bool Parser::isValidChannelName(std::string& channName) {
 bool Parser::isValidNickname(std::string& nick) {
   std::string specials = "-\\[]`^{}";
   if (nick.size() > 9 || !isalpha(nick[0])) {
-    std::cerr << "ERR_ERRONEUSNICKNAME - log" << std::endl;
+    std::cerr << "ERR_ERRONEUSNICKNAME - log" << std::endl; //-----------------
     return false;
   }
   for (size_t i = 1; i < nick.size(); i++) {
     if (!isalpha(nick[i]) && !isdigit(nick[i]) && specials.find(nick[i]) == std::string::npos) {
-      std::cerr << "ERR_ERRONEUSNICKNAME - log" << std::endl;
+      std::cerr << "ERR_ERRONEUSNICKNAME - log" << std::endl; //-----------------
       return false;
     }
   }

@@ -15,13 +15,14 @@ Channel::Channel():
 
 Channel::~Channel() {}
 
-void Channel::add_client(Client* cli) { ///tu teraz zmienic
+void Channel::add_client(Client* cli) {
   this->_members.push_back(cli);
 }
+
 void  Channel::addToInvited(std::string clientName) { 
   this->_invited.push_back(clientName); 
-  //dac w sygnaturze std::string nick  i wyszukiwac po nicku w mapie klientow serwera?
 }
+
 void Channel::addToChanFlags(char flag) {
   std::vector<char>::iterator it = std::find(_chanFlags.begin(), _chanFlags.end(), flag);
   if (it == _chanFlags.end())
@@ -132,7 +133,7 @@ bool Channel::hasEnoughParams(Client& client, Message& msg) {
 
 void Channel::setFlagOn(Server& serv, Client& client, Message msg) {
   std::string flagStr = msg.params[1];
-  for (size_t i = 1; i < flagStr.size(); ++i) { //doesnt delete corresponding parameter if its given to wrong flag
+  for (size_t i = 1; i < flagStr.size(); ++i) {
     if (std::string("itklo").find(flagStr[i]) == std::string::npos) {
       std::string reply = Replies::getReply(ERR_UNKNOWNMODE, client.getNickname(), std::string(1, flagStr[i]), "");
       client.write_msg(reply);
@@ -255,7 +256,7 @@ void Channel::setFlagOff(Client& client, Message msg) {
       if (!hasEnoughParams(client, msg)) continue;
       if (!this->isNicknameInChannel(msg.params[2])) {
           std::string reply = Replies::getReply(ERR_USERNOTINCHANNEL, client.getNickname(), msg.params[2], this->getChannelName());
-          client.write_msg(reply);
+          client.write_msg(reply) ;
           if (msg.params.size() > 2) msg.params.erase(msg.params.begin() + 2);
           continue;
       }

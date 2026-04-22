@@ -35,7 +35,7 @@ class Server {
   std::map<int, Client> _clients;
   std::map<std::string, Channel> _channels;
   void parseArg(int argc, char **argv);
-  void executeMessage(Client& client, Message &msg, Server& server);  // belongs to semantic parsing
+  void executeMessage(Client& client, Message &msg, Server& server);
  
   public:
   uint32_t getHostIp() const;

@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include "CommandHandler.hpp"
+#include "Replies.hpp"
 
 Server::Server(int argc, char** argv) { parseArg(argc, argv); }
 
@@ -19,13 +20,12 @@ void Server::parseArg(int argc, char** argv) {
   this->_port = std::atoi(argv[1]);
   this->_port_num = parse_string_port(argv[1]);
   this->_host_ip =
-      inet_addr("127.0.0.1");  // sets the default address to localhost
+      inet_addr("127.0.0.1");
   this->_password = std::string(argv[2]);
   if (this->_password.empty())
     throw std::out_of_range("Password must contain at least 1 letter");
 }
 
-/* ------------------ belongs to Hubert ------------------*/
 void Server::executeMessage(Client& client, Message& msg, Server& server) {
   switch (client.getState()) {
     case CONNECTED: {
@@ -34,6 +34,8 @@ void Server::executeMessage(Client& client, Message& msg, Server& server) {
         break ;
       }
       std::cerr << "Login reguired: PASS" << std::endl;
+      std::string reply = Replies::getReply(ERR_NOTREGISTERED, "*", "", "");
+      client.write_msg(reply);
       return ;
     }
     case HANDSHAKE: {
@@ -42,14 +44,16 @@ void Server::executeMessage(Client& client, Message& msg, Server& server) {
           break ;
       }
       else {
-        std::cerr << "ERR_NOTREGISTERED - logi --> HANDSHAKE" << std::endl;
+        std::string reply = Replies::getReply(ERR_NOTREGISTERED, "*", "", "");
+        client.write_msg(reply);
         return ;
       }
     } break;
     case REGISTERED: {
       std::cout << "inside REGISTERED: " <<msg.command << std::endl;
       if (msg.command == "PASS" || msg.command == "USER" || msg.command == "NICK") {
-        std::cerr << "ERR_ALREADYREGISTERED - log" << std::endl;
+        std::string reply = Replies::getReply(ERR_ALREADYREGISTERED, client.getNickname(), "", "");
+        client.write_msg(reply);
         return ;
       }
       break;
@@ -78,7 +82,7 @@ std::map<int, Client>& Server::getClients() { return this->_clients; }
 Channel* Server::getChannel(const std::string& chann) {
   std::map<std::string, Channel>::iterator it = this->_channels.find(chann);
   if (it != this->_channels.end())
-    return &it->second; //address of second map parameter - channel
+    return &it->second;
   return NULL;
 }
 

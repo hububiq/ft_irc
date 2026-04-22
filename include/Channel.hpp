@@ -17,7 +17,7 @@ private:
   std::string           _topic;
   std::vector<Client *> _admins;
   std::vector<Client *>  _members;
-  std::vector<std::string> _invited; //zmienic to na vector stringow chyba
+  std::vector<std::string> _invited;
   std::vector<char>     _chanFlags;
   std::string           _key; 
   unsigned int          _limit;
@@ -25,9 +25,6 @@ private:
   bool                  _t;
   bool                  _k;
   bool                  _l;
-
-  //implement CHANNELMODEIS and print all the flags
-
 public:
   Channel();
   ~Channel();

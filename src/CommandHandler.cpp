@@ -189,17 +189,19 @@ void CommandHandler::handleInvite(Client& client, Message& msg, Server& server)
 void CommandHandler::handlePrivMsg(Client& client, Message& msg, Server& server)
 {
     if (msg.params.empty() || msg.params[0].empty()) {
-        std::cerr << "ERR_NORECIPIENT- log" << std::endl; //-----------------
+        std::string reply = Replies::getReply(ERR_NORECIPIENT, client.getNickname(), msg.command, "");
+        client.write_msg(reply);
         return ;
     }
     if (msg.params.size() < 2 || msg.params[1].empty() || msg.params[1][0] != ':') {
-        std::cerr << "ERR_NOTEXTTOSEND- log" << std::endl; //-----------------
+        std::string reply = Replies::getReply(ERR_NOTEXTTOSEND, client.getNickname(), "", "");
+        client.write_msg(reply);
         return ;
     }
     Channel* channForMsg = server.getChannel(msg.params[0]); 
-    if (channForMsg == NULL 
-        && !Parser::findClient(server.getClients(), msg.params[0])) {
-        std::cerr << "ERR_NOSUCHNICK - log" << std::endl; //-----------------
+    if (channForMsg == NULL && !Parser::findClient(server.getClients(), msg.params[0])) {
+        std::string reply = Replies::getReply(ERR_NOSUCHNICK, client.getNickname(), msg.params[1], "");
+        client.write_msg(reply);
         return ;
     }
     std::string prefix = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname();
@@ -219,17 +221,19 @@ void CommandHandler::handlePrivMsg(Client& client, Message& msg, Server& server)
     }
 }
 
-/*TODO: check with Halloy if I need to sent RL_NOTOPIC if user joins canal without topic*/
-void CommandHandler::handleJoin(Client& client, Message& msg, Server& server) {
+void CommandHandler::handleJoin(Client& client, Message& msg, Server& server)
+{
     std::string nickname = client.getNickname();
     std::string command = msg.command;
-    if (msg.params.empty()) {
-        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl; //-----------------
+    if (msg.params.empty() || msg.params[0].size() == 1) {
+        std::string reply = Replies::getReply(ERR_NEEDMOREPARAMS, client.getNickname(), msg.command, "");
+        client.write_msg(reply);
         return ;
     }
     std::string& channelName = msg.params[0];
     if (!Parser::isValidChannelName(channelName)) {
-        std::cerr << "ERR_NOSUCHCHANNEL - log" << std::endl; //-----------------
+        std::string reply = Replies::getReply(ERR_NOSUCHCHANNEL, nickname, channelName, "");
+        client.write_msg(reply);
         return ;
     }
     Channel* ch = server.getChannel(channelName);
@@ -326,7 +330,8 @@ void CommandHandler::handleUser(Client& client, Message& msg, Server& server)
 {
     (void)server;
     if (msg.params.size() < 2) {
-        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl; //-----------------
+        std::string reply = Replies::getReply(ERR_NEEDMOREPARAMS, client.getNickname(), msg.command, "");
+        client.write_msg(reply);
         return ;
     }
     std::string username = msg.params[0];
@@ -335,7 +340,8 @@ void CommandHandler::handleUser(Client& client, Message& msg, Server& server)
         || username.find_first_of(std::string(" \r\n\0", 5)) != std::string::npos
         || realname[0] != ':'
         || realname.find_first_of(std::string("\0\r\n", 4)) != std::string::npos) {
-        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl; //-----------------
+        std::string reply = Replies::getReply(ERR_NEEDMOREPARAMS, client.getNickname(), msg.command, "");
+        client.write_msg(reply);
         return ;
     }
     client.setUsername(username);
@@ -349,18 +355,19 @@ void CommandHandler::handleUser(Client& client, Message& msg, Server& server)
 void CommandHandler::handleNick(Client& client, Message& msg, Server& server)
 {
     if (msg.params.empty()) {
-        std::cerr << "ERR_NONICKNAMEGIVEN - log" << std::endl;  //-----------------
+        std::string reply = Replies::getReply(ERR_NONICKNAMEGIVEN, "*", "", "");
+        client.write_msg(reply);
         return ;
     }
-    if (!Parser::isValidNickname(msg.params[0])) {
-        std::cerr << "ERR_ERRONEUSNICKNAME - log" << std::endl; //-----------------
+    if (!Parser::isValidNickname(msg.params[0], client)) {
         return ;
     }
     std::map<int, Client >& cliMap = server.getClients();
     std::map<int, Client >::iterator it;
     for (it = cliMap.begin(); it != cliMap.end(); it++) {
         if (it->second.getNickname() == msg.params[0]) {
-            std::cerr << "ERR_NICKNAMEINUSE - log" << std::endl; //-----------------
+            std::string reply = Replies::getReply(ERR_NICKNAMEINUSE, "*", msg.params[0], "");
+            client.write_msg(reply);
             return ;
         }
     }
@@ -370,16 +377,19 @@ void CommandHandler::handleNick(Client& client, Message& msg, Server& server)
 void CommandHandler::handlePass(Client& client, Message& msg, Server& server)
 {
     if (msg.params.empty()) {
-        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl;  //-----------------
+        std::string reply = Replies::getReply(ERR_NEEDMOREPARAMS, client.getNickname(), msg.command, "");
+        client.write_msg(reply);
         return ;
     }
     if ((msg.params[0] != server.getPassword())) {
-        std::cerr << "ERR_PASSWDMISMATCH - log" << std::endl; //-----------------
+        std::string reply = Replies::getReply(ERR_PASSWDMISMATCH, "*", "", "");
+        client.write_msg(reply);
         return ;
     }
     if (client.getAuthInfo()) {
 		std::cout << client.getAuthInfo() << std::endl; 
-        std::cerr << "462 ERR_ALREADYREGISTERED DUPA - log" << std::endl; //-----------------
+        std::string reply = Replies::getReply(ERR_ALREADYREGISTERED, client.getNickname(), "", "");
+        client.write_msg(reply);
         return;
     }
     client.setAuth();
@@ -389,7 +399,8 @@ void CommandHandler::handlePass(Client& client, Message& msg, Server& server)
 void CommandHandler::handlePing(Client &client, Message &msg, Server& server)
 {
     if (msg.params.empty()) {
-        std::cerr << "ERR_NEEDMOREPARAMS - log" << std::endl;  //-----------------
+        std::string reply = Replies::getReply(ERR_NEEDMOREPARAMS, client.getNickname(), msg.command, "");
+        client.write_msg(reply);
         return ;
     }
     (void)server;
@@ -404,7 +415,8 @@ void CommandHandler::handleCap(Client& client, Message& msg, Server& server)
 {
     (void)server;
     if (msg.params.empty()) {
-        std::cerr << "Need more paramters - log " << std::endl;
+        std::string reply = Replies::getReply(ERR_NEEDMOREPARAMS, client.getNickname(), msg.command, "");
+        client.write_msg(reply);
         return ;
     }
     std::string serverName = "localhost";
@@ -435,6 +447,8 @@ void CommandHandler::handleCommand(Client& client, Message& msg, Server& server)
     std::map<std::string, void(*)(Client&, Message&, Server&)>::iterator it = commands.find(msg.command);
     if (it != commands.end())
         it->second(client, msg, server);
-    else
-        std::cerr << "ERR_COMMANDUNKNOWN - log" << std::endl; //-----------------
+    else {
+        std::string reply = Replies::getReply(ERR_UNKNOWNCOMMAND, client.getNickname(), msg.command, "");
+        client.write_msg(reply);
+    }
 }

@@ -127,15 +127,17 @@ bool Parser::isValidChannelName(std::string& channName) {
   return true;
 }
 
-bool Parser::isValidNickname(std::string& nick) {
+bool Parser::isValidNickname(std::string& nick, Client& cli) {
   std::string specials = "-\\[]`^{}";
   if (nick.size() > 9 || !isalpha(nick[0])) {
-    std::cerr << "ERR_ERRONEUSNICKNAME - log" << std::endl; //-----------------
+    std::string reply = Replies::getReply(ERR_ERRONEUSNICKNAME, "*", nick, "");
+    cli.write_msg(reply);
     return false;
   }
   for (size_t i = 1; i < nick.size(); i++) {
     if (!isalpha(nick[i]) && !isdigit(nick[i]) && specials.find(nick[i]) == std::string::npos) {
-      std::cerr << "ERR_ERRONEUSNICKNAME - log" << std::endl; //-----------------
+      std::string reply = Replies::getReply(ERR_ERRONEUSNICKNAME, "*", nick, "");
+      cli.write_msg(reply);
       return false;
     }
   }
@@ -158,8 +160,7 @@ void Parser::extractParams(std::string line, Message& msg) {
 }
 
 void Parser::parseToStruct(const std::string& rawMessage, Message& msg) {
-  std::string line = rawMessage;  // there are 510 characters maximum allowed by
-                                  // protocol - should I handle it?	
+  std::string line = rawMessage;  
   if (line[0] == ':') {
     size_t prefixEnd = line.find(' ');
     if (prefixEnd == std::string::npos)

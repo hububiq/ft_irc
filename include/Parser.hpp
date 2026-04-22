@@ -6,6 +6,7 @@
 
 #include "Message.hpp"
 
+
 class Server;
 class Client;
 class Channel;
@@ -13,7 +14,7 @@ class Channel;
 namespace Parser {
   void parseToStruct(const std::string& rawMessage, Message& msg);
   void extractParams(std::string line, Message& msg);
-  bool isValidNickname(std::string& nick);
+  bool isValidNickname(std::string& nick, Client& cli);
   bool isValidChannelName(std::string& channName);
   bool modeGuardChecks(Channel* ch, Message& msg, Client& client);
   bool findClient(std::map<int, Client>& cliMap, std::string& name);

@@ -59,7 +59,7 @@ void Server::executeMessage(Client& client, Message& msg, Server& server) {
       break;
     }
   }
-  CommandHandler::handleCommand(client, msg, server);
+  CommandHandler::handleCommands(client, msg, server);
 }
 
 void Server::run() {

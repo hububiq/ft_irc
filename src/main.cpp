@@ -1,9 +1,11 @@
 #include <iostream>
 
 #include "Server.hpp"
+#include "CommandHandler.hpp"
 
 int main(int argc, char** argv) {
   try {
+    CommandHandler::initCommands();
     Server server(argc, argv);
     server.run();
   } catch (const std::exception& e) {

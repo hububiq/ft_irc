@@ -1,7 +1,6 @@
 #include "../include/Replies.hpp"
 
-std::string Replies::getReply(ReplyCode code, const std::string& userNick, 
-                                   const std::string& arg1, const std::string& arg2) 
+std::string Replies::getReply(ReplyCode code, const std::string &userNick, const std::string &arg1, const std::string &arg2)
 {
     std::string serverName = "localhost"; 
     std::string prefix = ":" + serverName + " ";
@@ -40,8 +39,8 @@ std::string Replies::getReply(ReplyCode code, const std::string& userNick,
         case ERR_NORECIPIENT:
             return prefix + "411 " + userNick + " :No recipient given (" + arg1 + ")\r\n";
 
-        case ERR_NOTEXTTOSEND:
-            return prefix + "412 " + userNick + " :No text to send\r\n";
+	case ERR_NOTEXTTOSEND:
+		return prefix + "412 " + userNick + " :No text to send\r\n";
 
         case ERR_UNKNOWNCOMMAND:
             return prefix + "421 " + userNick + " " + arg1 + " :Unknown command\r\n";
@@ -81,8 +80,8 @@ std::string Replies::getReply(ReplyCode code, const std::string& userNick,
         case ERR_ALREADYREGISTERED:
             return prefix + "462 " + userNick + " :Unauthorized command (already registered)\r\n";
 
-        case ERR_PASSWDMISMATCH:
-            return prefix + "464 " + userNick + " :Password incorrect\r\n";
+	case ERR_PASSWDMISMATCH:
+		return prefix + "464 " + userNick + " :Password incorrect\r\n";
 
         // ==========================================
         // CHANNEL MODE & PRIVILEGE ERRORS

@@ -6,7 +6,6 @@
 
 
 #include <algorithm>
-#include <sstream>
 #include <cctype>
 #include <iostream>
 
@@ -33,7 +32,7 @@ void Parser::loopOnFlags(std::string chName, Server& server, Client& cli) {
   cli.write_msg(reply);
 }
 
-bool Parser::isClientAdmin(Server& server, Client& client, std::string& chName)
+bool Parser::isClientAdmin(Server &server, Client &client, std::string &chName)
 {
   std::vector<Client *> admins = server.getChannel(chName)->getAdmins();
   std::string nick = client.getNickname();
@@ -71,14 +70,16 @@ bool Parser::isUserInChannel(Server& server, Client& client, const std::string& 
 }
 
 
-bool Parser::findClient(std::map<int, Client>& cliMap, std::string& name)
+
+bool Parser::findClient(std::map<int, Client>& cliMap, std::string& name) 
 {
-  std::map<int, Client>::iterator it;
-  for (it = cliMap.begin(); it != cliMap.end(); it++) {
-    if (it->second.getNickname() == name)
-      return true;
-  }
-  return false;
+	std::map<int, Client>::iterator it;
+	for (it = cliMap.begin(); it != cliMap.end(); it++)
+	{
+		if (it->second.getNickname() == name)
+			return true;
+	}
+	return false;
 }
 
 bool Parser::modeGuardChecks(Channel* ch, Message& msg, Client& client) {
@@ -115,16 +116,17 @@ bool Parser::modeGuardChecks(Channel* ch, Message& msg, Client& client) {
   return false;
 }
 
-bool Parser::isValidChannelName(std::string& channName) {
-	if (channName.size() < 2 || channName[0] != '#' || channName.size() > 200 )
-    return false;
+bool Parser::isValidChannelName(std::string &channName)
+{
+	if (channName.size() < 2 || channName[0] != '#' || channName.size() > 200)
+		return false;
 	for (size_t i = 1; i < channName.size(); i++)
 	{
 		char c = channName[i];
 		if (c == ' ' || c == '\0' || c == '\r' || c == '\n' || c == ',')
-      return false;
+			return false;
 	}
-  return true;
+	return true;
 }
 
 bool Parser::isValidNickname(std::string& nick, Client& cli) {
@@ -144,19 +146,23 @@ bool Parser::isValidNickname(std::string& nick, Client& cli) {
   return true;
 }
 
-void Parser::extractParams(std::string line, Message& msg) {
-  std::istringstream ss(line);
-  std::string token;
+void Parser::extractParams(std::string line, Message &msg)
+{
+	std::istringstream ss(line);
+	std::string        token;
 
-  while (ss >> token) {
-    if (token[0] == ':') {
-      std::string rest;
-      std::getline(ss, rest);
-      msg.params.push_back(token.substr(0) + rest);
-      break;
-    } else
-      msg.params.push_back(token);
-  }
+	while (ss >> token)
+	{
+		if (token[0] == ':')
+		{
+			std::string rest;
+			std::getline(ss, rest);
+			msg.params.push_back(token.substr(0) + rest);
+			break;
+		}
+		else
+			msg.params.push_back(token);
+	}
 }
 
 void Parser::parseToStruct(const std::string& rawMessage, Message& msg) {
@@ -185,4 +191,40 @@ void Parser::parseToStruct(const std::string& rawMessage, Message& msg) {
     line.erase(0, commandEnd + 1);
     Parser::extractParams(line, msg);
   }
+}
+
+// KICK utils
+
+bool Parser::clientCanKICK(Channel *channel_obj, Client &client)
+{
+	std::vector<Client *>           temp_members = channel_obj->getAdmins();
+	std::vector<Client *>::iterator it = temp_members.begin();
+	std::vector<Client *>::iterator it_end = temp_members.end();
+	while (it != it_end)
+	{
+		if (*it == &client)
+			return true;
+		++it;
+	}
+	return false;
+}
+
+bool Parser::clientToBeKICKed(Channel *channel_obj, const std::string &client_to_kick)
+{
+	std::vector<Client *>          &temp_members = channel_obj->getMembers();
+	std::vector<Client *>::iterator it = temp_members.begin();
+	std::vector<Client *>::iterator it_end = temp_members.end();
+
+	while (it != it_end)
+	{
+		Client *tmp_mem = *it;
+		if (tmp_mem->getNickname() == client_to_kick)
+		{
+			temp_members.erase(it);
+			std::cout << "Found client to kick" << std::endl;
+			return true;
+		}
+		++it;
+	}
+	return false;
 }

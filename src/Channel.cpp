@@ -1,5 +1,5 @@
-//#include "Channel.hpp"
-//#include "Client.hpp"
+// #include "Channel.hpp"
+// #include "Client.hpp"
 #include "../include/Channel.hpp"
 #include "../include/Client.hpp"
 #include "../include/Message.hpp"
@@ -15,8 +15,24 @@ Channel::Channel():
 
 Channel::~Channel() {}
 
-void Channel::add_client(Client* cli) {
-  this->_members.push_back(cli);
+Channel::Channel(std::string &name, std::string &key, Client *admin)
+{
+	this->_channel_name = name;
+	this->_key = key;
+	this->_admins.push_back(admin);
+	this->_members.push_back(admin);
+	this->_topic = "";
+	this->_l = 0;
+	_i = false;
+	_t = false;
+	_k = false;
+	_l = false;
+	_o = false;
+}
+
+void Channel::add_client(Client *cli)
+{
+	this->_members.push_back(cli);
 }
 
 void  Channel::addToInvited(std::string clientName) { 
@@ -285,10 +301,11 @@ bool Channel::isInvited(std::string clientToFind) {
   return false;
 }
 
-bool Channel::isThereTopic() {
-  if (this->_topic.size() != 0)
-    return true;
-  return false;
+bool Channel::isThereTopic()
+{
+	if (this->_topic.size() != 0)
+		return true;
+	return false;
 }
 
 bool Channel::isNicknameInChannel(std::string& nick) {
@@ -303,13 +320,13 @@ bool Channel::isNicknameInChannel(std::string& nick) {
 
 void Channel::broadcast(Client& sender, std::string& msg)
 {
-  std::vector<Client *>& members = this->getMembers();
-  std::vector<Client *>::iterator it;
-  for (it = members.begin(); it != members.end(); it++)
-  {
-    if (sender.getFd() != (*it)->getFd())
-      (*it)->write_msg(msg);
-  }
+	std::vector<Client *> &members = this->getMembers();
+	std::vector<Client *>::iterator it;
+	for (it = members.begin(); it != members.end(); it++)
+	{
+		if (sender.getFd() != (*it)->getFd())
+			(*it)->write_msg(msg);
+	}
 }
 
 // void Channel::remove_client(Client* client)
@@ -321,7 +338,7 @@ void Channel::broadcast(Client& sender, std::string& msg)
 //     // find an object in a vector object list
 //     this->_clients_list.erase(
 //       std::find(_clients_list.begin(),
-//       _clients_list.end(), 
+//       _clients_list.end(),
 //       client));
 //   }
 //   // Check the std::remove also

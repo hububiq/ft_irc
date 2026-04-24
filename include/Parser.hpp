@@ -1,8 +1,8 @@
 #ifndef PARSER_HPP
 #define PARSER_HPP
+#include <map>
 #include <stdexcept>
 #include <string>
-#include <map>
 
 #include "Message.hpp"
 

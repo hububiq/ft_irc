@@ -77,7 +77,7 @@ public:
   bool isNicknameInChannel(std::string& nick);
   void broadcast(Client& sender, std::string& msg);
 
+	void broadcast(Client &, std::string &);
 };
 
 #endif
-

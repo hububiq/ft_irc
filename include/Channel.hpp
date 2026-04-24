@@ -1,8 +1,6 @@
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
 
-// #include "Client.hpp"
-
 #include <string>
 #include <vector>
 
@@ -27,6 +25,7 @@ private:
   bool                  _l;
 public:
   Channel();
+  Channel(std::string &name, std::string &key, Client *admin);
   ~Channel();
 
   void add_client(Client* cli);
@@ -76,8 +75,6 @@ public:
   bool isThereTopic();
   bool isNicknameInChannel(std::string& nick);
   void broadcast(Client& sender, std::string& msg);
-
-	void broadcast(Client &, std::string &);
 };
 
 #endif

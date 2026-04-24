@@ -27,7 +27,6 @@ Channel::Channel(std::string &name, std::string &key, Client *admin)
 	_t = false;
 	_k = false;
 	_l = false;
-	_o = false;
 }
 
 void Channel::add_client(Client *cli)

@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "CommandHandler.hpp"
 
 volatile sig_atomic_t g_running = 1;
 
@@ -16,6 +17,7 @@ int main(int argc, char **argv)
 
 	try
 	{
+    	CommandHandler::initCommands();
 		Server server(argc, argv);
 		server.run();
 	}

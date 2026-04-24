@@ -25,20 +25,18 @@
 #include "Message.hpp"
 #include "Parser.hpp"
 
-class Server
-{
-  private:
-	int                            _socket_fd;
-	int                            _port;
-	uint32_t                       _host_ip;
-	uint16_t                       _port_num;
-	std::string                    _password;
-	std::map<int, Client>          _clients;
-	std::map<std::string, Channel> _channels;
-	void                           parseArg(int argc, char **argv);
-	void                           executeMessage(Client &client, Message &msg,
-	                                              Server &server); // belongs to semantic parsing
-
+class Server {
+ private:
+  int _socket_fd;
+  int _port;
+  uint32_t _host_ip;
+  uint16_t _port_num;
+  std::string _password;
+  std::map<int, Client> _clients;
+  std::map<std::string, Channel> _channels;
+  void parseArg(int argc, char **argv);
+  void executeMessage(Client& client, Message &msg, Server& server);
+ 
   public:
 	uint32_t    getHostIp() const;
 	uint16_t    getPortNum() const;

@@ -6,9 +6,11 @@ class Client;
 
 class Kick: public ACommand
 {
-    public:
-        void execute(Client&, Message&, Server&);
+public:
+    void execute(Client&, Message&, Server&);
+    bool clientCanKICK(Channel *, Client &);
+    Client *clientToBeKICKed(Channel *, const std::string &);
 };
 
-bool clientToBeKICKed(Channel *channel_obj, const std::string& client_to_kick);
-bool clientCanKICK(Channel *channel_obj, Client &client);
+//Client *clientToBeKICKed(Channel *, const std::string &);
+//bool clientCanKICK(Channel *, Client &);

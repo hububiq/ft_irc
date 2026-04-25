@@ -4,7 +4,8 @@
 enum ClientStatus
 {
 	READING,
-	READY_TO_RESPOND
+	READY_TO_RESPOND,
+	DISCONNECTING
 };
 
 enum ClientState

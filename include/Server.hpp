@@ -65,7 +65,7 @@ class Server {
 	HandleResult respond(Client &client);
 	std::map<int, Client>         &getClients();
 	Channel                       *getChannel(const std::string &chann);
-	std::map<std::string, Channel> getChannels();
+	std::map<std::string, Channel> &getChannels();
 	void                           addChannel(Channel &ch, std::string &chName);
 };
 

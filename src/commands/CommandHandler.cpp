@@ -32,7 +32,7 @@ extern Ping globalPingCmd;
 extern Cap globalCapCmd;
 extern Topic globalTopicCmd;
 extern Mode globalModeCmd;
-// extern Quit globalQuitCmd;
+extern Quit globalQuitCmd;
 
 
 std::map<std::string, ACommand*> CommandHandler::_commandsMap;
@@ -50,7 +50,7 @@ void CommandHandler::initCommands()
      _commandsMap["CAP"] = &globalCapCmd;
      _commandsMap["TOPIC"] = &globalTopicCmd;
      _commandsMap["MODE"] = &globalModeCmd;
-    //  this->_commandsMap["QUIT"] = &globalQuitCmd;
+    _commandsMap["QUIT"] = &globalQuitCmd;
 }
 
 void CommandHandler::handleCommands(Client& client, Message& msg, Server& server)

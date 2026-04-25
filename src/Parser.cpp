@@ -192,39 +192,3 @@ void Parser::parseToStruct(const std::string& rawMessage, Message& msg) {
     Parser::extractParams(line, msg);
   }
 }
-
-// KICK utils
-
-bool Parser::clientCanKICK(Channel *channel_obj, Client &client)
-{
-	std::vector<Client *>           temp_members = channel_obj->getAdmins();
-	std::vector<Client *>::iterator it = temp_members.begin();
-	std::vector<Client *>::iterator it_end = temp_members.end();
-	while (it != it_end)
-	{
-		if (*it == &client)
-			return true;
-		++it;
-	}
-	return false;
-}
-
-bool Parser::clientToBeKICKed(Channel *channel_obj, const std::string &client_to_kick)
-{
-	std::vector<Client *>          &temp_members = channel_obj->getMembers();
-	std::vector<Client *>::iterator it = temp_members.begin();
-	std::vector<Client *>::iterator it_end = temp_members.end();
-
-	while (it != it_end)
-	{
-		Client *tmp_mem = *it;
-		if (tmp_mem->getNickname() == client_to_kick)
-		{
-			temp_members.erase(it);
-			std::cout << "Found client to kick" << std::endl;
-			return true;
-		}
-		++it;
-	}
-	return false;
-}

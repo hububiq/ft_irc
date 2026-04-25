@@ -121,7 +121,7 @@ Channel* Server::getChannel(const std::string& chann) {
   return NULL;
 }
 
-std::map<std::string, Channel> Server::getChannels()
+std::map<std::string, Channel>& Server::getChannels()
 {
 	return this->_channels;
 }
@@ -244,7 +244,7 @@ void Server::loop_epoll(int epoll_fd, Server &server)
 				if (it != server._clients.end())
 				{
 					HandleResult res = process_request(epoll_fd, events[i].events, it->second);
-					if (res == DROP_CONNECTION)
+					if (res == DROP_CONNECTION || it->second.getStatus() == DISCONNECTING)
 					{
 						std::cout << "Client disconnected" << std::endl;
 						server._clients.erase(it);
@@ -375,7 +375,10 @@ HandleResult Server::process_request(int epoll_fd, uint32_t events, Client &clie
 				if (respond(client) == DROP_CONNECTION)
 					return DROP_CONNECTION;
 				if (client.getResponseBuffer().empty())
+				{
 					client.reset();
+					break;
+				}
 				else
 					return KEEP_CONNECTION;
 			}
@@ -383,6 +386,12 @@ HandleResult Server::process_request(int epoll_fd, uint32_t events, Client &clie
 			{
 				return KEEP_CONNECTION;
 			}
+		}
+		case DISCONNECTING:
+		{
+			if (!client.getResponseBuffer().empty())
+				respond(client);
+			return DROP_CONNECTION;
 		}
 		}
 	}

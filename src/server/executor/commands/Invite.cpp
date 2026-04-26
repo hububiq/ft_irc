@@ -1,11 +1,5 @@
 #include "Invite.hpp"
 
-#include "Client.hpp"
-#include "Message.hpp"
-#include "Parser.hpp"
-#include "Server.hpp"
-#include "reply_factory.hpp"
-
 void Invite::execute(Client& client, Message& msg, Server& server) {
   std::string nickname = client.getNickname();
   std::string command = msg.command;
@@ -40,7 +34,7 @@ void Invite::execute(Client& client, Message& msg, Server& server) {
     client.write_msg(reply);
     return;
   }
-  if (!Parser::isValidChannelName(msg.params[1])) {
+  if (!validator::isValidChannelName(msg.params[1])) {
     std::string reply =
         Replies::getReply(ERR_NOSUCHCHANNEL, nickname, msg.params[0], "");
     client.write_msg(reply);

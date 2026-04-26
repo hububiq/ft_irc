@@ -6,7 +6,8 @@ void extractPrefix(std::string& input, Message& msg) {
 
   size_t spacePos = input.find(' ');
   if (spacePos == std::string::npos) {
-    throw std::invalid_argument("Malformed IRC message: Prefix provided without command.");
+    throw std::invalid_argument(
+        "Malformed IRC message: Prefix provided without command.");
   }
 
   msg.prefix = input.substr(1, spacePos - 1);
@@ -42,7 +43,7 @@ std::string normalizeCommand(std::string command) {
   return command;
 }
 
-}
+}  // namespace
 
 void deserialize(std::string rawLine, Message& outMessage) {
   if (rawLine.empty()) {

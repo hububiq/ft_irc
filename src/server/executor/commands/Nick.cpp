@@ -1,17 +1,12 @@
 #include "Nick.hpp"
 
-#include "Client.hpp"
-#include "Message.hpp"
-#include "Server.hpp"
-#include "reply_factory.hpp"
-
 void Nick::execute(Client& client, Message& msg, Server& server) {
   if (msg.params.empty()) {
     std::string reply = Replies::getReply(ERR_NONICKNAMEGIVEN, "*", "", "");
     client.write_msg(reply);
     return;
   }
-  if (!Parser::isValidNickname(msg.params[0], client)) {
+  if (!validator::isValidNickname(msg.params[0], client)) {
     return;
   }
   std::map<int, Client>& cliMap = server.getClients();

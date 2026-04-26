@@ -2,7 +2,6 @@
 #include "epoll_initializer.hpp"
 
 #include <unistd.h>
-
 #include <stdexcept>
 
 namespace {

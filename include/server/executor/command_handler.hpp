@@ -1,10 +1,11 @@
-#include <map>
-#include <string>
+#ifndef COMMAND_HANDLER_HPP
+#define COMMAND_HANDLER_HPP
 
 #include <algorithm>
 #include <cctype>
 #include <iostream>
 #include <map>
+#include <string>
 
 #include "Cap.hpp"
 #include "Client.hpp"
@@ -36,3 +37,5 @@ class command_handler {
   static void setupCommandsMap();
   static void handleCommand(Client& client, Message& msg);
 };
+
+#endif

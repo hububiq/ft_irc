@@ -10,7 +10,6 @@ namespace message_parser {
 
 void deserialize(const std::string& rawLine, Message& outMessage);
 
-
-} 
+}
 
 #endif

@@ -9,7 +9,7 @@ bool process_message(Client &client) {
     Message msg;
     if (!messageLine.empty()) {
       message_parser::deserialize(messageLine, msg);
-      executor::executeMessage(client, msg, *this);
+      executor::executeMessage(client, msg);
     }
     client.setStatus(READY_TO_RESPOND);
     return true;

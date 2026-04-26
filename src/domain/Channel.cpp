@@ -5,7 +5,6 @@
 
 #include "Client.hpp"
 #include "Message.hpp"
-#include "Parser.hpp"
 #include "Server.hpp"
 #include "reply_factory.hpp"
 

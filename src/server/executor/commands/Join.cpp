@@ -1,11 +1,5 @@
 #include "Join.hpp"
 
-#include "Client.hpp"
-#include "Message.hpp"
-#include "Parser.hpp"
-#include "Server.hpp"
-#include "reply_factory.hpp"
-
 void Join::execute(Client& client, Message& msg, Server& server) {
   std::string nickname = client.getNickname();
   std::string command = msg.command;
@@ -16,7 +10,7 @@ void Join::execute(Client& client, Message& msg, Server& server) {
     return;
   }
   std::string& channelName = msg.params[0];
-  if (!Parser::isValidChannelName(channelName)) {
+  if (!validator::isValidChannelName(channelName)) {
     std::string reply =
         Replies::getReply(ERR_NOSUCHCHANNEL, nickname, channelName, "");
     client.write_msg(reply);
@@ -32,7 +26,7 @@ void Join::execute(Client& client, Message& msg, Server& server) {
     server.getChannel(channelName)->getAdmins().push_back(&client);
     server.getChannel(channelName)->add_client(&client);
   } else if (ch != NULL) {
-    if (Parser::modeGuardChecks(ch, msg, client)) return;
+    if (join_gatekeeper::modeGuardChecks(ch, msg, client)) return;
     ch->add_client(&client);
     std::string joinReply = ":" + client.getNickname() + "!" +
                             client.getUsername() + "@" + client.getHostname() +

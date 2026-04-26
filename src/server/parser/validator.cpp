@@ -1,4 +1,6 @@
-bool isValidNickname(std::string& nick, Client& cli) {
+#include "validator.hpp"
+
+bool validator::isValidNickname(std::string& nick, Client& cli) {
   std::string specials = "-\\[]`^{}";
   if (nick.size() > 9 || !isalpha(nick[0])) {
     std::string reply = Replies::getReply(ERR_ERRONEUSNICKNAME, "*", nick, "");
@@ -13,6 +15,17 @@ bool isValidNickname(std::string& nick, Client& cli) {
       cli.write_msg(reply);
       return false;
     }
+  }
+  return true;
+}
+
+bool validator::isValidChannelName(std::string& channName) {
+  if (channName.size() < 2 || channName[0] != '#' || channName.size() > 200)
+    return false;
+  for (size_t i = 1; i < channName.size(); i++) {
+    char c = channName[i];
+    if (c == ' ' || c == '\0' || c == '\r' || c == '\n' || c == ',')
+      return false;
   }
   return true;
 }

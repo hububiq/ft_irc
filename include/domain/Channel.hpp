@@ -38,15 +38,24 @@ class Channel {
   void kick(Client* client, Client* target, const std::string& reason);
   void broadcast(const std::string&);
 
-  std::string& getChannelName();
-  std::vector<Client*>& getAdmins();
-  std::vector<Client*>& getMembers();
-  std::vector<std::string>& getInvited();
-  std::vector<char>& getChanFlags();
+  const std::string& getChannelName() const;
+  const std::vector<Client*>& getAdmins() const;
+  const std::vector<Client*>& getMembers() const;
+  const std::vector<std::string>& getInvited() const;
+  const std::vector<char>& getChanFlags() const;
   unsigned int getLimit() const;
-  std::string getKey() const;
-  std::string getTopic() const;
+  const std::string getKey() const;
+  const std::string getTopic() const;
   unsigned int getMaxMembers() const;
+
+
+  std::string&  getChannelName() ;
+  std::vector<Client*>& getAdmins() ;
+  std::vector<Client*>& getMembers() ;
+  std::vector<std::string>& getInvited() ;
+  std::vector<char>& getChanFlags() ;
+  std::string getKey() ;
+  std::string getTopic() ;
   void setKey(std::string& key);
   void setTopic(std::string topic);
   void setChannelName(std::string& name);

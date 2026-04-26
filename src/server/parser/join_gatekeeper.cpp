@@ -20,10 +20,8 @@ bool isLimitReached(Channel* chan) {
          (chan->getMembers().size() >= chan->getLimit());
 }
 
-
-std::string getJoinValidationError(Channel* chan, const Message& msg,
-                                   const Client& client,
-                                   std::string& outExtraParam) {
+int getJoinValidationError(Channel* chan, const Message& msg,
+                           const Client& client, std::string& outExtraParam) {
   outExtraParam.clear();
 
   if (isInviteOnlyBlocked(chan, client)) {
@@ -38,18 +36,19 @@ std::string getJoinValidationError(Channel* chan, const Message& msg,
     return ERR_CHANNELISFULL;
   }
 
-  return "";  // Success
+  return 0;  // Success
 }
 }  // namespace
 
 bool join_gatekeeper::isJoinDenied(Channel* ch, Message& msg, Client& client) {
   std::string extraParam;
 
-  std::string errorCode = getJoinValidationError(ch, msg, client, extraParam);
+  int errorCode = getJoinValidationError(ch, msg, client, extraParam);
 
-  if (!errorCode.empty()) {
-    std::string reply = Replies::getReply(errorCode, client.getNickname(),
-                                          msg.params[0], extraParam);
+  if (errorCode != 0) {
+    std::string reply = reply_factory::getReply(
+        static_cast<ReplyCode>(errorCode), client.getNickname(), msg.params[0],
+        extraParam);
     client.write_msg(reply);
     return true;
   }

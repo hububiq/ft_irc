@@ -48,7 +48,7 @@ void Channel::addToAdmins(Server& serv, Client& cli, std::string& newAdmin) {
     it++;
   }
   std::string reply =
-      Replies::getReply(ERR_NOSUCHNICK, cli.getNickname(), newAdmin, "");
+      reply_factory::getReply(ERR_NOSUCHNICK, cli.getNickname(), newAdmin, "");
   cli.write_msg(reply);
 }
 
@@ -63,15 +63,24 @@ void Channel::removeFromFlags(char flag) {
   }
 }
 
-std::string& Channel::getChannelName() { return this->_channel_name; }
-std::vector<Client*>& Channel::getAdmins() { return this->_admins; }
-std::vector<Client*>& Channel::getMembers() { return this->_members; }
-std::vector<std::string>& Channel::getInvited() { return this->_invited; }
-std::vector<char>& Channel::getChanFlags() { return this->_chanFlags; }
+const std::string& Channel::getChannelName() const {return this->_channel_name; }
+const std::vector<Client*>& Channel::getAdmins() const { return this->_admins; }
+const std::vector<Client*>& Channel::getMembers() const { return this->_members; }
+const std::vector<std::string>& Channel::getInvited() const { return this->_invited; }
+const std::vector<char>& Channel::getChanFlags() const { return this->_chanFlags; }
 unsigned int Channel::getLimit() const { return this->_limit; }
-std::string Channel::getKey() const { return this->_key; }
-std::string Channel::getTopic() const { return this->_topic; }
+const std::string Channel::getKey() const { return this->_key; }
+const std::string Channel::getTopic() const { return this->_topic; }
 unsigned int Channel::getMaxMembers() const { return this->_limit; }
+
+std::string& Channel::getChannelName() {  return this->_channel_name; }
+std::vector<Client*>& Channel::getAdmins()  { return this->_admins; }
+std::vector<Client*>& Channel::getMembers()  { return this->_members; }
+std::vector<std::string>& Channel::getInvited()  { return this->_invited; }
+std::vector<char>& Channel::getChanFlags()  { return this->_chanFlags; }
+std::string Channel::getKey()  { return this->_key; }
+std::string Channel::getTopic()  { return this->_topic; }
+
 void Channel::setKey(std::string& key) { _key = key; }
 void Channel::setTopic(std::string topic) { this->_topic = topic; }
 void Channel::setChannelName(std::string& name) { this->_channel_name = name; }
@@ -135,7 +144,7 @@ void Channel::handleTurnI(Client& client, std::string& flagStr, int i) {
 
 bool Channel::hasEnoughParams(Client& client, Message& msg) {
   if (msg.params.size() < 3 || msg.params[2].empty()) {
-    std::string reply = Replies::getReply(
+    std::string reply = reply_factory::getReply(
         ERR_NEEDMOREPARAMS, client.getNickname(), msg.command, "");
     client.write_msg(reply);
     return false;
@@ -148,8 +157,8 @@ void Channel::setFlagOn(Server& serv, Client& client, Message msg) {
   for (size_t i = 1; i < flagStr.size(); ++i) {
     if (std::string("itklo").find(flagStr[i]) == std::string::npos) {
       std::string reply =
-          Replies::getReply(ERR_UNKNOWNMODE, client.getNickname(),
-                            std::string(1, flagStr[i]), "");
+          reply_factory::getReply(ERR_UNKNOWNMODE, client.getNickname(),
+                                  std::string(1, flagStr[i]), "");
       client.write_msg(reply);
       continue;
     }
@@ -162,8 +171,8 @@ void Channel::setFlagOn(Server& serv, Client& client, Message msg) {
         if (!hasEnoughParams(client, msg)) continue;
         this->handleTurnK(client, flagStr, i, msg);
       } else {
-        std::string reply = Replies::getReply(ERR_KEYSET, client.getNickname(),
-                                              this->getChannelName(), "");
+        std::string reply = reply_factory::getReply(
+            ERR_KEYSET, client.getNickname(), this->getChannelName(), "");
         client.write_msg(reply);
       }
       if (msg.params.size() > 2) msg.params.erase(msg.params.begin() + 2);
@@ -171,8 +180,8 @@ void Channel::setFlagOn(Server& serv, Client& client, Message msg) {
       if (!hasEnoughParams(client, msg)) continue;
       if (!this->isNicknameInChannel(msg.params[2])) {
         std::string reply =
-            Replies::getReply(ERR_USERNOTINCHANNEL, client.getNickname(),
-                              msg.params[2], this->getChannelName());
+            reply_factory::getReply(ERR_USERNOTINCHANNEL, client.getNickname(),
+                                    msg.params[2], this->getChannelName());
         client.write_msg(reply);
         if (msg.params.size() > 2) msg.params.erase(msg.params.begin() + 2);
         continue;
@@ -256,8 +265,8 @@ void Channel::setFlagOff(Client& client, Message msg) {
   for (size_t i = 1; i < flagStr.size(); ++i) {
     if (std::string("itklo").find(flagStr[i]) == std::string::npos) {
       std::string reply =
-          Replies::getReply(ERR_UNKNOWNMODE, client.getNickname(),
-                            std::string(1, flagStr[i]), "");
+          reply_factory::getReply(ERR_UNKNOWNMODE, client.getNickname(),
+                                  std::string(1, flagStr[i]), "");
       client.write_msg(reply);
       continue;
     }
@@ -272,8 +281,8 @@ void Channel::setFlagOff(Client& client, Message msg) {
       if (!hasEnoughParams(client, msg)) continue;
       if (!this->isNicknameInChannel(msg.params[2])) {
         std::string reply =
-            Replies::getReply(ERR_USERNOTINCHANNEL, client.getNickname(),
-                              msg.params[2], this->getChannelName());
+            reply_factory::getReply(ERR_USERNOTINCHANNEL, client.getNickname(),
+                                    msg.params[2], this->getChannelName());
         client.write_msg(reply);
         if (msg.params.size() > 2) msg.params.erase(msg.params.begin() + 2);
         continue;

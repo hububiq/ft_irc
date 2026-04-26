@@ -5,13 +5,13 @@
 #include "Client.hpp"
 #include "Message.hpp"
 #include "Server.hpp"
+#include "join_gatekeeper.hpp"
 #include "reply_factory.hpp"
 #include "validator.hpp"
-#include "join_gatekeeper.hpp"
 
 class Join : public ACommand {
  public:
-  void execute(Client&, Message&, Server&);
+  void execute(Client&, Message&);
 };
 
 #endif

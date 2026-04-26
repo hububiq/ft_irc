@@ -5,14 +5,14 @@
 #include "Server.hpp"
 #include "reply_factory.hpp"
 
-void Ping::execute(Client& client, Message& msg, Server& server) {
+void Ping::execute(Client& client, Message& msg) {
   if (msg.params.empty()) {
-    std::string reply = Replies::getReply(
+    std::string reply = reply_factory::getReply(
         ERR_NEEDMOREPARAMS, client.getNickname(), msg.command, "");
     client.write_msg(reply);
     return;
   }
-  (void)server;
+
   if (!msg.params.empty()) {
     std::string serverName = "localhost";
     std::string prefix = ":" + serverName + " ";

@@ -1,16 +1,8 @@
 #include "User.hpp"
 
-#include <algorithm>
-
-#include "Client.hpp"
-#include "Message.hpp"
-#include "Server.hpp"
-#include "reply_factory.hpp"
-
-void User::execute(Client& client, Message& msg, Server& server) {
-  (void)server;
+void User::execute(Client& client, Message& msg) {
   if (msg.params.size() < 2) {
-    std::string reply = Replies::getReply(
+    std::string reply = reply_factory::getReply(
         ERR_NEEDMOREPARAMS, client.getNickname(), msg.command, "");
     client.write_msg(reply);
     return;
@@ -22,7 +14,7 @@ void User::execute(Client& client, Message& msg, Server& server) {
       username.find_first_of(std::string(" \r\n\0", 5)) != std::string::npos ||
       realname[0] != ':' ||
       realname.find_first_of(std::string("\0\r\n", 4)) != std::string::npos) {
-    std::string reply = Replies::getReply(
+    std::string reply = reply_factory::getReply(
         ERR_NEEDMOREPARAMS, client.getNickname(), msg.command, "");
     client.write_msg(reply);
     return;
@@ -32,8 +24,8 @@ void User::execute(Client& client, Message& msg, Server& server) {
   client.setState(REGISTERED);
   client.setRegister();
   std::string reply =
-      Replies::getReply(RPL_WELCOME, client.getNickname(), client.getUsername(),
-                        client.getHostname());
+      reply_factory::getReply(RPL_WELCOME, client.getNickname(),
+                              client.getUsername(), client.getHostname());
   client.write_msg(reply);
 }
 

@@ -5,10 +5,9 @@
 #include "Server.hpp"
 #include "reply_factory.hpp"
 
-void Cap::execute(Client& client, Message& msg, Server& server) {
-  (void)server;
+void Cap::execute(Client& client, Message& msg) {
   if (msg.params.empty()) {
-    std::string reply = Replies::getReply(
+    std::string reply = reply_factory::getReply(
         ERR_NEEDMOREPARAMS, client.getNickname(), msg.command, "");
     client.write_msg(reply);
     return;

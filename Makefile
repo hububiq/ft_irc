@@ -14,6 +14,7 @@ SRCS = \
        src/server/epoll_state_manager.cpp \
        src/server/epoll_initializer.cpp \
        src/server/conn_handler.cpp \
+       src/utils/reply_factory.cpp \
        src/server/request_handler.cpp \
        src/server/executor/executor.cpp \
        src/server/executor/command_handler.cpp \
@@ -31,10 +32,10 @@ SRCS = \
        src/server/executor/commands/User.cpp \
        src/server/parser/join_gatekeeper.cpp \
        src/server/parser/message_parser.cpp \
+       src/server/parser/mode_reporter.cpp \
        src/server/parser/validator.cpp \
        src/domain/Channel.cpp \
-       src/domain/Client.cpp \
-       src/utils/reply_factory.cpp
+       src/domain/Client.cpp
 OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
 RM = rm -rf
 

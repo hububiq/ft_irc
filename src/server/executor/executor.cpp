@@ -5,7 +5,7 @@ bool process_connected(Client &client, Message &msg) {
   if (msg.command == CMD_CAP || msg.command == CMD_PASS) {
     return true;
   }
-  std::string reply = Replies::getReply(ERR_NOTREGISTERED, "*", "", "");
+  std::string reply = reply_factory::getReply(ERR_NOTREGISTERED, "*", "", "");
   client.write_msg(reply);
   return false;
 }
@@ -15,7 +15,7 @@ bool process_handshake(Client &client, Message &msg) {
       msg.command == CMD_CAP) {
     return true;
   }
-  std::string reply = Replies::getReply(ERR_NOTREGISTERED, "*", "", "");
+  std::string reply = reply_factory::getReply(ERR_NOTREGISTERED, "*", "", "");
   client.write_msg(reply);
   return false;
 }
@@ -24,7 +24,8 @@ bool process_registered(Client &client, Message &msg) {
   if (msg.command == CMD_PASS || msg.command == CMD_USER ||
       msg.command == CMD_NICK) {
     std::string nick = client.getNickname();
-    std::string reply = Replies::getReply(ERR_ALREADYREGISTERED, nick, "", "");
+    std::string reply =
+        reply_factory::getReply(ERR_ALREADYREGISTERED, nick, "", "");
     client.write_msg(reply);
     return false;
   }

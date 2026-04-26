@@ -1,9 +1,15 @@
 #include "validator.hpp"
 
+#include <cctype>
+
+#include "Client.hpp"
+#include "reply_factory.hpp"
+
 bool validator::isValidNickname(std::string& nick, Client& cli) {
   std::string specials = "-\\[]`^{}";
   if (nick.size() > 9 || !isalpha(nick[0])) {
-    std::string reply = Replies::getReply(ERR_ERRONEUSNICKNAME, "*", nick, "");
+    std::string reply =
+        reply_factory::getReply(ERR_ERRONEUSNICKNAME, "*", nick, "");
     cli.write_msg(reply);
     return false;
   }
@@ -11,7 +17,7 @@ bool validator::isValidNickname(std::string& nick, Client& cli) {
     if (!isalpha(nick[i]) && !isdigit(nick[i]) &&
         specials.find(nick[i]) == std::string::npos) {
       std::string reply =
-          Replies::getReply(ERR_ERRONEUSNICKNAME, "*", nick, "");
+          reply_factory::getReply(ERR_ERRONEUSNICKNAME, "*", nick, "");
       cli.write_msg(reply);
       return false;
     }

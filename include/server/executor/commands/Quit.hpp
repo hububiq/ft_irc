@@ -2,11 +2,17 @@
 #ifndef EXECUTOR_COMMANDS_QUIT_HPP
 #define EXECUTOR_COMMANDS_QUIT_HPP
 
+#include <algorithm>
+
 #include "ACommand.hpp"
+#include "Client.hpp"
+#include "Message.hpp"
+#include "Server.hpp"
+#include "reply_factory.hpp"
 
 class Quit : public ACommand {
  public:
-  void execute(Client&, Message&, Server&);
+  void execute(Client&, Message&);
 };
 
 #endif

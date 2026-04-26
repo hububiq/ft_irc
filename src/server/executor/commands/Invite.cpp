@@ -1,58 +1,60 @@
 #include "Invite.hpp"
 
-void Invite::execute(Client& client, Message& msg, Server& server) {
+extern Server* g_server;
+
+void Invite::execute(Client& client, Message& msg) {
   std::string nickname = client.getNickname();
   std::string command = msg.command;
   if (msg.params.size() < 2) {
     std::string reply =
-        Replies::getReply(ERR_NEEDMOREPARAMS, nickname, command, "");
+        reply_factory::getReply(ERR_NEEDMOREPARAMS, nickname, command, "");
     client.write_msg(reply);
     return;
   }
   if (!g_server->checkIfClientExistsByNickname(msg.params[0])) {
     std::string reply =
-        Replies::getReply(ERR_NOSUCHNICK, nickname, msg.params[1], "");
+        reply_factory::getReply(ERR_NOSUCHNICK, nickname, msg.params[1], "");
     client.write_msg(reply);
     return;
   }
-  Channel* ch = server.getChannel(msg.params[1]);
+  Channel* ch = g_server->getChannel(msg.params[1]);
   if (!ch) {
-    std::string reply = Replies::getReply(ERR_NOSUCHCHANNEL, nickname,
-                                          msg.params[0], msg.params[1]);
+    std::string reply = reply_factory::getReply(ERR_NOSUCHCHANNEL, nickname,
+                                                msg.params[0], msg.params[1]);
     client.write_msg(reply);
     return;
   }
-  if (ch && !Parser::isUserInChannel(server, client, ch->getChannelName())) {
+  if (ch && !g_server->isUserInChannel(client, ch->getChannelName())) {
     std::string reply =
-        Replies::getReply(ERR_NOTONCHANNEL, nickname, msg.params[1], "");
+        reply_factory::getReply(ERR_NOTONCHANNEL, nickname, msg.params[1], "");
     client.write_msg(reply);
     return;
   }
-  if (ch && Parser::isInviteeInChannel(server, msg, ch->getChannelName())) {
-    std::string reply = Replies::getReply(ERR_USERONCHANNEL, nickname,
-                                          msg.params[0], msg.params[1]);
+  if (ch && g_server->isInviteeInChannel(msg, ch->getChannelName())) {
+    std::string reply = reply_factory::getReply(ERR_USERONCHANNEL, nickname,
+                                                msg.params[0], msg.params[1]);
     client.write_msg(reply);
     return;
   }
   if (!validator::isValidChannelName(msg.params[1])) {
     std::string reply =
-        Replies::getReply(ERR_NOSUCHCHANNEL, nickname, msg.params[0], "");
+        reply_factory::getReply(ERR_NOSUCHCHANNEL, nickname, msg.params[0], "");
     client.write_msg(reply);
     return;
   }
   if (ch && ch->isInviteOnly()) {
-    if (!Parser::isClientAdmin(server, client, msg.params[1])) {
-      std::string reply =
-          Replies::getReply(ERR_CHANOPRIVSNEEDED, nickname, msg.params[0], "");
+    if (!g_server->isClientAdmin(client, msg.params[1])) {
+      std::string reply = reply_factory::getReply(ERR_CHANOPRIVSNEEDED,
+                                                  nickname, msg.params[0], "");
       client.write_msg(reply);
       return;
     }
   }
   ch->addToInvited(msg.params[0]);
-  std::string reply =
-      Replies::getReply(RPL_INVITING, nickname, msg.params[0], msg.params[1]);
+  std::string reply = reply_factory::getReply(RPL_INVITING, nickname,
+                                              msg.params[0], msg.params[1]);
   client.write_msg(reply);
-  std::map<int, Client>& cl = server.getClients();
+  std::map<int, Client>& cl = g_server->getClients();
   std::map<int, Client>::iterator it;
   std::string prefix = ":" + client.getNickname() + "!" + client.getUsername() +
                        "@" + client.getHostname();

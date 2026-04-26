@@ -1,14 +1,9 @@
 #include "Quit.hpp"
 
-#include <algorithm>
+extern Server *g_server;
 
-#include "Client.hpp"
-#include "Message.hpp"
-#include "Server.hpp"
-#include "reply_factory.hpp"
-
-void Quit::execute(Client &client, Message &msg, Server &server) {
-  std::map<std::string, Channel> &channels = server.getChannels();
+void Quit::execute(Client &client, Message &msg) {
+  std::map<std::string, Channel> &channels = g_server->getChannels();
   std::map<std::string, Channel>::iterator it_channel_b = channels.begin();
   std::map<std::string, Channel>::iterator it_channel_e = channels.end();
   while (it_channel_b != it_channel_e) {

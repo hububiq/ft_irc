@@ -59,7 +59,7 @@ bool Server::checkIfClientExistsByNickname(std::string& nickName) {
 bool Server::isClientAdmin(Client& client, const std::string& chName) {
   Channel* ch = this->getChannel(chName);
   if (!ch) return false;
-  std::vector<Client*>& admins = ch->getAdmins();
+  const std::vector<Client*>& admins = ch->getAdmins();
   std::string nick = client.getNickname();
   for (size_t i = 0; i < admins.size(); i++) {
     if (admins[i]->getNickname() == nick) return true;
@@ -72,7 +72,7 @@ bool Server::isInviteeInChannel(const Message& msg,
   Channel* ch = this->getChannel(channelName);
   if (!ch) return false;
   if (msg.params.empty()) return false;
-  std::vector<Client*>& memb = ch->getMembers();
+  const std::vector<Client*>& memb = ch->getMembers();
   for (size_t i = 0; i < memb.size(); i++) {
     if (memb[i]->getNickname() == msg.params[0]) return true;
   }
@@ -82,7 +82,7 @@ bool Server::isInviteeInChannel(const Message& msg,
 bool Server::isUserInChannel(Client& client, const std::string& channelName) {
   Channel* ch = this->getChannel(channelName);
   if (!ch) return false;
-  std::vector<Client*>& memb = ch->getMembers();
+  const std::vector<Client*>& memb = ch->getMembers();
   for (size_t i = 0; i < memb.size(); i++) {
     if (memb[i]->getNickname() == client.getNickname()) return true;
   }

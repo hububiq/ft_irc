@@ -41,7 +41,7 @@ enum ReplyCode {
   ERR_CHANOPRIVSNEEDED = 482
 };
 
-namespace Replies {
+namespace reply_factory {
 std::string getReply(ReplyCode code, const std::string &userNick,
                      const std::string &arg1, const std::string &arg2);
 }

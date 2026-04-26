@@ -10,7 +10,7 @@ class Client;
 
 class Kick : public ACommand {
  public:
-  void execute(Client &, Message &, Server &);
+  void execute(Client &, Message &);
   bool clientCanKICK(Channel *, Client &);
   Client *clientToBeKICKed(Channel *, const std::string &);
 };

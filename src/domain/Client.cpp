@@ -17,11 +17,11 @@ std::string &Client::getResponseBuffer() { return this->_response_buffer; }
 
 HandlerStatus Client::getStatus() const { return this->_status; }
 
-const std::string &Client::getNickname() { return this->_nickname; }
+const std::string &Client::getNickname() const { return this->_nickname; }
 
-const std::string &Client::getUsername() { return this->_username; }
+const std::string &Client::getUsername() const { return this->_username; }
 
-const std::string &Client::getRealName() { return this->_realname; }
+const std::string &Client::getRealName() const { return this->_realname; }
 
 bool Client::getRegisterInfo() const { return this->_isRegistered; }
 
@@ -53,9 +53,7 @@ void Client::reset() {
   // don't clear right now
 }
 
-void Client::write_msg(
-    std::string &message)  // queue message and let state machine handle send
-{
+void Client::write_msg(std::string &message) {
   this->_response_buffer += message;
   this->_status = READY_TO_RESPOND;
 }

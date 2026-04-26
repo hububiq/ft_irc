@@ -5,7 +5,7 @@
 
 class Ping : public ACommand {
  public:
-  void execute(Client&, Message&, Server&);
+  void execute(Client&, Message&);
 };
 
 #endif

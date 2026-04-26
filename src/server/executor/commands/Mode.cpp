@@ -1,57 +1,54 @@
 #include "Mode.hpp"
 
-#include "Client.hpp"
-#include "Message.hpp"
-#include "Server.hpp"
-#include "reply_factory.hpp"
+extern Server* g_server;
 
-void Mode::execute(Client& client, Message& msg, Server& server) {
+void Mode::execute(Client& client, Message& msg) {
   std::string nickname = client.getNickname();
   std::string command = msg.command;
   if (msg.params.empty()) {
     std::string reply =
-        Replies::getReply(ERR_NEEDMOREPARAMS, nickname, command, "");
+        reply_factory::getReply(ERR_NEEDMOREPARAMS, nickname, command, "");
     client.write_msg(reply);
     return;
   }
   if (msg.params.size() == 1) {
-    if (server.getChannel(msg.params[0]) == NULL) {
-      std::string reply =
-          Replies::getReply(ERR_NOSUCHCHANNEL, nickname, msg.params[0], "");
+    if (g_server->getChannel(msg.params[0]) == NULL) {
+      std::string reply = reply_factory::getReply(ERR_NOSUCHCHANNEL, nickname,
+                                                  msg.params[0], "");
       client.write_msg(reply);
       return;
     }
-    if (Parser::isClientAdmin(server, client, msg.params[0]))
-      Parser::loopOnFlags(msg.params[0], server, client);
+    if (g_server->isClientAdmin(client, msg.params[0]))
+      mode_reporter::reportChannelModes(client, msg.params[0]);
     else {
-      std::string reply =
-          Replies::getReply(ERR_CHANOPRIVSNEEDED, nickname, msg.params[0], "");
+      std::string reply = reply_factory::getReply(ERR_CHANOPRIVSNEEDED,
+                                                  nickname, msg.params[0], "");
       client.write_msg(reply);
       return;
     }
   }
   if (msg.params.size() >= 2) {
-    Channel* chanForMode = server.getChannel(msg.params[0]);
+    Channel* chanForMode = g_server->getChannel(msg.params[0]);
     if (!chanForMode) {
-      std::string reply =
-          Replies::getReply(ERR_NOSUCHCHANNEL, nickname, msg.params[0], "");
+      std::string reply = reply_factory::getReply(ERR_NOSUCHCHANNEL, nickname,
+                                                  msg.params[0], "");
       client.write_msg(reply);
       return;
     }
     std::string& chName = chanForMode->getChannelName();
-    if (Parser::isClientAdmin(server, client, chName)) {
+    if (g_server->isClientAdmin(client, chName)) {
       if (msg.params[1][0] == '+')
-        chanForMode->setFlagOn(server, client, msg);
+        chanForMode->setFlagOn(*g_server, client, msg);
       else if (msg.params[1][0] == '-')
         chanForMode->setFlagOff(client, msg);
       else {
-        std::string reply = Replies::getReply(
+        std::string reply = reply_factory::getReply(
             ERR_UNKNOWNMODE, nickname, std::string(1, msg.params[1][0]), "");
         client.write_msg(reply);
       }
     } else {
       std::string reply =
-          Replies::getReply(ERR_CHANOPRIVSNEEDED, nickname, chName, "");
+          reply_factory::getReply(ERR_CHANOPRIVSNEEDED, nickname, chName, "");
       client.write_msg(reply);
     }
   }

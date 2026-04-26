@@ -27,9 +27,9 @@ class Client {
   bool getRegisterInfo() const;
   bool getAuthInfo() const;
   ClientState getState() const;
-  const std::string &getNickname();
-  const std::string &getUsername();
-  const std::string &getRealName();
+  const std::string &getNickname() const;
+  const std::string &getUsername() const;
+  const std::string &getRealName() const;
   std::string &getRequestBuffer();
   std::string &getResponseBuffer();
   HandlerStatus getStatus() const;

@@ -1,26 +1,32 @@
 #include "Pass.hpp"
 
+#include <iostream>
+#include <string>
+
 #include "Client.hpp"
 #include "Message.hpp"
 #include "Server.hpp"
 #include "reply_factory.hpp"
 
-void Pass::execute(Client& client, Message& msg, Server& server) {
+extern Server* g_server;
+
+void Pass::execute(Client& client, Message& msg) {
   if (msg.params.empty()) {
-    std::string reply = Replies::getReply(
+    std::string reply = reply_factory::getReply(
         ERR_NEEDMOREPARAMS, client.getNickname(), msg.command, "");
     client.write_msg(reply);
     return;
   }
-  if ((msg.params[0] != server.getPassword())) {
-    std::string reply = Replies::getReply(ERR_PASSWDMISMATCH, "*", "", "");
+  if ((msg.params[0] != g_server->getPassword())) {
+    std::string reply =
+        reply_factory::getReply(ERR_PASSWDMISMATCH, "*", "", "");
     client.write_msg(reply);
     return;
   }
   if (client.getAuthInfo()) {
     std::cout << client.getAuthInfo() << std::endl;
-    std::string reply =
-        Replies::getReply(ERR_ALREADYREGISTERED, client.getNickname(), "", "");
+    std::string reply = reply_factory::getReply(ERR_ALREADYREGISTERED,
+                                                client.getNickname(), "", "");
     client.write_msg(reply);
     return;
   }

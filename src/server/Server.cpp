@@ -1,8 +1,4 @@
 #include "Server.hpp"
-#include "CommandHandler.hpp"
-#include "Replies.hpp" 
-
-extern volatile sig_atomic_t g_running;
 
 Server::Server(int argc, char **argv) : _socket_fd(-1)
 {

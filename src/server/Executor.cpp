@@ -1,3 +1,6 @@
+#include "Server.hpp"
+#include "CommandHandler.hpp"
+#include "Replies.hpp" 
 
 void Server::executeMessage(Client& client, Message& msg, Server& server) {
   switch (client.getState()) {

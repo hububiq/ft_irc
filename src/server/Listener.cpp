@@ -1,3 +1,5 @@
+#include "Server.hpp"
+
 int Server::create_socket()
 {
 	struct protoent *proto = getprotobyname("tcp");

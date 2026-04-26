@@ -12,10 +12,11 @@ SRCS = src/main.cpp \
        src/Parser.cpp \
        src/Replies.cpp \
        src/server/Server.cpp \
-       src/server/ServerCommandExecution.cpp \
-       src/server/ServerSocket.cpp \
-       src/server/ServerEpoll.cpp \
-       src/server/ServerRequest.cpp \
+			 src/server/Listener.cpp \
+			 src/server/Multiplexer.cpp \
+			 src/server/RequestHandler.cpp \
+			 src/server/Executor.cpp \
+			 src/server/ConnHandler.cpp \
        src/commands/CommandHandler.cpp \
        src/commands/Cap.cpp \
        src/commands/Invite.cpp \

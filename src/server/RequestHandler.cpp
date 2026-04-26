@@ -1,3 +1,5 @@
+#include "Server.hpp"
+
 bool Server::process_message(Client &client)
 {
 	size_t end_pos = client.getRequestBuffer().find(READ_END);

@@ -1,23 +1,6 @@
 #include "Server.hpp"
 
-Server::Server(int argc, char **argv) : _socket_fd(-1)
-{
-	parseArg(argc, argv); 
-}
-
-uint16_t Server::parse_string_port(const char *port_str)
-{
-	char *endptr;
-	long  port_num = std::strtol(port_str, &endptr, NUM_BASE);
-
-	if (*endptr != '\0' || port_num <= 1024 || port_num > 65535)
-	{
-		throw std::invalid_argument("Invalid port number");
-	}
-	return htons((uint16_t) port_num);
-}
-
-void Server::parseArg(int argc, char** argv) {
+Server::Server(int argc, char **argv) : _socket_fd(-1),  _epoll_fd(-1) {
   if (argc != 3)
     throw std::invalid_argument("Please use format: ./irc <port> <password>");
   this->_port = std::atoi(argv[1]);
@@ -28,67 +11,50 @@ void Server::parseArg(int argc, char** argv) {
     throw std::out_of_range("Password must contain at least 1 letter");
 }
 
+uint16_t Server::parse_string_port(const char *port_str) {
+  char *endptr;
+  long port_num = std::strtol(port_str, &endptr, NUM_BASE);
 
-void Server::run()
-{
-	init_socket(*this);
-	int epoll_fd = init_epoll(*this);
-	loop_epoll(epoll_fd, *this);
-	close(epoll_fd);
-}
-
-Server::~Server()
-{
-	if (_socket_fd != -1)
-	{
-		close(_socket_fd);
-	}
-	for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
-	{
-		close(it->first);
-	}
-	_clients.clear();
+  if (*endptr != '\0' || port_num <= 1024 || port_num > 65535) {
+    throw std::invalid_argument("Invalid port number");
+  }
+  return htons((uint16_t)port_num);
 }
 
-uint32_t Server::getHostIp() const
-{
-	return this->_host_ip;
-}
-uint16_t Server::getPortNum() const
-{
-	return this->_port_num;
-}
-int Server::getSocketFd() const
-{
-	return this->_socket_fd;
-}
-void Server::setSocketFd(int fd)
-{
-	this->_socket_fd = fd;
-}
-std::string Server::getPassword()
-{
-	return this->_password;
-}
-std::map<int, Client> &Server::getClients()
-{
-	return this->_clients;
+void Server::run() {
+  this->_socket_fd = init_socket();
+  this->_epoll_fd = init_epoll();
+  loop_epoll();
 }
 
-Channel* Server::getChannel(const std::string& chann) {
+Server::~Server() {
+  if (this->_socket_fd != -1) {
+    close(this->_socket_fd);
+  }
+  if (this->_epoll_fd != -1) {
+    close(this->_epoll_fd);
+  }
+  for (std::map<int, Client>::iterator it = this->_clients.begin();
+       it != this->_clients.end(); ++it) {
+    close(it->first);
+  }
+  this->_clients.clear();
+}
+
+std::string Server::getPassword() { return this->_password; }
+std::map<int, Client> &Server::getClients() { return this->_clients; }
+
+Channel *Server::getChannel(const std::string &chann) {
   std::map<std::string, Channel>::iterator it = this->_channels.find(chann);
-  if (it != this->_channels.end())
-    return &it->second;
+  if (it != this->_channels.end()) return &it->second;
   return NULL;
 }
 
-std::map<std::string, Channel>& Server::getChannels()
-{
-	return this->_channels;
+std::map<std::string, Channel> &Server::getChannels() {
+  return this->_channels;
 }
 
-void Server::addChannel(Channel &ch, std::string &chName)
-{
-	ch.setChannelName(chName);
-	this->_channels[chName] = ch;
+void Server::addChannel(Channel &ch, std::string &chName) {
+  ch.setChannelName(chName);
+  this->_channels[chName] = ch;
 }

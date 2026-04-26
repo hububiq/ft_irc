@@ -7,9 +7,10 @@ class Server;
 struct Message;
 
 class CommandHandler {
-    private:
-        static std::map<std::string, ACommand*> _commandsMap;
-    public:
-        static void initCommands();
-        static void handleCommands(Client& client, Message& msg, Server& server);
+ private:
+  static std::map<std::string, ACommand*> _commandsMap;
+
+ public:
+  static void initCommands();
+  static void handleCommands(Client& client, Message& msg, Server& server);
 };

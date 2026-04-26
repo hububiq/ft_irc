@@ -11,7 +11,8 @@ bool process_connected(Client &client, Message &msg) {
 }
 
 bool process_handshake(Client &client, Message &msg) {
-  if (msg.command == CMD_NICK || msg.command == CMD_USER || msg.command == CMD_CAP) {
+  if (msg.command == CMD_NICK || msg.command == CMD_USER ||
+      msg.command == CMD_CAP) {
     return true;
   }
   std::string reply = Replies::getReply(ERR_NOTREGISTERED, "*", "", "");
@@ -20,7 +21,8 @@ bool process_handshake(Client &client, Message &msg) {
 }
 
 bool process_registered(Client &client, Message &msg) {
-  if (msg.command == CMD_PASS || msg.command == CMD_USER || msg.command == CMD_NICK) {
+  if (msg.command == CMD_PASS || msg.command == CMD_USER ||
+      msg.command == CMD_NICK) {
     std::string nick = client.getNickname();
     std::string reply = Replies::getReply(ERR_ALREADYREGISTERED, nick, "", "");
     client.write_msg(reply);
@@ -28,7 +30,7 @@ bool process_registered(Client &client, Message &msg) {
   }
   return true;
 }
-}
+}  // namespace
 
 bool validateClientState(Client &client, Message &msg) {
   ClientState state = client.getState();

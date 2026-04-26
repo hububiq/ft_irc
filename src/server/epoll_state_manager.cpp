@@ -1,6 +1,6 @@
 void Server::schedule_send() {
   for (std::map<int, Client>::iterator it = this->_clients.begin();
-        it != this->_clients.end(); ++it) {
+       it != this->_clients.end(); ++it) {
     if (it->second.getStatus() == READY_TO_RESPOND) {
       schedule_epollout(it->second);
     }

@@ -20,8 +20,8 @@
 
 #include "Channel.hpp"
 #include "Client.hpp"
-#include "HandlerStatus.hpp"
 #include "EpollConfig.hpp"
+#include "HandlerStatus.hpp"
 #include "Message.hpp"
 #include "Parser.hpp"
 
@@ -37,27 +37,23 @@ class Server {
   std::map<std::string, Channel> _channels;
 
   uint16_t parse_string_port(const char *port_str);
-  /* Listener.cpp */
-  int create_socket();
-  void bind_socket(int socket_fd);
-  void start_socket(int socket_fd);
+  namespace listener {
   int init_socket();
-  /* Multiplexer.cpp */
+  }
+  namespace multiplexer {
   int init_epoll();
-  void register_socket(int epoll_fd);
   void loop_epoll();
-  /* StateManager */
-  void schedule_epollout(Client &client);
+  }  // namespace multiplexer
+  namespace epoll_state_manager {
   void schedule_epollin(Client &client);
   void schedule_send();
-  /* RequestHandler */
+  }  // namespace epoll_state_manager
+  namespace request_handler {
   HandleResult process_request(uint32_t events, Client &client);
-  HandleResult respond(Client &client);
-  bool process_message(Client &client);
-  HandleResult read_chunk(Client &client);
-  /* ConnHandler */
-  void register_client(int client_fd, std::string &hostname);
+  }
+  namespace conn_handler {
   void process_connect(int socket_fd);
+  }
 
  public:
   std::string getPassword();
@@ -69,7 +65,6 @@ class Server {
   Channel *getChannel(const std::string &chann);
   std::map<std::string, Channel> &getChannels();
   void addChannel(Channel &ch, std::string &chName);
-  
 };
 
 #endif

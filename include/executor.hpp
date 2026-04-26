@@ -1,11 +1,11 @@
 #ifndef EXECUTOR_HPP
 #define EXECUTOR_HPP
 
+#include "Client.hpp"
 #include "ClientState.hpp"
 #include "CommandHandler.hpp"
-#include "Replies.hpp"
-#include "Client.hpp"
 #include "Message.hpp"
+#include "Replies.hpp"
 #include "Server.hpp"
 
 const std::string CMD_CAP = "CAP";

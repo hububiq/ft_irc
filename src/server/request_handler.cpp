@@ -1,6 +1,7 @@
 #include "Server.hpp"
 
-bool Server::process_message(Client &client) {
+namespace {
+bool process_message(Client &client) {
   size_t end_pos = client.getRequestBuffer().find(READ_END);
   if (end_pos != std::string::npos) {
     std::string messageLine = client.getRequestBuffer().substr(0, end_pos);
@@ -8,7 +9,7 @@ bool Server::process_message(Client &client) {
     Message msg;
     if (!messageLine.empty()) {
       Parser::parseToStruct(messageLine, msg);
-      Executor::executeMessage(client, msg, *this);
+      executor::executeMessage(client, msg, *this);
     }
     client.setStatus(READY_TO_RESPOND);
     return true;
@@ -16,7 +17,7 @@ bool Server::process_message(Client &client) {
   return false;
 }
 
-HandleResult Server::read_chunk(Client &client) {
+HandleResult read_chunk(Client &client) {
   char recv_buffer[RECV_SIZE];
   ssize_t bytes = recv(client.getFd(), recv_buffer, sizeof(recv_buffer) - 1, 0);
 
@@ -25,7 +26,24 @@ HandleResult Server::read_chunk(Client &client) {
   return KEEP_CONNECTION;
 }
 
-HandleResult Server::process_request(uint32_t events, Client &client) {
+HandleResult respond(Client &client) {
+  if (client.getResponseBuffer().empty()) {
+    return KEEP_CONNECTION;
+  }
+
+  const std::string &buf = client.getResponseBuffer();
+  ssize_t sent = send(client.getFd(), buf.c_str(), buf.size(), 0);
+
+  if (sent < 0) {
+    return DROP_CONNECTION;
+  }
+
+  client.getResponseBuffer().erase(0, sent);
+  return KEEP_CONNECTION;
+}
+}  // namespace
+
+HandleResult request_handler::process_request(uint32_t events, Client &client) {
   if (events & EPOLLIN && (!(events & EPOLLOUT))) {
     if (read_chunk(client) == DROP_CONNECTION) {
       return DROP_CONNECTION;
@@ -36,7 +54,7 @@ HandleResult Server::process_request(uint32_t events, Client &client) {
     switch (client.getStatus()) {
       case READING: {
         if (!process_message(client)) {
-          if (events & EPOLLOUT) schedule_epollin(client);
+          if (events & EPOLLOUT) state_manager::schedule_epollin(client);
           return KEEP_CONNECTION;
         }
       }
@@ -55,20 +73,4 @@ HandleResult Server::process_request(uint32_t events, Client &client) {
       }
     }
   }
-}
-
-HandleResult Server::respond(Client &client) {
-  if (client.getResponseBuffer().empty()) {
-    return KEEP_CONNECTION;
-  }
-
-  const std::string &buf = client.getResponseBuffer();
-  ssize_t sent = send(client.getFd(), buf.c_str(), buf.size(), 0);
-
-  if (sent < 0) {
-    return DROP_CONNECTION;
-  }
-
-  client.getResponseBuffer().erase(0, sent);
-  return KEEP_CONNECTION;
 }

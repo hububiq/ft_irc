@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-Server::Server(int argc, char **argv) : _socket_fd(-1),  _epoll_fd(-1) {
+Server::Server(int argc, char **argv) : _socket_fd(-1), _epoll_fd(-1) {
   if (argc != 3)
     throw std::invalid_argument("Please use format: ./irc <port> <password>");
   this->_port = std::atoi(argv[1]);
@@ -22,9 +22,9 @@ uint16_t Server::parse_string_port(const char *port_str) {
 }
 
 void Server::run() {
-  this->_socket_fd = init_socket();
-  this->_epoll_fd = init_epoll();
-  loop_epoll();
+  this->_socket_fd = listener::init_socket();
+  this->_epoll_fd = multiplexer::init_epoll();
+  multiplexer::loop_epoll();
 }
 
 Server::~Server() {

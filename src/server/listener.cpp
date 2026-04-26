@@ -1,6 +1,7 @@
 #include "Server.hpp"
 
-int Server::create_socket() {
+namespace {
+int create_socket() {
   struct protoent *proto = getprotobyname("tcp");
   int protocol_num = proto ? proto->p_proto : 0;
 
@@ -25,7 +26,7 @@ int Server::create_socket() {
   return socket_fd;
 }
 
-void Server::bind_socket(int socket_fd) {
+void bind_socket(int socket_fd) {
   struct sockaddr_in addr;
 
   addr.sin_family = AF_INET;
@@ -43,13 +44,14 @@ void Server::bind_socket(int socket_fd) {
   }
 }
 
-void Server::start_socket(int socket_fd) {
+void start_socket(int socket_fd) {
   if (listen(socket_fd, SOMAXCONN) == -1) {
     throw std::runtime_error("Failed to listen on socket.");
   }
 }
+}  // namespace
 
-int Server::init_socket() {
+int listener::init_socket() {
   int socket_fd = create_socket();
   bind_socket(socket_fd);
   start_socket(socket_fd);

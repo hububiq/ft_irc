@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>
 
+#include "../Globals.hpp"
 #include "Cap.hpp"
 #include "Client.hpp"
 #include "Invite.hpp"
@@ -19,7 +20,6 @@
 #include "Quit.hpp"
 #include "Replies.hpp"
 #include "Server.hpp"
-#include "../Globals.hpp"
 #include "Topic.hpp"
 #include "User.hpp"
 

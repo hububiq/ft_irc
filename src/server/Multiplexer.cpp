@@ -24,11 +24,11 @@ void Server::register_socket(int epoll_fd) {
 void Server::loop_epoll() {
   struct epoll_event events[LIMIT];
   while (g_running) {
-    int num_ready = epoll_wait(events, LIMIT, TIMEOUT);
+    int num_ready = epoll_wait(this->_epoll_fd, events, LIMIT, TIMEOUT);
     for (int i = 0; i < num_ready; i++) {
       int event_fd = events[i].data.fd;
       if (event_fd == this->_socket_fd) {
-        process_connect(event_fd, this->_clients);
+        process_connect(event_fd);
       } else {
         std::map<int, Client>::iterator it = this->_clients.find(event_fd);
         if (it != this->_clients.end()) {

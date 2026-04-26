@@ -8,7 +8,7 @@ bool Server::process_message(Client &client) {
     Message msg;
     if (!messageLine.empty()) {
       Parser::parseToStruct(messageLine, msg);
-      this->executeMessage(client, msg, *this);
+      Executor::executeMessage(client, msg, *this);
     }
     client.setStatus(READY_TO_RESPOND);
     return true;
@@ -25,8 +25,7 @@ HandleResult Server::read_chunk(Client &client) {
   return KEEP_CONNECTION;
 }
 
-HandleResult Server::process_request(int epoll_fd, uint32_t events,
-                                     Client &client) {
+HandleResult Server::process_request(uint32_t events, Client &client) {
   if (events & EPOLLIN && (!(events & EPOLLOUT))) {
     if (read_chunk(client) == DROP_CONNECTION) {
       return DROP_CONNECTION;
@@ -37,7 +36,7 @@ HandleResult Server::process_request(int epoll_fd, uint32_t events,
     switch (client.getStatus()) {
       case READING: {
         if (!process_message(client)) {
-          if (events & EPOLLOUT) schedule_epollin(epoll_fd, client);
+          if (events & EPOLLOUT) schedule_epollin(client);
           return KEEP_CONNECTION;
         }
       }

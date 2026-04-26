@@ -12,5 +12,5 @@ class CommandHandler {
 
  public:
   static void initCommands();
-  static void handleCommands(Client& client, Message& msg, Server& server);
+  static void handleCommands(Client& client, Message& msg);
 };

@@ -46,22 +46,18 @@ class Server {
   int init_epoll();
   void register_socket(int epoll_fd);
   void loop_epoll();
-  /* Executor.cpp */
-  void executeMessage(Client &client, Message &msg);
   /* StateManager */
   void schedule_epollout(Client &client);
   void schedule_epollin(Client &client);
   void schedule_send();
   /* RequestHandler */
-  HandleResult process_request(int epoll_fd, uint32_t events, Client &client);
+  HandleResult process_request(uint32_t events, Client &client);
   HandleResult respond(Client &client);
   bool process_message(Client &client);
   HandleResult read_chunk(Client &client);
   /* ConnHandler */
-  void register_client(int client_fd, std::string &hostname,
-                       std::map<int, Client> &client);
-  void process_connect(int epoll_fd, int socket_fd,
-                       std::map<int, Client> &clients);
+  void register_client(int client_fd, std::string &hostname);
+  void process_connect(int socket_fd);
 
  public:
   std::string getPassword();

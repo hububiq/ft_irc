@@ -19,6 +19,7 @@
 #include "Quit.hpp"
 #include "Replies.hpp"
 #include "Server.hpp"
+#include "../Globals.hpp"
 #include "Topic.hpp"
 #include "User.hpp"
 

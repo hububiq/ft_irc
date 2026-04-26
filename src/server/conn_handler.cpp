@@ -1,14 +1,19 @@
-#include "Server.hpp"
+#include "conn_handler.hpp"
 
-void Server::register_client(int client_fd, std::string &hostname) {
+extern Server *g_server;
+
+namespace {
+void register_client(int client_fd, std::string &hostname) {
   Client c(client_fd);
   c.setHostname(hostname);
   c.setState(CONNECTED);
-  this->_clients.insert(std::make_pair(client_fd, c));
+  g_server->getClients().insert(std::make_pair(client_fd, c));
   std::cout << "Client connected" << std::endl;
+}  
 }
 
-void Server::process_connect(int epoll_fd, int socket_fd) {
+
+void conn_handler::process_connect(int socket_fd) {
   struct sockaddr_in addr;
   socklen_t len = sizeof(addr);
 
@@ -22,7 +27,7 @@ void Server::process_connect(int epoll_fd, int socket_fd) {
     struct epoll_event event;
     event.events = EPOLLIN;
     event.data.fd = client_fd;
-    epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &event);
+    epoll_ctl(g_server->getEpollFd(), EPOLL_CTL_ADD, client_fd, &event);
     register_client(client_fd, hostname);
   }
 }

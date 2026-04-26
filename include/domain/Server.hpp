@@ -36,42 +36,22 @@ class Server {
   std::map<int, Client> _clients;
   std::map<std::string, Channel> _channels;
 
-  uint16_t parse_string_port(const char *port_str);
-  namespace listener {
-  int init_socket();
-  }
-  namespace multiplexer {
-  int init_epoll();
-  void loop_epoll();
-  }  // namespace multiplexer
-  namespace epoll_state_manager {
-  void schedule_epollin(Client &client);
-  void schedule_send();
-  }  // namespace epoll_state_manager
-  namespace request_handler {
-  HandleResult process_request(uint32_t events, Client &client);
-  }
-  namespace conn_handler {
-  void process_connect(int socket_fd);
-  }
-
  public:
-  std::string getPassword();
-  Server(int argc, char **argv);
+  Server(int port, uint16_t port_num, uint32_t host_ip,
+         const std::string &password, int socket_fd, int epoll_fd);
   ~Server();
-  void run();
 
   std::map<int, Client> &getClients();
-  Channel *getChannel(const std::string &chann);
-  std::map<std::string, Channel> &getChannels();
-  void addChannel(Channel &ch, std::string &chName);
   int getSocketFd() const;
   int getEpollFd() const;
   int getPort() const;
   uint32_t getHostIp() const;
   uint16_t getPortNum() const;
-  Client *getClientByFd(int fd);
-  const std::string &getPasswordRef() const;
+  const std::string &getPassword() const;
+
+  Channel *getChannel(const std::string &chann);
+  std::map<std::string, Channel> &getChannels();
+  void addChannel(Channel &ch, std::string &chName);
 };
 
 #endif

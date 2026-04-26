@@ -3,7 +3,7 @@
 
 #include "Client.hpp"
 #include "ClientState.hpp"
-#include "CommandHandler.hpp"
+#include "command_handler.hpp"
 #include "Message.hpp"
 #include "Replies.hpp"
 #include "Server.hpp"

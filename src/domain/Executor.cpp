@@ -50,5 +50,5 @@ void executor::executeMessage(Client &client, Message &msg, Server &server) {
   if (!validateClientState(client, msg)) {
     return;
   }
-  CommandHandler::handleCommands(client, msg, server);
+  command_handler::handleCommands(client, msg, server);
 }

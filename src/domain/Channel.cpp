@@ -1,15 +1,13 @@
-// #include "Channel.hpp"
-// #include "Client.hpp"
-#include "../include/Channel.hpp"
+#include "Channel.hpp"
 
 #include <algorithm>
 #include <cstdlib>
 
-#include "../include/Client.hpp"
-#include "../include/Message.hpp"
-#include "../include/Parser.hpp"
-#include "../include/Replies.hpp"
-#include "../include/Server.hpp"
+#include "Client.hpp"
+#include "Message.hpp"
+#include "Parser.hpp"
+#include "Replies.hpp"
+#include "Server.hpp"
 
 Channel::Channel() : _limit(0), _i(false), _t(false), _k(false), _l(false) {}
 

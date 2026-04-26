@@ -1,4 +1,4 @@
-#include "../include/Replies.hpp"
+#include "Replies.hpp"
 
 std::string Replies::getReply(ReplyCode code, const std::string &userNick,
                               const std::string &arg1,

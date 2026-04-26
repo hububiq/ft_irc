@@ -1,5 +1,5 @@
-#include "CommandHandler.hpp"
-#include "Server.hpp"
+#include "server_runner.hpp"
+#include "command_handler.hpp" // deprecate the map in the future
 
 volatile sig_atomic_t g_running = 1;
 
@@ -14,9 +14,9 @@ int main(int argc, char **argv) {
   signal(SIGTERM, sig_handler);
 
   try {
-    CommandHandler::initCommands();
-    Server server(argc, argv);
-    server.run();
+    command_handler::setupCommandsMap(); 
+    runner::setup(argc, argv);
+    runner::run();
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
     return 1;

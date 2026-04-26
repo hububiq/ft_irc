@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "listener.hpp"
 
 namespace {
 int create_socket() {
@@ -26,12 +26,12 @@ int create_socket() {
   return socket_fd;
 }
 
-void bind_socket(int socket_fd) {
+void bind_socket(int socket_fd, uint32_t host_ip, uint16_t port_num) {
   struct sockaddr_in addr;
 
   addr.sin_family = AF_INET;
-  addr.sin_addr.s_addr = this->_host_ip;
-  addr.sin_port = this->_port_num;
+  addr.sin_addr.s_addr = host_ip;
+  addr.sin_port = port_num;
 
   if (bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
     throw std::runtime_error("Failed to bind socket.");
@@ -51,9 +51,9 @@ void start_socket(int socket_fd) {
 }
 }  // namespace
 
-int listener::init_socket() {
+int listener::init_socket(uint32_t host_ip, uint16_t port_num) {
   int socket_fd = create_socket();
-  bind_socket(socket_fd);
+  bind_socket(socket_fd, host_ip, port_num);
   start_socket(socket_fd);
   return socket_fd;
 }

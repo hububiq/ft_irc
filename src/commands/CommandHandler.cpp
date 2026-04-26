@@ -1,4 +1,4 @@
-#include "CommandHandler.hpp"
+#include "command_handler.hpp"
 
 #include <algorithm>
 #include <cctype>
@@ -36,9 +36,9 @@ extern Topic globalTopicCmd;
 extern Mode globalModeCmd;
 extern Quit globalQuitCmd;
 
-std::map<std::string, ACommand*> CommandHandler::_commandsMap;
+std::map<std::string, ACommand*> g_commandsMap;
 
-void CommandHandler::initCommands() {
+void setupCommandsMap() {
   _commandsMap["PASS"] = &globalPassCmd;
   _commandsMap["NICK"] = &globalNickCmd;
   _commandsMap["USER"] = &globalUserCmd;
@@ -53,7 +53,7 @@ void CommandHandler::initCommands() {
   _commandsMap["QUIT"] = &globalQuitCmd;
 }
 
-void CommandHandler::handleCommands(Client& client, Message& msg,
+void command_handler::handleCommands(Client& client, Message& msg,
                                     Server& server) {
   std::string cmdName = msg.command;
 

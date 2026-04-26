@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "request_handler.hpp"
 
 namespace {
 bool process_message(Client &client) {
@@ -8,8 +8,8 @@ bool process_message(Client &client) {
     client.getRequestBuffer().erase(0, end_pos + READ_END.size());
     Message msg;
     if (!messageLine.empty()) {
-      Parser::parseToStruct(messageLine, msg);
-      executor::executeMessage(client, msg, *this);
+      // Parser::parseToStruct(messageLine, msg);
+      // executor::executeMessage(client, msg, *this);
     }
     client.setStatus(READY_TO_RESPOND);
     return true;

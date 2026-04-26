@@ -2,6 +2,7 @@
 #define CLIENT_HPP
 #include <string>
 
+#include "ClientState.hpp"
 #include "HandlerStatus.hpp"
 
 class Client {

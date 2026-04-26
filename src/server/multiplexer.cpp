@@ -1,49 +1,30 @@
-#include "Server.hpp"
+#include "multiplexer.hpp"
 
 extern volatile sig_atomic_t g_running;
-
-namespace {
-void register_socket(int epoll_fd) {
-  struct epoll_event event;
-  event.events = EPOLLIN;
-  event.data.fd = this->_socket_fd;
-  if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, this->_socket_fd, &event) == -1) {
-    close(epoll_fd);
-    throw std::runtime_error("Failed to add socket to epoll.");
-  }
-}
-}  // namespace
-
-int multiplexer::init_epoll() {
-  int epoll_fd = epoll_create(1);
-  if (epoll_fd == -1) {
-    throw std::runtime_error("Failed to create epoll file descriptor.");
-  }
-  register_socket(epoll_fd);
-  return epoll_fd;
-}
+extern Server *g_server;
 
 void multiplexer::loop_epoll() {
   struct epoll_event events[LIMIT];
   while (g_running) {
-    int num_ready = epoll_wait(this->_epoll_fd, events, LIMIT, TIMEOUT);
+    int num_ready = epoll_wait(g_server->getEpollFd(), events, LIMIT, TIMEOUT);
     for (int i = 0; i < num_ready; i++) {
       int event_fd = events[i].data.fd;
-      if (event_fd == this->_socket_fd) {
+      if (event_fd == g_server->getSocketFd()) {
         conn_handler::process_connect(event_fd);
       } else {
-        std::map<int, Client>::iterator it = this->_clients.find(event_fd);
-        if (it != this->_clients.end()) {
+        std::map<int, Client>::iterator it =
+            g_server->getClients().find(event_fd);
+        if (it != g_server->getClients().end()) {
           HandleResult res =
               request_handler::process_request(events[i].events, it->second);
           if (res == DROP_CONNECTION) {
             std::cout << "Client disconnected" << std::endl;
-            this->_clients.erase(it);
+            g_server->getClients().erase(it);
             close(event_fd);
           }
         }
       }
     }
-    state_manger::schedule_send();
+    state_manager::schedule_send();
   }
 }

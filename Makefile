@@ -2,23 +2,25 @@ CC = c++
 NAME = irc
 FLAGS = -Wall -Wextra -Werror -std=c++98 -g -fsanitize=address
 INC_DIR = include
-COMM_INC_DIR = include/commands
 SRC_DIR = src
 OBJ_DIR = obj
-INCLUDES = -I${INC_DIR} -I${COMM_INC_DIR}
-SRCS = src/main.cpp \
-       src/Channel.cpp \
-       src/Client.cpp \
-       src/Parser.cpp \
-       src/Replies.cpp \
-       src/server/Server.cpp \
-			 src/server/Listener.cpp \
-			 src/server/Multiplexer.cpp \
-			 src/server/RequestHandler.cpp \
-			 src/server/Executor.cpp \
-			 src/server/ConnHandler.cpp \
-			 src/server/StateManager.cpp \
-       src/commands/CommandHandler.cpp \
+INCLUDES = -I${INC_DIR} -I${INC_DIR}/domain -I${INC_DIR}/server -I${INC_DIR}/server/executor -I${INC_DIR}/server/executor/commands -I${INC_DIR}/server/parser -I${INC_DIR}/utils
+SRCS = \
+       src/main.cpp \
+			 src/server/server_runner.cpp \
+       src/domain/Server.cpp \
+       src/server/multiplexer.cpp \
+       src/server/listener.cpp \
+       src/server/epoll_state_manager.cpp \
+       src/server/server_runner.cpp \
+       src/server/conn_handler.cpp \
+       src/server/request_handler.cpp \
+       src/server/executor/executor.cpp \
+       src/server/parser/Parser.cpp \
+       src/domain/Channel.cpp \
+       src/domain/Client.cpp \
+       src/domain/Executor.cpp \
+       src/commands/command_handler.cpp \
        src/commands/Cap.cpp \
        src/commands/Invite.cpp \
        src/commands/Join.cpp \
@@ -30,7 +32,8 @@ SRCS = src/main.cpp \
        src/commands/PrivMsg.cpp \
        src/commands/Quit.cpp \
        src/commands/Topic.cpp \
-       src/commands/User.cpp
+       src/commands/User.cpp \
+       src/utils/reply_factory.cpp
 OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
 RM = rm -rf
 

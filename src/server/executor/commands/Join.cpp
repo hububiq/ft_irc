@@ -3,8 +3,8 @@
 #include "Client.hpp"
 #include "Message.hpp"
 #include "Parser.hpp"
-#include "Replies.hpp"
 #include "Server.hpp"
+#include "reply_factory.hpp"
 
 void Join::execute(Client& client, Message& msg, Server& server) {
   std::string nickname = client.getNickname();

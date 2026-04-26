@@ -2,8 +2,8 @@
 
 #include "Client.hpp"
 #include "Message.hpp"
-#include "Replies.hpp"
 #include "Server.hpp"
+#include "reply_factory.hpp"
 
 void PrivMsg::execute(Client& client, Message& msg, Server& server) {
   if (msg.params.empty() || msg.params[0].empty()) {
@@ -21,7 +21,7 @@ void PrivMsg::execute(Client& client, Message& msg, Server& server) {
   }
   Channel* channForMsg = server.getChannel(msg.params[0]);
   if (channForMsg == NULL &&
-      !Parser::findClient(server.getClients(), msg.params[0])) {
+      !g_server->checkIfClientExistsByNickname(msg.params[0])) {
     std::string reply = Replies::getReply(ERR_NOSUCHNICK, client.getNickname(),
                                           msg.params[1], "");
     client.write_msg(reply);

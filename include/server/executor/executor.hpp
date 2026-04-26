@@ -3,10 +3,10 @@
 
 #include "Client.hpp"
 #include "ClientState.hpp"
-#include "command_handler.hpp"
 #include "Message.hpp"
-#include "Replies.hpp"
 #include "Server.hpp"
+#include "command_handler.hpp"
+#include "reply_factory.hpp"
 
 const std::string CMD_CAP = "CAP";
 const std::string CMD_INVITE = "INVITE";
@@ -21,7 +21,8 @@ const std::string CMD_QUIT = "QUIT";
 const std::string CMD_TOPIC = "TOPIC";
 const std::string CMD_USER = "USER";
 
-bool validateClientState(Client &client, Message &msg);
-void executeMessage(Client &client, Message &msg, Server &server);
+namespace executor {
+void executeMessage(Client &client, Message &msg);
+}
 
 #endif

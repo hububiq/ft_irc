@@ -1,15 +1,17 @@
 #ifndef RUNNER_HPP
 #define RUNNER_HPP
 
-#include "Server.hpp"
-#include "listener.hpp"
-#include "multiplexer.hpp"
-#include "epoll_initializer.hpp"
 #include <arpa/inet.h>
-#include <cstring>
+
 #include <cstdlib>
+#include <cstring>
 #include <stdexcept>
 #include <string>
+
+#include "Server.hpp"
+#include "epoll_initializer.hpp"
+#include "listener.hpp"
+#include "multiplexer.hpp"
 
 namespace runner {
 void setupCommandsMap();

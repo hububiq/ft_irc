@@ -1,8 +1,8 @@
-#include "Replies.hpp"
+#include "reply_factory.hpp"
 
-std::string Replies::getReply(ReplyCode code, const std::string &userNick,
-                              const std::string &arg1,
-                              const std::string &arg2) {
+std::string reply_factory::getReply(ReplyCode code, const std::string &userNick,
+                                    const std::string &arg1,
+                                    const std::string &arg2) {
   std::string serverName = "localhost";
   std::string prefix = ":" + serverName + " ";
 

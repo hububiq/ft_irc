@@ -16,10 +16,9 @@ SRCS = \
        src/server/conn_handler.cpp \
        src/server/request_handler.cpp \
        src/server/executor/executor.cpp \
-       src/server/parser/Parser.cpp \
+       src/server/parser/parser.cpp \
        src/domain/Channel.cpp \
        src/domain/Client.cpp \
-       src/domain/Executor.cpp \
        src/commands/command_handler.cpp \
        src/commands/Cap.cpp \
        src/commands/Invite.cpp \

@@ -3,8 +3,8 @@
 #include "Client.hpp"
 #include "Message.hpp"
 #include "Parser.hpp"
-#include "Replies.hpp"
 #include "Server.hpp"
+#include "reply_factory.hpp"
 
 void Invite::execute(Client& client, Message& msg, Server& server) {
   std::string nickname = client.getNickname();
@@ -15,7 +15,7 @@ void Invite::execute(Client& client, Message& msg, Server& server) {
     client.write_msg(reply);
     return;
   }
-  if (!Parser::findClient(server.getClients(), msg.params[0])) {
+  if (!g_server->checkIfClientExistsByNickname(msg.params[0])) {
     std::string reply =
         Replies::getReply(ERR_NOSUCHNICK, nickname, msg.params[1], "");
     client.write_msg(reply);

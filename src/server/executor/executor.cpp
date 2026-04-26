@@ -1,4 +1,4 @@
-#include "Executor.hpp"
+#include "executor.hpp"
 
 namespace {
 bool process_connected(Client &client, Message &msg) {
@@ -30,7 +30,6 @@ bool process_registered(Client &client, Message &msg) {
   }
   return true;
 }
-}  // namespace
 
 bool validateClientState(Client &client, Message &msg) {
   ClientState state = client.getState();
@@ -46,9 +45,11 @@ bool validateClientState(Client &client, Message &msg) {
   return true;
 }
 
-void Executor::executeMessage(Client &client, Message &msg, Server &server) {
+}  // namespace
+
+void executor::executeMessage(Client &client, Message &msg) {
   if (!validateClientState(client, msg)) {
     return;
   }
-  command_handler::handleCommands(client, msg, server);
+  command_handler::handleCommand(client, msg);
 }

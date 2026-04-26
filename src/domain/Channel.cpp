@@ -6,8 +6,8 @@
 #include "Client.hpp"
 #include "Message.hpp"
 #include "Parser.hpp"
-#include "Replies.hpp"
 #include "Server.hpp"
+#include "reply_factory.hpp"
 
 Channel::Channel() : _limit(0), _i(false), _t(false), _k(false), _l(false) {}
 

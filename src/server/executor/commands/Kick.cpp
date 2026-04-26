@@ -6,8 +6,8 @@
 #include "Client.hpp"
 #include "Message.hpp"
 #include "Parser.hpp"
-#include "Replies.hpp"
 #include "Server.hpp"
+#include "reply_factory.hpp"
 
 bool Kick::clientCanKICK(Channel *channel_obj, Client &client) {
   std::vector<Client *> temp_members = channel_obj->getAdmins();

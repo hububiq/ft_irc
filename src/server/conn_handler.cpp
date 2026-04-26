@@ -9,9 +9,8 @@ void register_client(int client_fd, std::string &hostname) {
   c.setState(CONNECTED);
   g_server->getClients().insert(std::make_pair(client_fd, c));
   std::cout << "Client connected" << std::endl;
-}  
 }
-
+}  // namespace
 
 void conn_handler::process_connect(int socket_fd) {
   struct sockaddr_in addr;

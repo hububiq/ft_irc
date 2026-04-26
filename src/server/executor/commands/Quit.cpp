@@ -4,8 +4,8 @@
 
 #include "Client.hpp"
 #include "Message.hpp"
-#include "Replies.hpp"
 #include "Server.hpp"
+#include "reply_factory.hpp"
 
 void Quit::execute(Client &client, Message &msg, Server &server) {
   std::map<std::string, Channel> &channels = server.getChannels();

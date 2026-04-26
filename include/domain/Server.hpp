@@ -23,7 +23,6 @@
 #include "EpollConfig.hpp"
 #include "HandlerStatus.hpp"
 #include "Message.hpp"
-#include "Parser.hpp"
 
 class Server {
  private:
@@ -42,6 +41,7 @@ class Server {
   ~Server();
 
   std::map<int, Client> &getClients();
+  bool checkIfClientExistsByNickname(std::string &nickName);
   int getSocketFd() const;
   int getEpollFd() const;
   int getPort() const;
@@ -52,6 +52,9 @@ class Server {
   Channel *getChannel(const std::string &chann);
   std::map<std::string, Channel> &getChannels();
   void addChannel(Channel &ch, std::string &chName);
+  bool isClientAdmin(Client &client, const std::string &chName);
+  bool isInviteeInChannel(const Message &msg, const std::string &channelName);
+  bool isUserInChannel(Client &client, const std::string &channelName);
 };
 
 #endif

@@ -14,8 +14,7 @@ std::string parse_pwd(char *arg) {
 }
 
 long parse_port(char *arg) {
-  if (!arg)
-    throw std::invalid_argument("Port argument missing");
+  if (!arg) throw std::invalid_argument("Port argument missing");
   char *endptr = NULL;
   long port = std::strtol(arg, &endptr, 10);
   if (*endptr != '\0' || port <= 1024 || port > 65535) {

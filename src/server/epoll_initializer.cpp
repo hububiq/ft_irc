@@ -1,8 +1,9 @@
 
 #include "epoll_initializer.hpp"
 
-#include <stdexcept>
 #include <unistd.h>
+
+#include <stdexcept>
 
 namespace {
 void register_socket(int epoll_fd, int socket_fd) {

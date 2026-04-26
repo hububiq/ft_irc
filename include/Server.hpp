@@ -65,6 +65,13 @@ class Server {
   Channel *getChannel(const std::string &chann);
   std::map<std::string, Channel> &getChannels();
   void addChannel(Channel &ch, std::string &chName);
+  int getSocketFd() const;
+  int getEpollFd() const;
+  int getPort() const;
+  uint32_t getHostIp() const;
+  uint16_t getPortNum() const;
+  Client *getClientByFd(int fd);
+  const std::string &getPasswordRef() const;
 };
 
 #endif

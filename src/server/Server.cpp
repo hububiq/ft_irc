@@ -1,4 +1,8 @@
 #include "Server.hpp"
+#include "Globals.hpp"
+
+// Global god object pointer.
+Server *g_server = NULL;
 
 Server::Server(int argc, char **argv) : _socket_fd(-1), _epoll_fd(-1) {
   if (argc != 3)
@@ -9,6 +13,7 @@ Server::Server(int argc, char **argv) : _socket_fd(-1), _epoll_fd(-1) {
   this->_password = std::string(argv[2]);
   if (this->_password.empty())
     throw std::out_of_range("Password must contain at least 1 letter");
+  g_server = this;
 }
 
 uint16_t Server::parse_string_port(const char *port_str) {
@@ -28,6 +33,7 @@ void Server::run() {
 }
 
 Server::~Server() {
+  g_server = NULL;
   if (this->_socket_fd != -1) {
     close(this->_socket_fd);
   }
@@ -58,3 +64,21 @@ void Server::addChannel(Channel &ch, std::string &chName) {
   ch.setChannelName(chName);
   this->_channels[chName] = ch;
 }
+
+int Server::getSocketFd() const { return this->_socket_fd; }
+
+int Server::getEpollFd() const { return this->_epoll_fd; }
+
+int Server::getPort() const { return this->_port; }
+
+uint32_t Server::getHostIp() const { return this->_host_ip; }
+
+uint16_t Server::getPortNum() const { return this->_port_num; }
+
+Client *Server::getClientByFd(int fd) {
+  std::map<int, Client>::iterator it = this->_clients.find(fd);
+  if (it != this->_clients.end()) return &it->second;
+  return NULL;
+}
+
+const std::string &Server::getPasswordRef() const { return this->_password; }

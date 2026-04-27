@@ -50,20 +50,25 @@ ServerRunner::ServerRunner(int argc, char **argv) {
 
   m_server = new ServerDao(static_cast<int>(port), port_num, host_ip, pwd,
                            socket_fd, epoll_fd);
-
-  ConnHandler *connHandler = new ConnHandler(m_server);
+                           
   EpollStateManager *stateManager = new EpollStateManager(m_server);
-  
-  Validator *validator = new Validator();
-  JoinGatekeeper *joinGatekeeper = new JoinGatekeeper();
-  ModeReporter *modeReporter = new ModeReporter(m_server);
-
-  CommandHandler *commandHandler = new CommandHandler(m_server, validator, joinGatekeeper, modeReporter);
-  Executor *executor = new Executor(commandHandler);
-  MessageParser *messageParser = new MessageParser();
-
-  RequestHandler *requestHandler = new RequestHandler(stateManager, executor, messageParser); 
-  m_multiplexer = new Multiplexer(m_server, connHandler, requestHandler, stateManager);
+  m_multiplexer = new Multiplexer(
+    m_server,
+    new ConnHandler(m_server),
+    new RequestHandler(
+      stateManager,
+      new Executor(
+        new CommandHandler(
+          m_server,
+          new Validator(),
+          new JoinGatekeeper(),
+          new ModeReporter(m_server)
+        )
+      ),
+      new MessageParser();
+    ),
+    stateManager
+  );
 }
 
 ServerRunner::~ServerRunner() {

@@ -9,10 +9,12 @@
 #include "ServerDao.hpp"
 #include "reply_factory.hpp"
 
-class ServerDao;
-class Client;
-namespace mode_reporter {
-void reportChannelModes(Client& client, const std::string& channelName);
-}
+class ModeReporter {
+private:
+  ServerDao* m_server;
+public:
+  ModeReporter(ServerDao* server);
+  void reportChannelModes(Client& client, const std::string& channelName);
+};
 
 #endif

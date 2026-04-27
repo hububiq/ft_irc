@@ -5,9 +5,10 @@
 
 class Client;
 
-namespace validator {
-bool isValidNickname(std::string& nick, Client& cli);
-bool isValidChannelName(std::string& channName);
-}  // namespace validator
+class Validator {
+public:
+  bool isValidNickname(std::string& nick, Client& cli);
+  bool isValidChannelName(std::string& channName);
+};
 
 #endif

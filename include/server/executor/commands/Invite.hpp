@@ -8,9 +8,13 @@
 #include "reply_factory.hpp"
 #include "validator.hpp"
 
+class Validator;
+
 class Invite : public ACommand {
+ private:
+  Validator* m_validator;
  public:
-  Invite(ServerDao *server = NULL);
+  Invite(ServerDao *server = NULL, Validator *validator = NULL);
   
   
   

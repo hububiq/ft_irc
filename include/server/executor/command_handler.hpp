@@ -24,6 +24,10 @@
 #include "User.hpp"
 #include "reply_factory.hpp"
 
+#include "join_gatekeeper.hpp"
+#include "mode_reporter.hpp"
+#include "validator.hpp"
+
 class ACommand;
 class Client;
 class ServerDao;
@@ -32,9 +36,12 @@ struct Message;
 class CommandHandler {
  private:
   std::map<std::string, ACommand*> _commandsMap;
+  Validator* m_validator;
+  JoinGatekeeper* m_joinGatekeeper;
+  ModeReporter* m_modeReporter;
 
  public:
-  CommandHandler(ServerDao *server);
+  CommandHandler(ServerDao *server, Validator* validator, JoinGatekeeper* joinGatekeeper, ModeReporter* modeReporter);
   ~CommandHandler();
   void handleCommand(Client& client, Message& msg);
 };

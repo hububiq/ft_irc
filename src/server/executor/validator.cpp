@@ -5,7 +5,7 @@
 #include "Client.hpp"
 #include "reply_factory.hpp"
 
-bool validator::isValidNickname(std::string& nick, Client& cli) {
+bool Validator::isValidNickname(std::string& nick, Client& cli) {
   std::string specials = "-\\[]`^{}";
   if (nick.size() > 9 || !isalpha(nick[0])) {
     std::string reply =
@@ -25,7 +25,7 @@ bool validator::isValidNickname(std::string& nick, Client& cli) {
   return true;
 }
 
-bool validator::isValidChannelName(std::string& channName) {
+bool Validator::isValidChannelName(std::string& channName) {
   if (channName.size() < 2 || channName[0] != '#' || channName.size() > 200)
     return false;
   for (size_t i = 1; i < channName.size(); i++) {

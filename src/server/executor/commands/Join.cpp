@@ -12,7 +12,7 @@ void Join::execute(Client& client, Message& msg) {
     return;
   }
   std::string& channelName = msg.params[0];
-  if (!validator::isValidChannelName(channelName)) {
+  if (!m_validator->isValidChannelName(channelName)) {
     std::string reply =
         reply_factory::getReply(ERR_NOSUCHCHANNEL, nickname, channelName, "");
     client.write_msg(reply);
@@ -28,7 +28,7 @@ void Join::execute(Client& client, Message& msg) {
     m_server->getChannel(channelName)->getAdmins().push_back(&client);
     m_server->getChannel(channelName)->add_client(&client);
   } else if (ch != NULL) {
-    if (join_gatekeeper::isJoinDenied(ch, msg, client)) return;
+    if (m_joinGatekeeper->isJoinDenied(ch, msg, client)) return;
     ch->add_client(&client);
     std::string joinReply = ":" + client.getNickname() + "!" +
                             client.getUsername() + "@" + client.getHostname() +
@@ -53,4 +53,4 @@ void Join::execute(Client& client, Message& msg) {
 
 
 
-Join::Join(ServerDao *server) : ACommand(server) {}
+Join::Join(ServerDao *server, Validator *validator, JoinGatekeeper *joinGatekeeper) : ACommand(server), m_validator(validator), m_joinGatekeeper(joinGatekeeper) {}

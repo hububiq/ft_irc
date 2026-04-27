@@ -4,10 +4,11 @@
 #include "listener.hpp"
 #include "multiplexer.hpp"
 #include "server_runner.hpp"
+#include "validator.hpp"
+#include "mode_reporter.hpp"
+#include "join_gatekeeper.hpp"
 
 extern volatile sig_atomic_t g_running;
-
-ServerDao *g_server = NULL;
 
 namespace {
 std::string parse_pwd(char *arg) {
@@ -49,12 +50,15 @@ ServerRunner::ServerRunner(int argc, char **argv) {
 
   m_server = new ServerDao(static_cast<int>(port), port_num, host_ip, pwd,
                            socket_fd, epoll_fd);
-  g_server = m_server;
 
   ConnHandler *connHandler = new ConnHandler(m_server);
   EpollStateManager *stateManager = new EpollStateManager(m_server);
   
-  CommandHandler *commandHandler = new CommandHandler(m_server);
+  Validator *validator = new Validator();
+  JoinGatekeeper *joinGatekeeper = new JoinGatekeeper();
+  ModeReporter *modeReporter = new ModeReporter(m_server);
+
+  CommandHandler *commandHandler = new CommandHandler(m_server, validator, joinGatekeeper, modeReporter);
   Executor *executor = new Executor(commandHandler);
   MessageParser *messageParser = new MessageParser();
 
@@ -68,7 +72,6 @@ ServerRunner::~ServerRunner() {
   if (m_server) {
     delete m_server;
     m_server = NULL;
-    g_server = NULL;
   }
 }
 

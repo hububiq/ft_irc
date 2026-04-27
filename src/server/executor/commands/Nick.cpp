@@ -9,7 +9,7 @@ void Nick::execute(Client& client, Message& msg) {
     client.write_msg(reply);
     return;
   }
-  if (!validator::isValidNickname(msg.params[0], client)) {
+  if (!m_validator->isValidNickname(msg.params[0], client)) {
     return;
   }
   std::map<int, Client>& cliMap = m_server->getClients();
@@ -31,4 +31,4 @@ void Nick::execute(Client& client, Message& msg) {
 
 
 
-Nick::Nick(ServerDao *server) : ACommand(server) {}
+Nick::Nick(ServerDao *server, Validator *validator) : ACommand(server), m_validator(validator) {}

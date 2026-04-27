@@ -1,15 +1,6 @@
 #include "message_parser.hpp"
 
-#include <algorithm>
-#include <cctype>
-#include <stdexcept>
-#include <vector>
-
-namespace {
-std::string normalizeCommand(std::string command);
-void extractParams(std::string& input, Message& msg);
-
-void extractPrefix(std::string& input, Message& msg) {
+void MessageParser::extractPrefix(std::string& input, Message& msg) {
   if (input[0] != ':') return;
 
   size_t spacePos = input.find(' ');
@@ -23,7 +14,7 @@ void extractPrefix(std::string& input, Message& msg) {
   input.erase(0, spacePos + 1);
 }
 
-void trimLeadingWhitespace(std::string& input) {
+void MessageParser::trimLeadingWhitespace(std::string& input) {
   size_t firstContentChar = input.find_first_not_of(" \t");
   if (firstContentChar == std::string::npos) {
     throw std::invalid_argument("Message contains no command.");
@@ -31,7 +22,7 @@ void trimLeadingWhitespace(std::string& input) {
   input.erase(0, firstContentChar);
 }
 
-void extractCommand(std::string& input, Message& msg) {
+void MessageParser::extractCommand(std::string& input, Message& msg) {
   size_t spacePos = input.find(' ');
   std::string rawCommand;
 
@@ -46,13 +37,13 @@ void extractCommand(std::string& input, Message& msg) {
   msg.command = normalizeCommand(rawCommand);
 }
 
-std::string normalizeCommand(std::string command) {
+std::string MessageParser::normalizeCommand(std::string command) {
   std::transform(command.begin(), command.end(), command.begin(),
                  static_cast<int (*)(int)>(std::toupper));
   return command;
 }
 
-void extractParams(std::string& input, Message& msg) {
+void MessageParser::extractParams(std::string& input, Message& msg) {
   while (!input.empty()) {
     size_t first = input.find_first_not_of(' ');
     if (first == std::string::npos) break;
@@ -76,8 +67,6 @@ void extractParams(std::string& input, Message& msg) {
     input.erase(0, spacePos + 1);
   }
 }
-
-}  // namespace
 
 void MessageParser::deserialize(const std::string& rawLine, Message& outMessage) {
   if (rawLine.empty()) {

@@ -19,7 +19,7 @@ void Mode::execute(Client& client, Message& msg) {
       return;
     }
     if (m_server->isClientAdmin(client, msg.params[0]))
-      mode_reporter::reportChannelModes(client, msg.params[0]);
+      m_modeReporter->reportChannelModes(client, msg.params[0]);
     else {
       std::string reply = reply_factory::getReply(ERR_CHANOPRIVSNEEDED,
                                                   nickname, msg.params[0], "");
@@ -60,4 +60,4 @@ void Mode::execute(Client& client, Message& msg) {
 
 
 
-Mode::Mode(ServerDao *server) : ACommand(server) {}
+Mode::Mode(ServerDao *server, ModeReporter *modeReporter) : ACommand(server), m_modeReporter(modeReporter) {}

@@ -7,8 +7,9 @@
 #include "Client.hpp"
 #include "Message.hpp"
 #include "reply_factory.hpp"
-namespace join_gatekeeper {
-bool isJoinDenied(Channel* ch, Message& msg, Client& client);
-}
+class JoinGatekeeper {
+public:
+  bool isJoinDenied(Channel* ch, Message& msg, Client& client);
+};
 
 #endif

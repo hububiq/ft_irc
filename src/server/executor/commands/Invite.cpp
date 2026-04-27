@@ -36,7 +36,7 @@ void Invite::execute(Client& client, Message& msg) {
     client.write_msg(reply);
     return;
   }
-  if (!validator::isValidChannelName(msg.params[1])) {
+  if (!m_validator->isValidChannelName(msg.params[1])) {
     std::string reply =
         reply_factory::getReply(ERR_NOSUCHCHANNEL, nickname, msg.params[0], "");
     client.write_msg(reply);
@@ -73,4 +73,4 @@ void Invite::execute(Client& client, Message& msg) {
 
 
 
-Invite::Invite(ServerDao *server) : ACommand(server) {}
+Invite::Invite(ServerDao *server, Validator *validator) : ACommand(server), m_validator(validator) {}

@@ -7,19 +7,7 @@
 #include "ServerDao.hpp"
 #include "command_handler.hpp"
 #include "reply_factory.hpp"
-
-const std::string CMD_CAP = "CAP";
-const std::string CMD_INVITE = "INVITE";
-const std::string CMD_JOIN = "JOIN";
-const std::string CMD_KICK = "KICK";
-const std::string CMD_MODE = "MODE";
-const std::string CMD_NICK = "NICK";
-const std::string CMD_PASS = "PASS";
-const std::string CMD_PING = "PING";
-const std::string CMD_PRIVMSG = "PRIVMSG";
-const std::string CMD_QUIT = "QUIT";
-const std::string CMD_TOPIC = "TOPIC";
-const std::string CMD_USER = "USER";
+#include "CommandType.hpp"
 
 class CommandHandler;
 
@@ -31,6 +19,10 @@ public:
 
 private:
   CommandHandler *m_commandHandler;
+  bool process_connected(Client &client, Message &msg);
+  bool process_handshake(Client &client, Message &msg);
+  bool process_registered(Client &client, Message &msg);
+  bool validateClientState(Client &client, Message &msg);
 };
 
 #endif

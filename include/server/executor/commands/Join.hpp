@@ -9,9 +9,15 @@
 #include "reply_factory.hpp"
 #include "validator.hpp"
 
+class Validator;
+class JoinGatekeeper;
+
 class Join : public ACommand {
+ private:
+  Validator* m_validator;
+  JoinGatekeeper* m_joinGatekeeper;
  public:
-  Join(ServerDao *server = NULL);
+  Join(ServerDao *server = NULL, Validator *validator = NULL, JoinGatekeeper *joinGatekeeper = NULL);
   
   
   

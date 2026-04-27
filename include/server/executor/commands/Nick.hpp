@@ -8,9 +8,13 @@
 #include "reply_factory.hpp"
 #include "validator.hpp"
 
+class Validator;
+
 class Nick : public ACommand {
+ private:
+  Validator* m_validator;
  public:
-  Nick(ServerDao *server = NULL);
+  Nick(ServerDao *server = NULL, Validator *validator = NULL);
   
   
   

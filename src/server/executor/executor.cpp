@@ -1,7 +1,6 @@
 #include "executor.hpp"
 
-namespace {
-bool process_connected(Client &client, Message &msg) {
+bool Executor::process_connected(Client &client, Message &msg) {
   if (msg.command == CMD_CAP || msg.command == CMD_PASS) {
     return true;
   }
@@ -10,7 +9,7 @@ bool process_connected(Client &client, Message &msg) {
   return false;
 }
 
-bool process_handshake(Client &client, Message &msg) {
+bool Executor::process_handshake(Client &client, Message &msg) {
   if (msg.command == CMD_NICK || msg.command == CMD_USER ||
       msg.command == CMD_CAP) {
     return true;
@@ -20,7 +19,7 @@ bool process_handshake(Client &client, Message &msg) {
   return false;
 }
 
-bool process_registered(Client &client, Message &msg) {
+bool Executor::process_registered(Client &client, Message &msg) {
   if (msg.command == CMD_PASS || msg.command == CMD_USER ||
       msg.command == CMD_NICK) {
     std::string nick = client.getNickname();
@@ -32,7 +31,7 @@ bool process_registered(Client &client, Message &msg) {
   return true;
 }
 
-bool validateClientState(Client &client, Message &msg) {
+bool Executor::validateClientState(Client &client, Message &msg) {
   ClientState state = client.getState();
 
   switch (state) {
@@ -45,8 +44,6 @@ bool validateClientState(Client &client, Message &msg) {
   }
   return true;
 }
-
-}  // namespace
 
 Executor::Executor(CommandHandler *commandHandler) : m_commandHandler(commandHandler) {}
 

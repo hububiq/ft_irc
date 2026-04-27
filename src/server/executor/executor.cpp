@@ -48,9 +48,15 @@ bool validateClientState(Client &client, Message &msg) {
 
 }  // namespace
 
-void executor::executeMessage(Client &client, Message &msg) {
+Executor::Executor(CommandHandler *commandHandler) : m_commandHandler(commandHandler) {}
+
+Executor::~Executor() {
+  if (m_commandHandler) delete m_commandHandler;
+}
+
+void Executor::executeMessage(Client &client, Message &msg) {
   if (!validateClientState(client, msg)) {
     return;
   }
-  command_handler::handleCommand(client, msg);
+  m_commandHandler->handleCommand(client, msg);
 }

@@ -21,8 +21,16 @@ const std::string CMD_QUIT = "QUIT";
 const std::string CMD_TOPIC = "TOPIC";
 const std::string CMD_USER = "USER";
 
-namespace executor {
-void executeMessage(Client &client, Message &msg);
-}
+class CommandHandler;
+
+class Executor {
+public:
+  Executor(CommandHandler *commandHandler);
+  ~Executor();
+  void executeMessage(Client &client, Message &msg);
+
+private:
+  CommandHandler *m_commandHandler;
+};
 
 #endif

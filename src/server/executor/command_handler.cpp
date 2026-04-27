@@ -13,9 +13,7 @@ extern Topic globalTopicCmd;
 extern Mode globalModeCmd;
 extern Quit globalQuitCmd;
 
-std::map<std::string, ACommand*> command_handler::_commandsMap;
-
-void command_handler::setupCommandsMap() {
+CommandHandler::CommandHandler() {
   _commandsMap["PASS"] = &globalPassCmd;
   _commandsMap["NICK"] = &globalNickCmd;
   _commandsMap["USER"] = &globalUserCmd;
@@ -30,7 +28,7 @@ void command_handler::setupCommandsMap() {
   _commandsMap["QUIT"] = &globalQuitCmd;
 }
 
-void command_handler::handleCommand(Client& client, Message& msg) {
+void CommandHandler::handleCommand(Client& client, Message& msg) {
   std::string cmdName = msg.command;
 
   std::map<std::string, ACommand*>::iterator it = _commandsMap.find(cmdName);

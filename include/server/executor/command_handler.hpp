@@ -29,13 +29,13 @@ class Client;
 class ServerDao;
 struct Message;
 
-class command_handler {
+class CommandHandler {
  private:
-  static std::map<std::string, ACommand*> _commandsMap;
+  std::map<std::string, ACommand*> _commandsMap;
 
  public:
-  static void setupCommandsMap();
-  static void handleCommand(Client& client, Message& msg);
+  CommandHandler();
+  void handleCommand(Client& client, Message& msg);
 };
 
 #endif

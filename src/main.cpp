@@ -14,9 +14,8 @@ int main(int argc, char **argv) {
   signal(SIGTERM, sig_handler);
 
   try {
-    command_handler::setupCommandsMap();
-    runner::setup(argc, argv);
-    runner::run();
+    ServerRunner runner(argc, argv);
+    runner.run();
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
     return 1;

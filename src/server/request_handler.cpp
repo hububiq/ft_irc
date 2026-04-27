@@ -1,15 +1,22 @@
 #include "request_handler.hpp"
 
-namespace {
-bool process_message(Client &client) {
+RequestHandler::RequestHandler(EpollStateManager *stateManager, Executor *executor, MessageParser *messageParser)
+    : m_stateManager(stateManager), m_executor(executor), m_messageParser(messageParser) {}
+
+RequestHandler::~RequestHandler() {
+  if (m_executor) delete m_executor;
+  if (m_messageParser) delete m_messageParser;
+}
+
+bool RequestHandler::process_message(Client &client) {
   size_t end_pos = client.getRequestBuffer().find(READ_END);
   if (end_pos != std::string::npos) {
     std::string messageLine = client.getRequestBuffer().substr(0, end_pos);
     client.getRequestBuffer().erase(0, end_pos + READ_END.size());
     Message msg;
     if (!messageLine.empty()) {
-      message_parser::deserialize(messageLine, msg);
-      executor::executeMessage(client, msg);
+      m_messageParser->deserialize(messageLine, msg);
+      m_executor->executeMessage(client, msg);
     }
     client.setStatus(READY_TO_RESPOND);
     return true;
@@ -17,7 +24,7 @@ bool process_message(Client &client) {
   return false;
 }
 
-HandleResult read_chunk(Client &client) {
+HandleResult RequestHandler::read_chunk(Client &client) {
   char recv_buffer[RECV_SIZE];
   ssize_t bytes = recv(client.getFd(), recv_buffer, sizeof(recv_buffer) - 1, 0);
 
@@ -26,7 +33,7 @@ HandleResult read_chunk(Client &client) {
   return KEEP_CONNECTION;
 }
 
-HandleResult respond(Client &client) {
+HandleResult RequestHandler::respond(Client &client) {
   if (client.getResponseBuffer().empty()) {
     return KEEP_CONNECTION;
   }
@@ -41,9 +48,8 @@ HandleResult respond(Client &client) {
   client.getResponseBuffer().erase(0, sent);
   return KEEP_CONNECTION;
 }
-}  // namespace
 
-HandleResult request_handler::process_request(uint32_t events, Client &client) {
+HandleResult RequestHandler::process_request(uint32_t events, Client &client) {
   if (events & EPOLLIN && (!(events & EPOLLOUT))) {
     if (read_chunk(client) == DROP_CONNECTION) {
       return DROP_CONNECTION;
@@ -54,7 +60,7 @@ HandleResult request_handler::process_request(uint32_t events, Client &client) {
     switch (client.getStatus()) {
       case READING: {
         if (!process_message(client)) {
-          if (events & EPOLLOUT) state_manager::schedule_epollin(client);
+          if (events & EPOLLOUT) m_stateManager->schedule_epollin(client);
           return KEEP_CONNECTION;
         }
       }

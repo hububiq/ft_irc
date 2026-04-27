@@ -81,7 +81,7 @@ void extractParams(std::string& input, Message& msg) {
 
 namespace message_parser {
 
-void deserialize(const std::string& rawLine, Message& outMessage) {
+void MessageParser::deserialize(const std::string& rawLine, Message& outMessage) {
   if (rawLine.empty()) {
     throw std::invalid_argument("Cannot parse an empty message.");
   }

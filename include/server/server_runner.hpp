@@ -13,10 +13,21 @@
 #include "listener.hpp"
 #include "multiplexer.hpp"
 
-namespace runner {
-void setupCommandsMap();
-void setup(int argc, char **argv);
-void run();
-}  // namespace runner
+class MessageParser;
+class CommandHandler;
+class Executor;
+
+class ServerRunner {
+public:
+  ServerRunner(int argc, char **argv);
+  ~ServerRunner();
+  void run();
+
+private:
+  ServerDao *m_server;
+  Listener m_listener;
+  EpollInitializer m_epollInitializer;
+  Multiplexer *m_multiplexer;
+};
 
 #endif

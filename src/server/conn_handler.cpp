@@ -1,18 +1,16 @@
 #include "conn_handler.hpp"
 
-extern ServerDao *g_server;
+ConnHandler::ConnHandler(ServerDao *server) : m_server(server) {}
 
-namespace {
-void register_client(int client_fd, std::string &hostname) {
+void ConnHandler::register_client(int client_fd, std::string &hostname) {
   Client c(client_fd);
   c.setHostname(hostname);
   c.setState(CONNECTED);
-  g_server->getClients().insert(std::make_pair(client_fd, c));
+  m_server->getClients().insert(std::make_pair(client_fd, c));
   std::cout << "Client connected" << std::endl;
 }
-}  // namespace
 
-void conn_handler::process_connect(int socket_fd) {
+void ConnHandler::process_connect(int socket_fd) {
   struct sockaddr_in addr;
   socklen_t len = sizeof(addr);
 
@@ -26,7 +24,7 @@ void conn_handler::process_connect(int socket_fd) {
     struct epoll_event event;
     event.events = EPOLLIN;
     event.data.fd = client_fd;
-    epoll_ctl(g_server->getEpollFd(), EPOLL_CTL_ADD, client_fd, &event);
+    epoll_ctl(m_server->getEpollFd(), EPOLL_CTL_ADD, client_fd, &event);
     register_client(client_fd, hostname);
   }
 }

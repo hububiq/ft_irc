@@ -1,30 +1,42 @@
 #include "multiplexer.hpp"
 
 extern volatile sig_atomic_t g_running;
-extern ServerDao *g_server;
+Multiplexer::Multiplexer(ServerDao *server, ConnHandler *connHandler,
+                         RequestHandler *requestHandler,
+                         EpollStateManager *stateManager)
+    : m_server(server),
+      m_connHandler(connHandler),
+      m_requestHandler(requestHandler),
+      m_stateManager(stateManager) {}
 
-void multiplexer::loop_epoll() {
+Multiplexer::~Multiplexer() {
+  if (m_connHandler) delete m_connHandler;
+  if (m_requestHandler) delete m_requestHandler;
+  if (m_stateManager) delete m_stateManager;
+}
+
+void Multiplexer::loop_epoll() {
   struct epoll_event events[LIMIT];
   while (g_running) {
-    int num_ready = epoll_wait(g_server->getEpollFd(), events, LIMIT, TIMEOUT);
+    int num_ready = epoll_wait(m_server->getEpollFd(), events, LIMIT, TIMEOUT);
     for (int i = 0; i < num_ready; i++) {
       int event_fd = events[i].data.fd;
-      if (event_fd == g_server->getSocketFd()) {
-        conn_handler::process_connect(event_fd);
+      if (event_fd == m_server->getSocketFd()) {
+        m_connHandler->process_connect(event_fd);
       } else {
         std::map<int, Client>::iterator it =
-            g_server->getClients().find(event_fd);
-        if (it != g_server->getClients().end()) {
+            m_server->getClients().find(event_fd);
+        if (it != m_server->getClients().end()) {
           HandleResult res =
-              request_handler::process_request(events[i].events, it->second);
+              m_requestHandler->process_request(events[i].events, it->second);
           if (res == DROP_CONNECTION) {
             std::cout << "Client disconnected" << std::endl;
-            g_server->getClients().erase(it);
+            m_server->getClients().erase(it);
             close(event_fd);
           }
         }
       }
     }
-    state_manager::schedule_send();
+    m_stateManager->schedule_send();
   }
 }

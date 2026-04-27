@@ -3,8 +3,9 @@
 
 #include <sys/epoll.h>
 
-namespace epoll_initializer {
-int init_epoll(int socket_fd);
-}  // namespace epoll_initializer
+class EpollInitializer {
+public:
+  int init_epoll(int socket_fd);
+};
 
 #endif

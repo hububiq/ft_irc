@@ -6,10 +6,9 @@
 
 #include "Message.hpp"
 
-namespace message_parser {
-
-void deserialize(const std::string& rawLine, Message& outMessage);
-
-}
+class MessageParser {
+public:
+  void deserialize(const std::string& rawLine, Message& outMessage);
+};
 
 #endif

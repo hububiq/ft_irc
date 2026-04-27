@@ -51,7 +51,7 @@ void start_socket(int socket_fd) {
 }
 }  // namespace
 
-int listener::init_socket(uint32_t host_ip, uint16_t port_num) {
+int Listener::init_socket(uint32_t host_ip, uint16_t port_num) {
   int socket_fd = create_socket();
   bind_socket(socket_fd, host_ip, port_num);
   start_socket(socket_fd);

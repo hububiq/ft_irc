@@ -60,4 +60,12 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+test: all
+	@echo "Running tests..."
+	@chmod +x test/*.sh && for f in test/test_*.sh; do echo "--- Running $$f ---"; ./$$f || exit 1; done
+
+.PHONY: all clean fclean re test
+	@echo "Running tests..."
+	@cd test && chmod +x test_basic.sh && ./test_basic.sh
+
+.PHONY: all clean fclean re test

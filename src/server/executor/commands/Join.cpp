@@ -28,6 +28,10 @@ void Join::execute(Client &client, Message &msg)
 		m_server->addChannel(channel, channelName);
 		m_server->getChannel(channelName)->getAdmins().push_back(&client);
 		m_server->getChannel(channelName)->add_client(&client);
+		std::string joinReply = ":" + client.getNickname() + "!" + client.getUsername() + "@" +
+		                        client.getHostname() + " JOIN " + channelName + "\r\n";
+		client.write_msg(joinReply);
+		ch = m_server->getChannel(channelName);
 	}
 	else if (ch != NULL)
 	{

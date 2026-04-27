@@ -1,13 +1,11 @@
 
+#include "EpollInitializer.hpp"
+
 #include <unistd.h>
 
 #include <stdexcept>
 
-#include "EpollInitializer.hpp"
-
-namespace
-{
-void register_socket(int epoll_fd, int socket_fd)
+void EpollInitializer::register_socket(int epoll_fd, int socket_fd)
 {
 	struct epoll_event event;
 	event.events = EPOLLIN;
@@ -18,7 +16,6 @@ void register_socket(int epoll_fd, int socket_fd)
 		throw std::runtime_error("Failed to add socket to epoll.");
 	}
 }
-} // namespace
 
 int EpollInitializer::init_epoll(int socket_fd)
 {

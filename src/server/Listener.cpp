@@ -1,8 +1,6 @@
 #include "Listener.hpp"
 
-namespace
-{
-int create_socket()
+int Listener::create_socket()
 {
 	struct protoent *proto = getprotobyname("tcp");
 	int              protocol_num = proto ? proto->p_proto : 0;
@@ -32,7 +30,7 @@ int create_socket()
 	return socket_fd;
 }
 
-void bind_socket(int socket_fd, uint32_t host_ip, uint16_t port_num)
+void Listener::bind_socket(int socket_fd, uint32_t host_ip, uint16_t port_num)
 {
 	struct sockaddr_in addr;
 
@@ -53,14 +51,13 @@ void bind_socket(int socket_fd, uint32_t host_ip, uint16_t port_num)
 	}
 }
 
-void start_socket(int socket_fd)
+void Listener::start_socket(int socket_fd)
 {
 	if (listen(socket_fd, SOMAXCONN) == -1)
 	{
 		throw std::runtime_error("Failed to listen on socket.");
 	}
 }
-} // namespace
 
 int Listener::init_socket(uint32_t host_ip, uint16_t port_num)
 {

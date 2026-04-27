@@ -23,6 +23,11 @@ class Listener
 {
   public:
 	int init_socket(uint32_t host_ip, uint16_t port_num);
+
+  private:
+	int  create_socket();
+	void bind_socket(int socket_fd, uint32_t host_ip, uint16_t port_num);
+	void start_socket(int socket_fd);
 };
 
 #endif

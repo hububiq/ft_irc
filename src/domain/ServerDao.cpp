@@ -1,6 +1,6 @@
-#include "Server.hpp"
+#include "ServerDao.hpp"
 
-Server::Server(int port, uint16_t port_num, uint32_t host_ip,
+ServerDao::ServerDao(int port, uint16_t port_num, uint32_t host_ip,
                const std::string& password, int socket_fd, int epoll_fd)
     : _socket_fd(socket_fd),
       _epoll_fd(epoll_fd),
@@ -9,7 +9,7 @@ Server::Server(int port, uint16_t port_num, uint32_t host_ip,
       _port_num(port_num),
       _password(password) {}
 
-Server::~Server() {
+ServerDao::~ServerDao() {
   close(this->_socket_fd);
   close(this->_epoll_fd);
   for (std::map<int, Client>::iterator it = this->_clients.begin();
@@ -19,36 +19,36 @@ Server::~Server() {
   this->_clients.clear();
 }
 
-std::map<int, Client>& Server::getClients() { return this->_clients; }
+std::map<int, Client>& ServerDao::getClients() { return this->_clients; }
 
-std::map<std::string, Channel>& Server::getChannels() {
+std::map<std::string, Channel>& ServerDao::getChannels() {
   return this->_channels;
 }
 
-Channel* Server::getChannel(const std::string& chann) {
+Channel* ServerDao::getChannel(const std::string& chann) {
   std::map<std::string, Channel>::iterator it = this->_channels.find(chann);
   if (it != this->_channels.end()) return &it->second;
   return NULL;
 }
 
-void Server::addChannel(Channel& ch, std::string& chName) {
+void ServerDao::addChannel(Channel& ch, std::string& chName) {
   ch.setChannelName(chName);
   this->_channels[chName] = ch;
 }
 
-int Server::getSocketFd() const { return this->_socket_fd; }
+int ServerDao::getSocketFd() const { return this->_socket_fd; }
 
-int Server::getEpollFd() const { return this->_epoll_fd; }
+int ServerDao::getEpollFd() const { return this->_epoll_fd; }
 
-int Server::getPort() const { return this->_port; }
+int ServerDao::getPort() const { return this->_port; }
 
-uint32_t Server::getHostIp() const { return this->_host_ip; }
+uint32_t ServerDao::getHostIp() const { return this->_host_ip; }
 
-uint16_t Server::getPortNum() const { return this->_port_num; }
+uint16_t ServerDao::getPortNum() const { return this->_port_num; }
 
-const std::string& Server::getPassword() const { return this->_password; }
+const std::string& ServerDao::getPassword() const { return this->_password; }
 
-bool Server::checkIfClientExistsByNickname(std::string& nickName) {
+bool ServerDao::checkIfClientExistsByNickname(std::string& nickName) {
   std::map<int, Client>::iterator it;
   for (it = _clients.begin(); it != _clients.end(); it++) {
     if (it->second.getNickname() == nickName) return true;
@@ -56,7 +56,7 @@ bool Server::checkIfClientExistsByNickname(std::string& nickName) {
   return false;
 }
 
-bool Server::isClientAdmin(Client& client, const std::string& chName) {
+bool ServerDao::isClientAdmin(Client& client, const std::string& chName) {
   Channel* ch = this->getChannel(chName);
   if (!ch) return false;
   const std::vector<Client*>& admins = ch->getAdmins();
@@ -67,7 +67,7 @@ bool Server::isClientAdmin(Client& client, const std::string& chName) {
   return false;
 }
 
-bool Server::isInviteeInChannel(const Message& msg,
+bool ServerDao::isInviteeInChannel(const Message& msg,
                                 const std::string& channelName) {
   Channel* ch = this->getChannel(channelName);
   if (!ch) return false;
@@ -79,7 +79,7 @@ bool Server::isInviteeInChannel(const Message& msg,
   return false;
 }
 
-bool Server::isUserInChannel(Client& client, const std::string& channelName) {
+bool ServerDao::isUserInChannel(Client& client, const std::string& channelName) {
   Channel* ch = this->getChannel(channelName);
   if (!ch) return false;
   const std::vector<Client*>& memb = ch->getMembers();

@@ -1,6 +1,6 @@
 #include "mode_reporter.hpp"
 
-extern Server* g_server;
+extern ServerDao* g_server;
 
 namespace mode_reporter {
 void reportChannelModes(Client& cli, const std::string& chName) {

@@ -8,7 +8,7 @@ INCLUDES = -I${INC_DIR} -I${INC_DIR}/domain -I${INC_DIR}/server -I${INC_DIR}/ser
 SRCS = \
        src/main.cpp \
        src/server/server_runner.cpp \
-       src/domain/Server.cpp \
+       src/domain/ServerDao.cpp \
        src/server/multiplexer.cpp \
        src/server/listener.cpp \
        src/server/epoll_state_manager.cpp \

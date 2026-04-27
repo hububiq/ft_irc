@@ -7,7 +7,7 @@
 #include "ACommand.hpp"
 #include "Client.hpp"
 #include "Message.hpp"
-#include "Server.hpp"
+#include "ServerDao.hpp"
 #include "reply_factory.hpp"
 
 class Quit : public ACommand {

@@ -5,7 +5,7 @@
 #include <vector>
 
 class Client;
-class Server;
+class ServerDao;
 struct Message;
 
 class Channel {
@@ -31,7 +31,7 @@ class Channel {
   void add_client(Client* cli);
   void addToInvited(std::string clientName);
   void addToChanFlags(char flag);
-  void addToAdmins(Server& serv, Client& cli, std::string& newAdmin);
+  void addToAdmins(ServerDao& serv, Client& cli, std::string& newAdmin);
   void removeFromFlags(char flag);
   // void remove_client(Client*);
   // void remove_client(Client*);
@@ -68,11 +68,11 @@ class Channel {
   void setFlagOff(Client& client, Message msg);
   bool hasEnoughParams(Client& client, Message& msg);
   void handleTurnL(Client& client, std::string& flagStr, int i, Message& msg);
-  void handleTurnO(Client& client, Server& serv, Message& msg);
+  void handleTurnO(Client& client, ServerDao& serv, Message& msg);
   void handleTurnK(Client& client, std::string& flagStr, int i, Message& msg);
   void handleTurnT(Client& client, std::string& flagStr, int i);
   void handleTurnI(Client& client, std::string& flagStr, int i);
-  void setFlagOn(Server& serv, Client& client, Message msg);
+  void setFlagOn(ServerDao& serv, Client& client, Message msg);
   void toggleParticularFlag(bool& flag);
 
   bool isInviteOnly();

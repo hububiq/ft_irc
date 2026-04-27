@@ -5,10 +5,10 @@
 
 #include "Client.hpp"
 #include "Message.hpp"
-#include "Server.hpp"
+#include "ServerDao.hpp"
 #include "reply_factory.hpp"
 
-extern Server* g_server;
+extern ServerDao* g_server;
 
 void Pass::execute(Client& client, Message& msg) {
   if (msg.params.empty()) {

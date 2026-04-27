@@ -5,10 +5,10 @@
 #include "Channel.hpp"
 #include "Client.hpp"
 #include "Message.hpp"
-#include "Server.hpp"
+#include "ServerDao.hpp"
 #include "reply_factory.hpp"
 
-extern Server *g_server;
+extern ServerDao *g_server;
 
 bool Kick::clientCanKICK(Channel *channel_obj, Client &client) {
   std::vector<Client *> temp_members = channel_obj->getAdmins();

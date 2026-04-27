@@ -22,7 +22,7 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="McpProjectServerCommands">
+  <component name="McpProjectServerDaoCommands">
     <commands />
     <urls />
   </component>

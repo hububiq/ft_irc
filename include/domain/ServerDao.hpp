@@ -24,7 +24,7 @@
 #include "HandlerStatus.hpp"
 #include "Message.hpp"
 
-class Server {
+class ServerDao {
  private:
   int _socket_fd;
   int _epoll_fd;
@@ -36,9 +36,9 @@ class Server {
   std::map<std::string, Channel> _channels;
 
  public:
-  Server(int port, uint16_t port_num, uint32_t host_ip,
+  ServerDao(int port, uint16_t port_num, uint32_t host_ip,
          const std::string &password, int socket_fd, int epoll_fd);
-  ~Server();
+  ~ServerDao();
 
   std::map<int, Client> &getClients();
   bool checkIfClientExistsByNickname(std::string &nickName);

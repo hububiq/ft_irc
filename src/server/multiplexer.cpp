@@ -1,7 +1,7 @@
 #include "multiplexer.hpp"
 
 extern volatile sig_atomic_t g_running;
-extern Server *g_server;
+extern ServerDao *g_server;
 
 void multiplexer::loop_epoll() {
   struct epoll_event events[LIMIT];

@@ -2,7 +2,7 @@
 #define EXECUTOR_COMMANDS_PASS_HPP
 
 #include "ACommand.hpp"
-extern Server *g_server;
+extern ServerDao *g_server;
 
 class Pass : public ACommand {
  public:

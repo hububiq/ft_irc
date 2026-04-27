@@ -1,6 +1,6 @@
 #include "Topic.hpp"
 
-extern Server* g_server;
+extern ServerDao* g_server;
 
 void Topic::execute(Client& client, Message& msg) {
   std::string nickname = client.getNickname();

@@ -4,7 +4,7 @@
 #include "ACommand.hpp"
 #include "Client.hpp"
 #include "Message.hpp"
-#include "Server.hpp"
+#include "ServerDao.hpp"
 #include "reply_factory.hpp"
 #include "validator.hpp"
 

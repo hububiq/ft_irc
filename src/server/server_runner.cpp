@@ -2,7 +2,7 @@
 
 extern volatile sig_atomic_t g_running;
 
-Server *g_server = NULL;
+ServerDao *g_server = NULL;
 
 namespace {
 std::string parse_pwd(char *arg) {
@@ -42,7 +42,7 @@ void runner::setup(int argc, char **argv) {
     throw;
   }
 
-  g_server = new Server(static_cast<int>(port), port_num, host_ip, pwd,
+  g_server = new ServerDao(static_cast<int>(port), port_num, host_ip, pwd,
                         socket_fd, epoll_fd);
 }
 

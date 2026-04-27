@@ -2,7 +2,7 @@
 
 #include "Client.hpp"
 #include "Message.hpp"
-#include "Server.hpp"
+#include "ServerDao.hpp"
 #include "reply_factory.hpp"
 
 void Cap::execute(Client& client, Message& msg) {

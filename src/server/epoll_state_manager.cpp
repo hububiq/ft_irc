@@ -1,6 +1,6 @@
 #include "epoll_state_manager.hpp"
 
-extern Server *g_server;
+extern ServerDao *g_server;
 
 namespace {
 void schedule_epollout(Client &client) {

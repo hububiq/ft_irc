@@ -5,7 +5,7 @@
 
 #include "Client.hpp"
 #include "Message.hpp"
-#include "Server.hpp"
+#include "ServerDao.hpp"
 #include "reply_factory.hpp"
 
 Channel::Channel() : _limit(0), _i(false), _t(false), _k(false), _l(false) {}
@@ -37,7 +37,7 @@ void Channel::addToChanFlags(char flag) {
   if (it == _chanFlags.end()) this->_chanFlags.push_back(flag);
 }
 
-void Channel::addToAdmins(Server& serv, Client& cli, std::string& newAdmin) {
+void Channel::addToAdmins(ServerDao& serv, Client& cli, std::string& newAdmin) {
   std::map<int, Client>& members = serv.getClients();
   std::map<int, Client>::iterator it = members.begin();
   while (it != members.end()) {
@@ -108,7 +108,7 @@ void Channel::handleTurnL(Client& client, std::string& flagStr, int i,
   if (msg.params.size() > 2) msg.params.erase(msg.params.begin() + 2);
 }
 
-void Channel::handleTurnO(Client& client, Server& serv, Message& msg) {
+void Channel::handleTurnO(Client& client, ServerDao& serv, Message& msg) {
   this->addToAdmins(serv, client, msg.params[2]);
   std::string reply = ":" + client.getNickname() + "!" + client.getUsername() +
                       "@" + client.getHostname() + " MODE " +
@@ -160,7 +160,7 @@ bool Channel::hasEnoughParams(Client& client, Message& msg) {
   return true;
 }
 
-void Channel::setFlagOn(Server& serv, Client& client, Message msg) {
+void Channel::setFlagOn(ServerDao& serv, Client& client, Message msg) {
   std::string flagStr = msg.params[1];
   for (size_t i = 1; i < flagStr.size(); ++i) {
     if (std::string("itklo").find(flagStr[i]) == std::string::npos) {

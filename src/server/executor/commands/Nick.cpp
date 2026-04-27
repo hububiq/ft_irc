@@ -1,6 +1,6 @@
 #include "Nick.hpp"
 
-extern Server* g_server;
+extern ServerDao* g_server;
 
 void Nick::execute(Client& client, Message& msg) {
   if (msg.params.empty()) {

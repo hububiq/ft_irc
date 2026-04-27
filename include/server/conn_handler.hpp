@@ -2,7 +2,7 @@
 #define CONN_HANDLER_HPP
 
 #include "Client.hpp"
-#include "Server.hpp"
+#include "ServerDao.hpp"
 
 namespace conn_handler {
 void process_connect(int socket_fd);

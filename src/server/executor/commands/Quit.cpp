@@ -1,6 +1,6 @@
 #include "Quit.hpp"
 
-extern Server *g_server;
+extern ServerDao *g_server;
 
 void Quit::execute(Client &client, Message &msg) {
   std::map<std::string, Channel> &channels = g_server->getChannels();

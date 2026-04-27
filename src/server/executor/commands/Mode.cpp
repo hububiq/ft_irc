@@ -1,6 +1,6 @@
 #include "Mode.hpp"
 
-extern Server* g_server;
+extern ServerDao* g_server;
 
 void Mode::execute(Client& client, Message& msg) {
   std::string nickname = client.getNickname();

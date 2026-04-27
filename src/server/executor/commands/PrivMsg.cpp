@@ -1,6 +1,6 @@
 #include "PrivMsg.hpp"
 
-extern Server* g_server;
+extern ServerDao* g_server;
 
 void PrivMsg::execute(Client& client, Message& msg) {
   if (msg.params.empty() || msg.params[0].empty()) {

@@ -19,14 +19,14 @@
 #include "Ping.hpp"
 #include "PrivMsg.hpp"
 #include "Quit.hpp"
-#include "Server.hpp"
+#include "ServerDao.hpp"
 #include "Topic.hpp"
 #include "User.hpp"
 #include "reply_factory.hpp"
 
 class ACommand;
 class Client;
-class Server;
+class ServerDao;
 struct Message;
 
 class command_handler {

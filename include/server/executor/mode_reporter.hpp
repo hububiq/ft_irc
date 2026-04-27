@@ -6,10 +6,10 @@
 
 #include "Channel.hpp"
 #include "Client.hpp"
-#include "Server.hpp"
+#include "ServerDao.hpp"
 #include "reply_factory.hpp"
 
-class Server;
+class ServerDao;
 class Client;
 namespace mode_reporter {
 void reportChannelModes(Client& client, const std::string& channelName);

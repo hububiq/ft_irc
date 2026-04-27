@@ -1,6 +1,6 @@
 #include "conn_handler.hpp"
 
-extern Server *g_server;
+extern ServerDao *g_server;
 
 namespace {
 void register_client(int client_fd, std::string &hostname) {

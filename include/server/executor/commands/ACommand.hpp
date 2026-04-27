@@ -2,7 +2,7 @@
 #define COMMAND_HPP
 
 class Client;
-class Server;
+class ServerDao;
 struct Message;
 
 class ACommand {

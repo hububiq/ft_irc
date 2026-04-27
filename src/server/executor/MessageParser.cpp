@@ -65,7 +65,7 @@ void MessageParser::extractParams(std::string &input, Message &msg)
 			break;
 		if (input[0] == ':')
 		{
-			msg.params.push_back(input.substr(1));
+			msg.params.push_back(input.substr(0));
 			input.clear();
 			break;
 		}

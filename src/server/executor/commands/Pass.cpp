@@ -8,9 +8,7 @@
 #include "ServerDao.hpp"
 #include "reply_factory.hpp"
 
-
-
-void Pass::execute(Client& client, Message& msg) {
+void Pass::execute(Client &client, Message &msg) {
   if (msg.params.empty()) {
     std::string reply = reply_factory::getReply(
         ERR_NEEDMOREPARAMS, client.getNickname(), msg.command, "");
@@ -33,11 +31,5 @@ void Pass::execute(Client& client, Message& msg) {
   client.setAuth();
   client.setState(HANDSHAKE);
 }
-
-
-
-
-
-
 
 Pass::Pass(ServerDao *server) : ACommand(server) {}

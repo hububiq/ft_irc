@@ -8,8 +8,6 @@
 #include "ServerDao.hpp"
 #include "reply_factory.hpp"
 
-
-
 bool Kick::clientCanKICK(Channel *channel_obj, Client &client) {
   std::vector<Client *> temp_members = channel_obj->getAdmins();
   std::vector<Client *>::iterator it = temp_members.begin();
@@ -56,8 +54,8 @@ void Kick::execute(Client &client, Message &msg) {
       std::string replay = ":" + nick + "!" + client.getRealName() +
                            "@localhost" + " KICK " + channel_name + " " +
                            client_to_kick + " :" + reason + "\r\n";
-      kicked->write_msg(replay);  // this line notifies the kicked clinet first
-                                  // (that is kicked)
+      kicked->write_msg(replay);  // this line notifies the kicked clinet
+                                  // first (that is kicked)
       channel_obj->broadcast(client, replay);
       // find and earse
       std::vector<Client *> &members = channel_obj->getMembers();
@@ -78,9 +76,5 @@ void Kick::execute(Client &client, Message &msg) {
     client.write_msg(err);
   }
 }
-
-
-
-
 
 Kick::Kick(ServerDao *server) : ACommand(server) {}

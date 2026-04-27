@@ -4,17 +4,18 @@
 #include <stdint.h>
 
 #include "ServerDao.hpp"
-#include "conn_handler.hpp"
-#include "epoll_state_manager.hpp"
-#include "request_handler.hpp"
+#include "ConnHandler.hpp"
+#include "EpollStateManager.hpp"
+#include "RequestHandler.hpp"
 
 class Multiplexer {
-public:
+ public:
   Multiplexer(ServerDao *server, ConnHandler *connHandler,
               RequestHandler *requestHandler, EpollStateManager *stateManager);
   ~Multiplexer();
   void loop_epoll();
-private:
+
+ private:
   ServerDao *m_server;
   ConnHandler *m_connHandler;
   RequestHandler *m_requestHandler;

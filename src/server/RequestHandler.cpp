@@ -1,7 +1,10 @@
-#include "request_handler.hpp"
+#include "RequestHandler.hpp"
 
-RequestHandler::RequestHandler(EpollStateManager *stateManager, Executor *executor, MessageParser *messageParser)
-    : m_stateManager(stateManager), m_executor(executor), m_messageParser(messageParser) {}
+RequestHandler::RequestHandler(EpollStateManager *stateManager,
+                               Executor *executor, MessageParser *messageParser)
+    : m_stateManager(stateManager),
+      m_executor(executor),
+      m_messageParser(messageParser) {}
 
 RequestHandler::~RequestHandler() {
   if (m_executor) delete m_executor;

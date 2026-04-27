@@ -5,7 +5,7 @@
 #include "ServerDao.hpp"
 #include "reply_factory.hpp"
 
-void Ping::execute(Client& client, Message& msg) {
+void Ping::execute(Client &client, Message &msg) {
   if (msg.params.empty()) {
     std::string reply = reply_factory::getReply(
         ERR_NEEDMOREPARAMS, client.getNickname(), msg.command, "");
@@ -21,11 +21,5 @@ void Ping::execute(Client& client, Message& msg) {
     client.write_msg(replay);
   }
 }
-
-
-
-
-
-
 
 Ping::Ping(ServerDao *server) : ACommand(server) {}

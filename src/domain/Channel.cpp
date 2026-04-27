@@ -12,7 +12,7 @@ Channel::Channel() : _limit(0), _i(false), _t(false), _k(false), _l(false) {}
 
 Channel::~Channel() {}
 
-Channel::Channel(std::string& name, std::string& key, Client* admin) {
+Channel::Channel(std::string &name, std::string &key, Client *admin) {
   this->_channel_name = name;
   this->_key = key;
   this->_admins.push_back(admin);
@@ -25,7 +25,7 @@ Channel::Channel(std::string& name, std::string& key, Client* admin) {
   _l = false;
 }
 
-void Channel::add_client(Client* cli) { this->_members.push_back(cli); }
+void Channel::add_client(Client *cli) { this->_members.push_back(cli); }
 
 void Channel::addToInvited(std::string clientName) {
   this->_invited.push_back(clientName);
@@ -37,8 +37,8 @@ void Channel::addToChanFlags(char flag) {
   if (it == _chanFlags.end()) this->_chanFlags.push_back(flag);
 }
 
-void Channel::addToAdmins(ServerDao& serv, Client& cli, std::string& newAdmin) {
-  std::map<int, Client>& members = serv.getClients();
+void Channel::addToAdmins(ServerDao &serv, Client &cli, std::string &newAdmin) {
+  std::map<int, Client> &members = serv.getClients();
   std::map<int, Client>::iterator it = members.begin();
   while (it != members.end()) {
     if (it->second.getNickname() == newAdmin) {
@@ -53,7 +53,7 @@ void Channel::addToAdmins(ServerDao& serv, Client& cli, std::string& newAdmin) {
 }
 
 void Channel::removeFromFlags(char flag) {
-  std::vector<char>& flagVec = this->getChanFlags();
+  std::vector<char> &flagVec = this->getChanFlags();
   std::vector<char>::iterator it = flagVec.begin();
   while (it != flagVec.end()) {
     if (*it == flag)
@@ -63,17 +63,19 @@ void Channel::removeFromFlags(char flag) {
   }
 }
 
-const std::string& Channel::getChannelName() const {
+const std::string &Channel::getChannelName() const {
   return this->_channel_name;
 }
-const std::vector<Client*>& Channel::getAdmins() const { return this->_admins; }
-const std::vector<Client*>& Channel::getMembers() const {
+const std::vector<Client *> &Channel::getAdmins() const {
+  return this->_admins;
+}
+const std::vector<Client *> &Channel::getMembers() const {
   return this->_members;
 }
-const std::vector<std::string>& Channel::getInvited() const {
+const std::vector<std::string> &Channel::getInvited() const {
   return this->_invited;
 }
-const std::vector<char>& Channel::getChanFlags() const {
+const std::vector<char> &Channel::getChanFlags() const {
   return this->_chanFlags;
 }
 unsigned int Channel::getLimit() const { return this->_limit; }
@@ -81,22 +83,22 @@ const std::string Channel::getKey() const { return this->_key; }
 const std::string Channel::getTopic() const { return this->_topic; }
 unsigned int Channel::getMaxMembers() const { return this->_limit; }
 
-std::string& Channel::getChannelName() { return this->_channel_name; }
-std::vector<Client*>& Channel::getAdmins() { return this->_admins; }
-std::vector<Client*>& Channel::getMembers() { return this->_members; }
-std::vector<std::string>& Channel::getInvited() { return this->_invited; }
-std::vector<char>& Channel::getChanFlags() { return this->_chanFlags; }
+std::string &Channel::getChannelName() { return this->_channel_name; }
+std::vector<Client *> &Channel::getAdmins() { return this->_admins; }
+std::vector<Client *> &Channel::getMembers() { return this->_members; }
+std::vector<std::string> &Channel::getInvited() { return this->_invited; }
+std::vector<char> &Channel::getChanFlags() { return this->_chanFlags; }
 std::string Channel::getKey() { return this->_key; }
 std::string Channel::getTopic() { return this->_topic; }
 
-void Channel::setKey(std::string& key) { _key = key; }
+void Channel::setKey(std::string &key) { _key = key; }
 void Channel::setTopic(std::string topic) { this->_topic = topic; }
-void Channel::setChannelName(std::string& name) { this->_channel_name = name; }
+void Channel::setChannelName(std::string &name) { this->_channel_name = name; }
 void Channel::setLimit(unsigned int l) { this->_limit = l; }
 
 /*turning on the flags*/
-void Channel::handleTurnL(Client& client, std::string& flagStr, int i,
-                          Message& msg) {
+void Channel::handleTurnL(Client &client, std::string &flagStr, int i,
+                          Message &msg) {
   if (!this->isChannelLimit()) this->toggleParticularFlag(this->_l);
   this->addToChanFlags(flagStr[i]);
   this->setLimit(std::atoi(msg.params[2].c_str()));
@@ -108,7 +110,7 @@ void Channel::handleTurnL(Client& client, std::string& flagStr, int i,
   if (msg.params.size() > 2) msg.params.erase(msg.params.begin() + 2);
 }
 
-void Channel::handleTurnO(Client& client, ServerDao& serv, Message& msg) {
+void Channel::handleTurnO(Client &client, ServerDao &serv, Message &msg) {
   this->addToAdmins(serv, client, msg.params[2]);
   std::string reply = ":" + client.getNickname() + "!" + client.getUsername() +
                       "@" + client.getHostname() + " MODE " +
@@ -118,8 +120,8 @@ void Channel::handleTurnO(Client& client, ServerDao& serv, Message& msg) {
   if (msg.params.size() > 2) msg.params.erase(msg.params.begin() + 2);
 }
 
-void Channel::handleTurnK(Client& client, std::string& flagStr, int i,
-                          Message& msg) {
+void Channel::handleTurnK(Client &client, std::string &flagStr, int i,
+                          Message &msg) {
   this->toggleParticularFlag(this->_k);
   this->addToChanFlags(flagStr[i]);
   this->setKey(msg.params[2]);
@@ -130,7 +132,7 @@ void Channel::handleTurnK(Client& client, std::string& flagStr, int i,
   client.write_msg(reply);
 }
 
-void Channel::handleTurnT(Client& client, std::string& flagStr, int i) {
+void Channel::handleTurnT(Client &client, std::string &flagStr, int i) {
   this->toggleParticularFlag(this->_t);
   this->addToChanFlags(flagStr[i]);
   std::string reply = ":" + client.getNickname() + "!" + client.getUsername() +
@@ -140,7 +142,7 @@ void Channel::handleTurnT(Client& client, std::string& flagStr, int i) {
   client.write_msg(reply);
 }
 
-void Channel::handleTurnI(Client& client, std::string& flagStr, int i) {
+void Channel::handleTurnI(Client &client, std::string &flagStr, int i) {
   this->toggleParticularFlag(this->_i);
   this->addToChanFlags(flagStr[i]);
   std::string reply = ":" + client.getNickname() + "!" + client.getUsername() +
@@ -150,7 +152,7 @@ void Channel::handleTurnI(Client& client, std::string& flagStr, int i) {
   client.write_msg(reply);
 }
 
-bool Channel::hasEnoughParams(Client& client, Message& msg) {
+bool Channel::hasEnoughParams(Client &client, Message &msg) {
   if (msg.params.size() < 3 || msg.params[2].empty()) {
     std::string reply = reply_factory::getReply(
         ERR_NEEDMOREPARAMS, client.getNickname(), msg.command, "");
@@ -160,7 +162,7 @@ bool Channel::hasEnoughParams(Client& client, Message& msg) {
   return true;
 }
 
-void Channel::setFlagOn(ServerDao& serv, Client& client, Message msg) {
+void Channel::setFlagOn(ServerDao &serv, Client &client, Message msg) {
   std::string flagStr = msg.params[1];
   for (size_t i = 1; i < flagStr.size(); ++i) {
     if (std::string("itklo").find(flagStr[i]) == std::string::npos) {
@@ -198,7 +200,10 @@ void Channel::setFlagOn(ServerDao& serv, Client& client, Message msg) {
     } else if (flagStr[i] == 'l') {
       if (!hasEnoughParams(client, msg)) continue;
       if (!msg.params[2].empty() &&
-          msg.params[2].find_first_not_of("0123456789") != std::string::npos) {
+          msg.params[2].find_first_not_of("0123"
+                                          "4567"
+                                          "8"
+                                          "9") != std::string::npos) {
         if (msg.params.size() > 2) msg.params.erase(msg.params.begin() + 2);
         continue;
       }
@@ -209,7 +214,7 @@ void Channel::setFlagOn(ServerDao& serv, Client& client, Message msg) {
 /*turning on the flags*/
 
 /*turning off the flags*/
-void Channel::handleTurnOffI(Client& client) {
+void Channel::handleTurnOffI(Client &client) {
   this->toggleParticularFlag(this->_i);
   this->removeFromFlags('i');
   std::string reply = ":" + client.getNickname() + "!" + client.getUsername() +
@@ -219,7 +224,7 @@ void Channel::handleTurnOffI(Client& client) {
   client.write_msg(reply);
 }
 
-void Channel::handleTurnOffT(Client& client) {
+void Channel::handleTurnOffT(Client &client) {
   this->toggleParticularFlag(this->_t);
   this->removeFromFlags('t');
   std::string reply = ":" + client.getNickname() + "!" + client.getUsername() +
@@ -229,7 +234,7 @@ void Channel::handleTurnOffT(Client& client) {
   client.write_msg(reply);
 }
 
-void Channel::handleTurnOffK(Client& client) {
+void Channel::handleTurnOffK(Client &client) {
   this->toggleParticularFlag(this->_k);
   this->removeFromFlags('k');
   this->_key.clear();
@@ -240,7 +245,7 @@ void Channel::handleTurnOffK(Client& client) {
   client.write_msg(reply);
 }
 
-void Channel::handleTurnOffL(Client& client) {
+void Channel::handleTurnOffL(Client &client) {
   this->toggleParticularFlag(this->_l);
   this->removeFromFlags('l');
   this->_limit = 0;
@@ -251,9 +256,9 @@ void Channel::handleTurnOffL(Client& client) {
   client.write_msg(reply);
 }
 
-void Channel::handleTurnOffO(Client& client, Message& msg) {
-  std::string& targetNick = msg.params[2];
-  std::vector<Client*>::iterator it;
+void Channel::handleTurnOffO(Client &client, Message &msg) {
+  std::string &targetNick = msg.params[2];
+  std::vector<Client *>::iterator it;
   for (it = this->_admins.begin(); it != this->_admins.end(); it++) {
     if ((*it)->getNickname() == targetNick) {
       this->_admins.erase(it);
@@ -268,7 +273,7 @@ void Channel::handleTurnOffO(Client& client, Message& msg) {
   if (msg.params.size() > 2) msg.params.erase(msg.params.begin() + 2);
 }
 
-void Channel::setFlagOff(Client& client, Message msg) {
+void Channel::setFlagOff(Client &client, Message msg) {
   std::string flagStr = msg.params[1];
   for (size_t i = 1; i < flagStr.size(); ++i) {
     if (std::string("itklo").find(flagStr[i]) == std::string::npos) {
@@ -303,7 +308,7 @@ void Channel::setFlagOff(Client& client, Message msg) {
 }
 /*turning off the flags*/
 
-void Channel::toggleParticularFlag(bool& flag) { flag = !flag; }
+void Channel::toggleParticularFlag(bool &flag) { flag = !flag; }
 bool Channel::isInviteOnly() { return this->_i; }
 bool Channel::isTopicForOperator() { return this->_t; }
 bool Channel::isChannelKey() { return this->_k; }
@@ -321,18 +326,18 @@ bool Channel::isThereTopic() {
   return false;
 }
 
-bool Channel::isNicknameInChannel(std::string& nick) {
-  std::vector<Client*>& members = this->getMembers();
-  std::vector<Client*>::iterator it;
+bool Channel::isNicknameInChannel(std::string &nick) {
+  std::vector<Client *> &members = this->getMembers();
+  std::vector<Client *>::iterator it;
   for (it = members.begin(); it != members.end(); it++) {
     if ((*it)->getNickname() == nick) return true;
   }
   return false;
 }
 
-void Channel::broadcast(Client& sender, std::string& msg) {
-  std::vector<Client*>& members = this->getMembers();
-  std::vector<Client*>::iterator it;
+void Channel::broadcast(Client &sender, std::string &msg) {
+  std::vector<Client *> &members = this->getMembers();
+  std::vector<Client *>::iterator it;
   for (it = members.begin(); it != members.end(); it++) {
     if (sender.getFd() != (*it)->getFd()) (*it)->write_msg(msg);
   }

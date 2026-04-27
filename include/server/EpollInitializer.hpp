@@ -4,7 +4,7 @@
 #include <sys/epoll.h>
 
 class EpollInitializer {
-public:
+ public:
   int init_epoll(int socket_fd);
 };
 

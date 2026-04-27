@@ -1,7 +1,5 @@
 #include "Quit.hpp"
 
-
-
 void Quit::execute(Client &client, Message &msg) {
   std::map<std::string, Channel> &channels = m_server->getChannels();
   std::map<std::string, Channel>::iterator it_channel_b = channels.begin();
@@ -34,10 +32,5 @@ void Quit::execute(Client &client, Message &msg) {
       it_channel_b++;
   }
 }
-
-
-
-
-
 
 Quit::Quit(ServerDao *server) : ACommand(server) {}

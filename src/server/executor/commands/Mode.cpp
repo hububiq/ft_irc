@@ -1,8 +1,6 @@
 #include "Mode.hpp"
 
-
-
-void Mode::execute(Client& client, Message& msg) {
+void Mode::execute(Client &client, Message &msg) {
   std::string nickname = client.getNickname();
   std::string command = msg.command;
   if (msg.params.empty()) {
@@ -28,14 +26,14 @@ void Mode::execute(Client& client, Message& msg) {
     }
   }
   if (msg.params.size() >= 2) {
-    Channel* chanForMode = m_server->getChannel(msg.params[0]);
+    Channel *chanForMode = m_server->getChannel(msg.params[0]);
     if (!chanForMode) {
       std::string reply = reply_factory::getReply(ERR_NOSUCHCHANNEL, nickname,
                                                   msg.params[0], "");
       client.write_msg(reply);
       return;
     }
-    std::string& chName = chanForMode->getChannelName();
+    std::string &chName = chanForMode->getChannelName();
     if (m_server->isClientAdmin(client, chName)) {
       if (msg.params[1][0] == '+')
         chanForMode->setFlagOn(*m_server, client, msg);
@@ -54,10 +52,5 @@ void Mode::execute(Client& client, Message& msg) {
   }
 }
 
-
-
-
-
-
-
-Mode::Mode(ServerDao *server, ModeReporter *modeReporter) : ACommand(server), m_modeReporter(modeReporter) {}
+Mode::Mode(ServerDao *server, ModeReporter *modeReporter)
+    : ACommand(server), m_modeReporter(modeReporter) {}

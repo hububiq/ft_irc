@@ -1,8 +1,6 @@
 #include "Topic.hpp"
 
-
-
-void Topic::execute(Client& client, Message& msg) {
+void Topic::execute(Client &client, Message &msg) {
   std::string nickname = client.getNickname();
   std::string command = msg.command;
   if (msg.params.empty()) {
@@ -11,7 +9,7 @@ void Topic::execute(Client& client, Message& msg) {
     client.write_msg(reply);
     return;
   }
-  Channel* chan = m_server->getChannel(msg.params[0]);
+  Channel *chan = m_server->getChannel(msg.params[0]);
   if (!chan) {
     std::string reply =
         reply_factory::getReply(ERR_NOSUCHCHANNEL, nickname, msg.params[0], "");
@@ -38,7 +36,7 @@ void Topic::execute(Client& client, Message& msg) {
     return;
   }
   if (isUserInChan && msg.params.size() >= 2) {
-    Channel* tempChan = m_server->getChannel(msg.params[0]);
+    Channel *tempChan = m_server->getChannel(msg.params[0]);
     if (!tempChan) {
       std::string reply = reply_factory::getReply(ERR_NOTONCHANNEL, nickname,
                                                   msg.params[0], "");
@@ -71,11 +69,5 @@ void Topic::execute(Client& client, Message& msg) {
     }
   }
 }
-
-
-
-
-
-
 
 Topic::Topic(ServerDao *server) : ACommand(server) {}

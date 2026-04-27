@@ -3,21 +3,21 @@
 
 #include "Client.hpp"
 #include "ClientState.hpp"
+#include "CommandType.hpp"
 #include "Message.hpp"
 #include "ServerDao.hpp"
-#include "command_handler.hpp"
+#include "CommandHandler.hpp"
 #include "reply_factory.hpp"
-#include "CommandType.hpp"
 
 class CommandHandler;
 
 class Executor {
-public:
+ public:
   Executor(CommandHandler *commandHandler);
   ~Executor();
   void executeMessage(Client &client, Message &msg);
 
-private:
+ private:
   CommandHandler *m_commandHandler;
   bool process_connected(Client &client, Message &msg);
   bool process_handshake(Client &client, Message &msg);

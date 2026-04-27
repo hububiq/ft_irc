@@ -1,4 +1,4 @@
-#include "executor.hpp"
+#include "Executor.hpp"
 
 bool Executor::process_connected(Client &client, Message &msg) {
   if (msg.command == CMD_CAP || msg.command == CMD_PASS) {
@@ -45,7 +45,8 @@ bool Executor::validateClientState(Client &client, Message &msg) {
   return true;
 }
 
-Executor::Executor(CommandHandler *commandHandler) : m_commandHandler(commandHandler) {}
+Executor::Executor(CommandHandler *commandHandler)
+    : m_commandHandler(commandHandler) {}
 
 Executor::~Executor() {
   if (m_commandHandler) delete m_commandHandler;

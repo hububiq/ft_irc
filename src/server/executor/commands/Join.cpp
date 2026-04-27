@@ -1,8 +1,6 @@
 #include "Join.hpp"
 
-
-
-void Join::execute(Client& client, Message& msg) {
+void Join::execute(Client &client, Message &msg) {
   std::string nickname = client.getNickname();
   std::string command = msg.command;
   if (msg.params.empty() || msg.params[0].size() == 1) {
@@ -11,14 +9,14 @@ void Join::execute(Client& client, Message& msg) {
     client.write_msg(reply);
     return;
   }
-  std::string& channelName = msg.params[0];
+  std::string &channelName = msg.params[0];
   if (!m_validator->isValidChannelName(channelName)) {
     std::string reply =
         reply_factory::getReply(ERR_NOSUCHCHANNEL, nickname, channelName, "");
     client.write_msg(reply);
     return;
   }
-  Channel* ch = m_server->getChannel(channelName);
+  Channel *ch = m_server->getChannel(channelName);
   if (ch && m_server->isUserInChannel(client, ch->getChannelName())) {
     return;
   }
@@ -47,10 +45,8 @@ void Join::execute(Client& client, Message& msg) {
   }
 }
 
-
-
-
-
-
-
-Join::Join(ServerDao *server, Validator *validator, JoinGatekeeper *joinGatekeeper) : ACommand(server), m_validator(validator), m_joinGatekeeper(joinGatekeeper) {}
+Join::Join(ServerDao *server, Validator *Validator,
+           JoinGatekeeper *joinGatekeeper)
+    : ACommand(server),
+      m_validator(Validator),
+      m_joinGatekeeper(joinGatekeeper) {}

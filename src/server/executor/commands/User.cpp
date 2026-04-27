@@ -1,6 +1,6 @@
 #include "User.hpp"
 
-void User::execute(Client& client, Message& msg) {
+void User::execute(Client &client, Message &msg) {
   if (msg.params.size() < 2) {
     std::string reply = reply_factory::getReply(
         ERR_NEEDMOREPARAMS, client.getNickname(), msg.command, "");
@@ -28,11 +28,5 @@ void User::execute(Client& client, Message& msg) {
                               client.getUsername(), client.getHostname());
   client.write_msg(reply);
 }
-
-
-
-
-
-
 
 User::User(ServerDao *server) : ACommand(server) {}

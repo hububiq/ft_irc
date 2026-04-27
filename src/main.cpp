@@ -1,5 +1,5 @@
-#include "command_handler.hpp"  // deprecate the map in the future
-#include "server_runner.hpp"
+#include "CommandHandler.hpp"  // deprecate the map in the future
+#include "ServerRunner.hpp"
 
 volatile sig_atomic_t g_running = 1;
 

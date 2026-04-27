@@ -1,8 +1,6 @@
 #include "Invite.hpp"
 
-
-
-void Invite::execute(Client& client, Message& msg) {
+void Invite::execute(Client &client, Message &msg) {
   std::string nickname = client.getNickname();
   std::string command = msg.command;
   if (msg.params.size() < 2) {
@@ -17,7 +15,7 @@ void Invite::execute(Client& client, Message& msg) {
     client.write_msg(reply);
     return;
   }
-  Channel* ch = m_server->getChannel(msg.params[1]);
+  Channel *ch = m_server->getChannel(msg.params[1]);
   if (!ch) {
     std::string reply = reply_factory::getReply(ERR_NOSUCHCHANNEL, nickname,
                                                 msg.params[0], msg.params[1]);
@@ -54,7 +52,7 @@ void Invite::execute(Client& client, Message& msg) {
   std::string reply = reply_factory::getReply(RPL_INVITING, nickname,
                                               msg.params[0], msg.params[1]);
   client.write_msg(reply);
-  std::map<int, Client>& cl = m_server->getClients();
+  std::map<int, Client> &cl = m_server->getClients();
   std::map<int, Client>::iterator it;
   std::string prefix = ":" + client.getNickname() + "!" + client.getUsername() +
                        "@" + client.getHostname();
@@ -67,10 +65,5 @@ void Invite::execute(Client& client, Message& msg) {
   }
 }
 
-
-
-
-
-
-
-Invite::Invite(ServerDao *server, Validator *validator) : ACommand(server), m_validator(validator) {}
+Invite::Invite(ServerDao *server, Validator *Validator)
+    : ACommand(server), m_validator(Validator) {}

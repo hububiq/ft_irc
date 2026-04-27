@@ -6,19 +6,20 @@
 #include "Client.hpp"
 #include "HandlerStatus.hpp"
 #include "ServerDao.hpp"
-#include "epoll_state_manager.hpp"
-#include "executor.hpp"
-#include "message_parser.hpp"
+#include "EpollStateManager.hpp"
+#include "Executor.hpp"
+#include "MessageParser.hpp"
 
 class Executor;
 
 class RequestHandler {
-public:
-  RequestHandler(EpollStateManager *stateManager, Executor *executor, MessageParser *messageParser);
+ public:
+  RequestHandler(EpollStateManager *stateManager, Executor *executor,
+                 MessageParser *messageParser);
   ~RequestHandler();
   HandleResult process_request(uint32_t events, Client &client);
 
-private:
+ private:
   EpollStateManager *m_stateManager;
   Executor *m_executor;
   MessageParser *m_messageParser;

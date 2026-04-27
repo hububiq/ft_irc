@@ -5,11 +5,11 @@
 #include "ServerDao.hpp"
 
 class ConnHandler {
-public:
+ public:
   ConnHandler(ServerDao *server);
   void process_connect(int socket_fd);
 
-private:
+ private:
   ServerDao *m_server;
   void register_client(int client_fd, std::string &hostname);
 };

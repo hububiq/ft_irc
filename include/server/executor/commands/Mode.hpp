@@ -5,20 +5,19 @@
 #include "Client.hpp"
 #include "Message.hpp"
 #include "ServerDao.hpp"
-#include "mode_reporter.hpp"
+#include "ModeReporter.hpp"
 #include "reply_factory.hpp"
 
 class ModeReporter;
 
 class Mode : public ACommand {
  private:
-  ModeReporter* m_modeReporter;
+  ModeReporter *m_modeReporter;
+
  public:
   Mode(ServerDao *server = NULL, ModeReporter *modeReporter = NULL);
-  
-  
-  
-  void execute(Client&, Message&);
+
+  void execute(Client &, Message &);
 };
 
 #endif

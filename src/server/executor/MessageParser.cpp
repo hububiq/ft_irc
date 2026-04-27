@@ -1,12 +1,13 @@
-#include "message_parser.hpp"
+#include "MessageParser.hpp"
 
-void MessageParser::extractPrefix(std::string& input, Message& msg) {
+void MessageParser::extractPrefix(std::string &input, Message &msg) {
   if (input[0] != ':') return;
 
   size_t spacePos = input.find(' ');
   if (spacePos == std::string::npos) {
     throw std::invalid_argument(
-        "Malformed IRC message: Prefix provided without command.");
+        "Malformed IRC message: Prefix provided "
+        "without command.");
   }
 
   msg.prefix = input.substr(1, spacePos - 1);
@@ -14,7 +15,7 @@ void MessageParser::extractPrefix(std::string& input, Message& msg) {
   input.erase(0, spacePos + 1);
 }
 
-void MessageParser::trimLeadingWhitespace(std::string& input) {
+void MessageParser::trimLeadingWhitespace(std::string &input) {
   size_t firstContentChar = input.find_first_not_of(" \t");
   if (firstContentChar == std::string::npos) {
     throw std::invalid_argument("Message contains no command.");
@@ -22,7 +23,7 @@ void MessageParser::trimLeadingWhitespace(std::string& input) {
   input.erase(0, firstContentChar);
 }
 
-void MessageParser::extractCommand(std::string& input, Message& msg) {
+void MessageParser::extractCommand(std::string &input, Message &msg) {
   size_t spacePos = input.find(' ');
   std::string rawCommand;
 
@@ -43,7 +44,7 @@ std::string MessageParser::normalizeCommand(std::string command) {
   return command;
 }
 
-void MessageParser::extractParams(std::string& input, Message& msg) {
+void MessageParser::extractParams(std::string &input, Message &msg) {
   while (!input.empty()) {
     size_t first = input.find_first_not_of(' ');
     if (first == std::string::npos) break;
@@ -68,7 +69,8 @@ void MessageParser::extractParams(std::string& input, Message& msg) {
   }
 }
 
-void MessageParser::deserialize(const std::string& rawLine, Message& outMessage) {
+void MessageParser::deserialize(const std::string &rawLine,
+                                Message &outMessage) {
   if (rawLine.empty()) {
     throw std::invalid_argument("Cannot parse an empty message.");
   }

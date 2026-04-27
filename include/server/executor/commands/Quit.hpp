@@ -13,10 +13,8 @@
 class Quit : public ACommand {
  public:
   Quit(ServerDao *server = NULL);
-  
-  
-  
-  void execute(Client&, Message&);
+
+  void execute(Client &, Message &);
 };
 
 #endif

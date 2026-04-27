@@ -22,11 +22,10 @@
 #include "ServerDao.hpp"
 #include "Topic.hpp"
 #include "User.hpp"
+#include "JoinGatekeeper.hpp"
+#include "ModeReporter.hpp"
 #include "reply_factory.hpp"
-
-#include "join_gatekeeper.hpp"
-#include "mode_reporter.hpp"
-#include "validator.hpp"
+#include "Validator.hpp"
 
 class ACommand;
 class Client;
@@ -35,15 +34,16 @@ struct Message;
 
 class CommandHandler {
  private:
-  std::map<std::string, ACommand*> _commandsMap;
-  Validator* m_validator;
-  JoinGatekeeper* m_joinGatekeeper;
-  ModeReporter* m_modeReporter;
+  std::map<std::string, ACommand *> _commandsMap;
+  Validator *m_validator;
+  JoinGatekeeper *m_joinGatekeeper;
+  ModeReporter *m_modeReporter;
 
  public:
-  CommandHandler(ServerDao *server, Validator* validator, JoinGatekeeper* joinGatekeeper, ModeReporter* modeReporter);
+  CommandHandler(ServerDao *server, Validator *Validator,
+                 JoinGatekeeper *joinGatekeeper, ModeReporter *modeReporter);
   ~CommandHandler();
-  void handleCommand(Client& client, Message& msg);
+  void handleCommand(Client &client, Message &msg);
 };
 
 #endif

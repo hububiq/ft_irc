@@ -1,8 +1,6 @@
 #include "PrivMsg.hpp"
 
-
-
-void PrivMsg::execute(Client& client, Message& msg) {
+void PrivMsg::execute(Client &client, Message &msg) {
   if (msg.params.empty() || msg.params[0].empty()) {
     std::string reply = reply_factory::getReply(
         ERR_NORECIPIENT, client.getNickname(), msg.command, "");
@@ -16,7 +14,7 @@ void PrivMsg::execute(Client& client, Message& msg) {
     client.write_msg(reply);
     return;
   }
-  Channel* channForMsg = m_server->getChannel(msg.params[0]);
+  Channel *channForMsg = m_server->getChannel(msg.params[0]);
   if (channForMsg == NULL &&
       !m_server->checkIfClientExistsByNickname(msg.params[0])) {
     std::string reply = reply_factory::getReply(
@@ -31,7 +29,7 @@ void PrivMsg::execute(Client& client, Message& msg) {
                         " " + msg.params[1] + "\r\n";
     channForMsg->broadcast(client, reply);
   } else if (msg.params[0][0] != '#') {
-    std::map<int, Client>& cl = m_server->getClients();
+    std::map<int, Client> &cl = m_server->getClients();
     std::map<int, Client>::iterator it;
     for (it = cl.begin(); it != cl.end(); it++) {
       if (it->second.getNickname() == msg.params[0]) {
@@ -42,11 +40,5 @@ void PrivMsg::execute(Client& client, Message& msg) {
     }
   }
 }
-
-
-
-
-
-
 
 PrivMsg::PrivMsg(ServerDao *server) : ACommand(server) {}

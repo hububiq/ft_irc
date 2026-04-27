@@ -10,10 +10,8 @@
 class Topic : public ACommand {
  public:
   Topic(ServerDao *server = NULL);
-  
-  
-  
-  void execute(Client&, Message&);
+
+  void execute(Client &, Message &);
 };
 
 #endif

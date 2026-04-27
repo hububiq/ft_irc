@@ -1,9 +1,9 @@
-#include "mode_reporter.hpp"
+#include "ModeReporter.hpp"
 
-ModeReporter::ModeReporter(ServerDao* server) : m_server(server) {}
+ModeReporter::ModeReporter(ServerDao *server) : m_server(server) {}
 
-void ModeReporter::reportChannelModes(Client& cli, const std::string& chName) {
-  Channel* chan = m_server->getChannel(chName);
+void ModeReporter::reportChannelModes(Client &cli, const std::string &chName) {
+  Channel *chan = m_server->getChannel(chName);
   if (!chan) {
     std::string reply = reply_factory::getReply(ERR_NOSUCHCHANNEL,
                                                 cli.getNickname(), chName, "");

@@ -37,7 +37,7 @@ class ServerDao {
 
  public:
   ServerDao(int port, uint16_t port_num, uint32_t host_ip,
-         const std::string &password, int socket_fd, int epoll_fd);
+            const std::string &password, int socket_fd, int epoll_fd);
   ~ServerDao();
 
   std::map<int, Client> &getClients();

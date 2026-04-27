@@ -5,12 +5,12 @@
 #include "ServerDao.hpp"
 
 class EpollStateManager {
-public:
+ public:
   EpollStateManager(ServerDao *server);
   void schedule_epollin(Client &client);
   void schedule_send();
 
-private:
+ private:
   ServerDao *m_server;
   void schedule_epollout(Client &client);
 };

@@ -1,6 +1,6 @@
-#include "join_gatekeeper.hpp"
+#include "JoinGatekeeper.hpp"
 
-bool JoinGatekeeper::isJoinDenied(Channel* ch, Message& msg, Client& client) {
+bool JoinGatekeeper::isJoinDenied(Channel *ch, Message &msg, Client &client) {
   if (ch->isInviteOnly() && !ch->isInvited(client.getNickname())) {
     std::string reply = reply_factory::getReply(
         ERR_INVITEONLYCHAN, client.getNickname(), msg.params[0], "");

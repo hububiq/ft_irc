@@ -1,17 +1,16 @@
-#include "command_handler.hpp"
-#include "executor.hpp"
-#include "message_parser.hpp"
-#include "listener.hpp"
-#include "multiplexer.hpp"
-#include "server_runner.hpp"
-#include "validator.hpp"
-#include "mode_reporter.hpp"
-#include "join_gatekeeper.hpp"
+#include "CommandHandler.hpp"
+#include "Executor.hpp"
+#include "JoinGatekeeper.hpp"
+#include "Listener.hpp"
+#include "MessageParser.hpp"
+#include "ModeReporter.hpp"
+#include "Multiplexer.hpp"
+#include "ServerRunner.hpp"
+#include "Validator.hpp"
 
 extern volatile sig_atomic_t g_running;
 
-namespace {
-std::string parse_pwd(char *arg) {
+std::string ServerRunner::parse_pwd(char *arg) {
   std::string pwd(arg ? arg : "");
   if (pwd.empty()) {
     throw std::out_of_range("Password must contain at least 1 letter");
@@ -19,7 +18,7 @@ std::string parse_pwd(char *arg) {
   return pwd;
 }
 
-long parse_port(char *arg) {
+long ServerRunner::parse_port(char *arg) {
   if (!arg) throw std::invalid_argument("Port argument missing");
   char *endptr = NULL;
   long port = std::strtol(arg, &endptr, 10);
@@ -28,7 +27,6 @@ long parse_port(char *arg) {
   }
   return port;
 }
-}  // namespace
 
 ServerRunner::ServerRunner(int argc, char **argv) {
   if (argc != 3) {
@@ -39,7 +37,7 @@ ServerRunner::ServerRunner(int argc, char **argv) {
   uint16_t port_num = htons((uint16_t)port);
   std::string pwd = parse_pwd(argv[2]);
   uint32_t host_ip = inet_addr("127.0.0.1");
-  int socket_fd = m_listener.init_socket(host_ip, port_num);
+  int socket_fd = m_Listener.init_socket(host_ip, port_num);
   int epoll_fd;
   try {
     epoll_fd = m_epollInitializer.init_epoll(socket_fd);
@@ -50,9 +48,24 @@ ServerRunner::ServerRunner(int argc, char **argv) {
 
   m_server = new ServerDao(static_cast<int>(port), port_num, host_ip, pwd,
                            socket_fd, epoll_fd);
-                           
+
   EpollStateManager *stateManager = new EpollStateManager(m_server);
-  m_multiplexer = new Multiplexer(
+  m_Multiplexer = new Multiplexer(
+      m_server, new ConnHandler(m_server),
+      new RequestHandler(stateManager,
+                         new Executor(new CommandHandler(
+                             m_server, new Validator(), new JoinGatekeeper(),
+                             new ModeReporter(m_server))),
+                         new MessageParser()),
+      stateManager);
+}
+
+/*
+m_server = new ServerDao(static_cast<int>(port), port_num, host_ip, pwd,
+socket_fd, epoll_fd);
+
+  EpollStateManager *stateManager = new EpollStateManager(m_server);
+  m_Multiplexer = new Multiplexer(
     m_server,
     new ConnHandler(m_server),
     new RequestHandler(
@@ -69,10 +82,10 @@ ServerRunner::ServerRunner(int argc, char **argv) {
     ),
     stateManager
   );
-}
+*/
 
 ServerRunner::~ServerRunner() {
-  if (m_multiplexer) delete m_multiplexer;
+  if (m_Multiplexer) delete m_Multiplexer;
 
   if (m_server) {
     delete m_server;
@@ -80,6 +93,4 @@ ServerRunner::~ServerRunner() {
   }
 }
 
-void ServerRunner::run() {
-  m_multiplexer->loop_epoll();
-}
+void ServerRunner::run() { m_Multiplexer->loop_epoll(); }

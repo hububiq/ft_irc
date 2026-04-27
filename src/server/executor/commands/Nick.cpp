@@ -1,8 +1,6 @@
 #include "Nick.hpp"
 
-
-
-void Nick::execute(Client& client, Message& msg) {
+void Nick::execute(Client &client, Message &msg) {
   if (msg.params.empty()) {
     std::string reply =
         reply_factory::getReply(ERR_NONICKNAMEGIVEN, "*", "", "");
@@ -12,7 +10,7 @@ void Nick::execute(Client& client, Message& msg) {
   if (!m_validator->isValidNickname(msg.params[0], client)) {
     return;
   }
-  std::map<int, Client>& cliMap = m_server->getClients();
+  std::map<int, Client> &cliMap = m_server->getClients();
   std::map<int, Client>::iterator it;
   for (it = cliMap.begin(); it != cliMap.end(); it++) {
     if (it->second.getNickname() == msg.params[0]) {
@@ -25,10 +23,5 @@ void Nick::execute(Client& client, Message& msg) {
   client.setNickname(msg.params[0]);
 }
 
-
-
-
-
-
-
-Nick::Nick(ServerDao *server, Validator *validator) : ACommand(server), m_validator(validator) {}
+Nick::Nick(ServerDao *server, Validator *Validator)
+    : ACommand(server), m_validator(Validator) {}

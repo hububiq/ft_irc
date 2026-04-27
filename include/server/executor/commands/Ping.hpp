@@ -5,6 +5,10 @@
 
 class Ping : public ACommand {
  public:
+  Ping(ServerDao *server = NULL);
+  
+  
+  
   void execute(Client&, Message&);
 };
 

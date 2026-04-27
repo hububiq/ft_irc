@@ -54,7 +54,7 @@ ServerRunner::ServerRunner(int argc, char **argv) {
   ConnHandler *connHandler = new ConnHandler(m_server);
   EpollStateManager *stateManager = new EpollStateManager(m_server);
   
-  CommandHandler *commandHandler = new CommandHandler();
+  CommandHandler *commandHandler = new CommandHandler(m_server);
   Executor *executor = new Executor(commandHandler);
   MessageParser *messageParser = new MessageParser();
 

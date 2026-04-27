@@ -9,6 +9,10 @@
 
 class PrivMsg : public ACommand {
  public:
+  PrivMsg(ServerDao *server = NULL);
+  
+  
+  
   void execute(Client&, Message&);
 };
 

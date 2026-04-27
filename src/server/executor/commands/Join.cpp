@@ -1,6 +1,6 @@
 #include "Join.hpp"
 
-extern ServerDao* g_server;
+
 
 void Join::execute(Client& client, Message& msg) {
   std::string nickname = client.getNickname();
@@ -18,15 +18,15 @@ void Join::execute(Client& client, Message& msg) {
     client.write_msg(reply);
     return;
   }
-  Channel* ch = g_server->getChannel(channelName);
-  if (ch && g_server->isUserInChannel(client, ch->getChannelName())) {
+  Channel* ch = m_server->getChannel(channelName);
+  if (ch && m_server->isUserInChannel(client, ch->getChannelName())) {
     return;
   }
   if (ch == NULL) {
     Channel channel = Channel();
-    g_server->addChannel(channel, channelName);
-    g_server->getChannel(channelName)->getAdmins().push_back(&client);
-    g_server->getChannel(channelName)->add_client(&client);
+    m_server->addChannel(channel, channelName);
+    m_server->getChannel(channelName)->getAdmins().push_back(&client);
+    m_server->getChannel(channelName)->add_client(&client);
   } else if (ch != NULL) {
     if (join_gatekeeper::isJoinDenied(ch, msg, client)) return;
     ch->add_client(&client);
@@ -47,4 +47,10 @@ void Join::execute(Client& client, Message& msg) {
   }
 }
 
-Join globalJoinCmd;
+
+
+
+
+
+
+Join::Join(ServerDao *server) : ACommand(server) {}

@@ -8,7 +8,7 @@
 #include "ServerDao.hpp"
 #include "reply_factory.hpp"
 
-extern ServerDao* g_server;
+
 
 void Pass::execute(Client& client, Message& msg) {
   if (msg.params.empty()) {
@@ -17,7 +17,7 @@ void Pass::execute(Client& client, Message& msg) {
     client.write_msg(reply);
     return;
   }
-  if ((msg.params[0] != g_server->getPassword())) {
+  if ((msg.params[0] != m_server->getPassword())) {
     std::string reply =
         reply_factory::getReply(ERR_PASSWDMISMATCH, "*", "", "");
     client.write_msg(reply);
@@ -34,4 +34,10 @@ void Pass::execute(Client& client, Message& msg) {
   client.setState(HANDSHAKE);
 }
 
-Pass globalPassCmd;
+
+
+
+
+
+
+Pass::Pass(ServerDao *server) : ACommand(server) {}

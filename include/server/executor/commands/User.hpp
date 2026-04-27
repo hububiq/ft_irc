@@ -10,6 +10,10 @@
 
 class User : public ACommand {
  public:
+  User(ServerDao *server = NULL);
+  
+  
+  
   void execute(Client&, Message&);
 };
 

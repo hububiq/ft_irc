@@ -10,6 +10,10 @@
 
 class Invite : public ACommand {
  public:
+  Invite(ServerDao *server = NULL);
+  
+  
+  
   void execute(Client&, Message&);
 };
 

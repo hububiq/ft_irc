@@ -1,6 +1,6 @@
 #include "Nick.hpp"
 
-extern ServerDao* g_server;
+
 
 void Nick::execute(Client& client, Message& msg) {
   if (msg.params.empty()) {
@@ -12,7 +12,7 @@ void Nick::execute(Client& client, Message& msg) {
   if (!validator::isValidNickname(msg.params[0], client)) {
     return;
   }
-  std::map<int, Client>& cliMap = g_server->getClients();
+  std::map<int, Client>& cliMap = m_server->getClients();
   std::map<int, Client>::iterator it;
   for (it = cliMap.begin(); it != cliMap.end(); it++) {
     if (it->second.getNickname() == msg.params[0]) {
@@ -25,4 +25,10 @@ void Nick::execute(Client& client, Message& msg) {
   client.setNickname(msg.params[0]);
 }
 
-Nick globalNickCmd;
+
+
+
+
+
+
+Nick::Nick(ServerDao *server) : ACommand(server) {}

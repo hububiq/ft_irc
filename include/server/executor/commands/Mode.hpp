@@ -10,6 +10,10 @@
 
 class Mode : public ACommand {
  public:
+  Mode(ServerDao *server = NULL);
+  
+  
+  
   void execute(Client&, Message&);
 };
 

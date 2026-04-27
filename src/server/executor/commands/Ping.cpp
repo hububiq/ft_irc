@@ -22,4 +22,10 @@ void Ping::execute(Client& client, Message& msg) {
   }
 }
 
-Ping globalPingCmd;
+
+
+
+
+
+
+Ping::Ping(ServerDao *server) : ACommand(server) {}

@@ -5,6 +5,10 @@
 
 class Cap : public ACommand {
  public:
+  Cap(ServerDao *server = NULL);
+  
+  
+  
   void execute(Client&, Message&);
 };
 

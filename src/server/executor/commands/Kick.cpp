@@ -8,7 +8,7 @@
 #include "ServerDao.hpp"
 #include "reply_factory.hpp"
 
-extern ServerDao *g_server;
+
 
 bool Kick::clientCanKICK(Channel *channel_obj, Client &client) {
   std::vector<Client *> temp_members = channel_obj->getAdmins();
@@ -43,7 +43,7 @@ void Kick::execute(Client &client, Message &msg) {
   std::string client_to_kick = msg.params[1];
   std::string reason =
       (msg.params.size() > 2) ? msg.params[2] : "No reason given";
-  Channel *channel_obj = g_server->getChannel(channel_name);
+  Channel *channel_obj = m_server->getChannel(channel_name);
   if (!channel_obj) {
     std::cout << reply_factory::getReply(ERR_NOSUCHCHANNEL, nick, channel_name,
                                          "");
@@ -78,4 +78,9 @@ void Kick::execute(Client &client, Message &msg) {
     client.write_msg(err);
   }
 }
-Kick globalKickCmd;
+
+
+
+
+
+Kick::Kick(ServerDao *server) : ACommand(server) {}

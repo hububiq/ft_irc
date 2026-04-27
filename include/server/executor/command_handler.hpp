@@ -34,7 +34,8 @@ class CommandHandler {
   std::map<std::string, ACommand*> _commandsMap;
 
  public:
-  CommandHandler();
+  CommandHandler(ServerDao *server);
+  ~CommandHandler();
   void handleCommand(Client& client, Message& msg);
 };
 

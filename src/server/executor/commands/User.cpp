@@ -29,4 +29,10 @@ void User::execute(Client& client, Message& msg) {
   client.write_msg(reply);
 }
 
-User globalUserCmd;
+
+
+
+
+
+
+User::User(ServerDao *server) : ACommand(server) {}

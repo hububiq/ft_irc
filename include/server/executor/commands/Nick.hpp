@@ -10,6 +10,10 @@
 
 class Nick : public ACommand {
  public:
+  Nick(ServerDao *server = NULL);
+  
+  
+  
   void execute(Client&, Message&);
 };
 

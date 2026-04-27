@@ -1,9 +1,9 @@
 #include "Quit.hpp"
 
-extern ServerDao *g_server;
+
 
 void Quit::execute(Client &client, Message &msg) {
-  std::map<std::string, Channel> &channels = g_server->getChannels();
+  std::map<std::string, Channel> &channels = m_server->getChannels();
   std::map<std::string, Channel>::iterator it_channel_b = channels.begin();
   std::map<std::string, Channel>::iterator it_channel_e = channels.end();
   while (it_channel_b != it_channel_e) {
@@ -34,4 +34,10 @@ void Quit::execute(Client &client, Message &msg) {
       it_channel_b++;
   }
 }
-Quit globalQuitCmd;
+
+
+
+
+
+
+Quit::Quit(ServerDao *server) : ACommand(server) {}

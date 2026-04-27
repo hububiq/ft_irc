@@ -1,6 +1,6 @@
 #include "Mode.hpp"
 
-extern ServerDao* g_server;
+
 
 void Mode::execute(Client& client, Message& msg) {
   std::string nickname = client.getNickname();
@@ -12,13 +12,13 @@ void Mode::execute(Client& client, Message& msg) {
     return;
   }
   if (msg.params.size() == 1) {
-    if (g_server->getChannel(msg.params[0]) == NULL) {
+    if (m_server->getChannel(msg.params[0]) == NULL) {
       std::string reply = reply_factory::getReply(ERR_NOSUCHCHANNEL, nickname,
                                                   msg.params[0], "");
       client.write_msg(reply);
       return;
     }
-    if (g_server->isClientAdmin(client, msg.params[0]))
+    if (m_server->isClientAdmin(client, msg.params[0]))
       mode_reporter::reportChannelModes(client, msg.params[0]);
     else {
       std::string reply = reply_factory::getReply(ERR_CHANOPRIVSNEEDED,
@@ -28,7 +28,7 @@ void Mode::execute(Client& client, Message& msg) {
     }
   }
   if (msg.params.size() >= 2) {
-    Channel* chanForMode = g_server->getChannel(msg.params[0]);
+    Channel* chanForMode = m_server->getChannel(msg.params[0]);
     if (!chanForMode) {
       std::string reply = reply_factory::getReply(ERR_NOSUCHCHANNEL, nickname,
                                                   msg.params[0], "");
@@ -36,9 +36,9 @@ void Mode::execute(Client& client, Message& msg) {
       return;
     }
     std::string& chName = chanForMode->getChannelName();
-    if (g_server->isClientAdmin(client, chName)) {
+    if (m_server->isClientAdmin(client, chName)) {
       if (msg.params[1][0] == '+')
-        chanForMode->setFlagOn(*g_server, client, msg);
+        chanForMode->setFlagOn(*m_server, client, msg);
       else if (msg.params[1][0] == '-')
         chanForMode->setFlagOff(client, msg);
       else {
@@ -54,4 +54,10 @@ void Mode::execute(Client& client, Message& msg) {
   }
 }
 
-Mode globalModeCmd;
+
+
+
+
+
+
+Mode::Mode(ServerDao *server) : ACommand(server) {}

@@ -11,6 +11,10 @@
 
 class Join : public ACommand {
  public:
+  Join(ServerDao *server = NULL);
+  
+  
+  
   void execute(Client&, Message&);
 };
 

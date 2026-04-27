@@ -1,6 +1,6 @@
 #include "Topic.hpp"
 
-extern ServerDao* g_server;
+
 
 void Topic::execute(Client& client, Message& msg) {
   std::string nickname = client.getNickname();
@@ -11,14 +11,14 @@ void Topic::execute(Client& client, Message& msg) {
     client.write_msg(reply);
     return;
   }
-  Channel* chan = g_server->getChannel(msg.params[0]);
+  Channel* chan = m_server->getChannel(msg.params[0]);
   if (!chan) {
     std::string reply =
         reply_factory::getReply(ERR_NOSUCHCHANNEL, nickname, msg.params[0], "");
     client.write_msg(reply);
     return;
   }
-  bool isUserInChan = g_server->isUserInChannel(client, chan->getChannelName());
+  bool isUserInChan = m_server->isUserInChannel(client, chan->getChannelName());
   if (!isUserInChan) {
     std::string reply =
         reply_factory::getReply(ERR_NOTONCHANNEL, nickname, msg.params[0], "");
@@ -38,7 +38,7 @@ void Topic::execute(Client& client, Message& msg) {
     return;
   }
   if (isUserInChan && msg.params.size() >= 2) {
-    Channel* tempChan = g_server->getChannel(msg.params[0]);
+    Channel* tempChan = m_server->getChannel(msg.params[0]);
     if (!tempChan) {
       std::string reply = reply_factory::getReply(ERR_NOTONCHANNEL, nickname,
                                                   msg.params[0], "");
@@ -46,7 +46,7 @@ void Topic::execute(Client& client, Message& msg) {
       return;
     }
     if (tempChan && tempChan->isTopicForOperator() &&
-        !(g_server->isClientAdmin(client, msg.params[0]))) {
+        !(m_server->isClientAdmin(client, msg.params[0]))) {
       std::string reply = reply_factory::getReply(ERR_CHANOPRIVSNEEDED,
                                                   nickname, msg.params[0], "");
       client.write_msg(reply);
@@ -72,4 +72,10 @@ void Topic::execute(Client& client, Message& msg) {
   }
 }
 
-Topic globalTopicCmd;
+
+
+
+
+
+
+Topic::Topic(ServerDao *server) : ACommand(server) {}

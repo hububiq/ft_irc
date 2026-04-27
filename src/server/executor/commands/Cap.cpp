@@ -18,4 +18,10 @@ void Cap::execute(Client& client, Message& msg) {
   client.write_msg(replay);
 }
 
-Cap globalCapCmd;
+
+
+
+
+
+
+Cap::Cap(ServerDao *server) : ACommand(server) {}

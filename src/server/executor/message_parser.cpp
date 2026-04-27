@@ -86,7 +86,6 @@ void deserialize(const std::string& rawLine, Message& outMessage) {
     throw std::invalid_argument("Cannot parse an empty message.");
   }
 
-  // work on a mutable copy
   std::string input = rawLine;
 
   extractPrefix(input, outMessage);

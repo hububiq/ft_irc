@@ -48,14 +48,13 @@ class Channel {
   const std::string getTopic() const;
   unsigned int getMaxMembers() const;
 
-
-  std::string&  getChannelName() ;
-  std::vector<Client*>& getAdmins() ;
-  std::vector<Client*>& getMembers() ;
-  std::vector<std::string>& getInvited() ;
-  std::vector<char>& getChanFlags() ;
-  std::string getKey() ;
-  std::string getTopic() ;
+  std::string& getChannelName();
+  std::vector<Client*>& getAdmins();
+  std::vector<Client*>& getMembers();
+  std::vector<std::string>& getInvited();
+  std::vector<char>& getChanFlags();
+  std::string getKey();
+  std::string getTopic();
   void setKey(std::string& key);
   void setTopic(std::string topic);
   void setChannelName(std::string& name);

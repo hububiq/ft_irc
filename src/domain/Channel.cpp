@@ -63,23 +63,31 @@ void Channel::removeFromFlags(char flag) {
   }
 }
 
-const std::string& Channel::getChannelName() const {return this->_channel_name; }
+const std::string& Channel::getChannelName() const {
+  return this->_channel_name;
+}
 const std::vector<Client*>& Channel::getAdmins() const { return this->_admins; }
-const std::vector<Client*>& Channel::getMembers() const { return this->_members; }
-const std::vector<std::string>& Channel::getInvited() const { return this->_invited; }
-const std::vector<char>& Channel::getChanFlags() const { return this->_chanFlags; }
+const std::vector<Client*>& Channel::getMembers() const {
+  return this->_members;
+}
+const std::vector<std::string>& Channel::getInvited() const {
+  return this->_invited;
+}
+const std::vector<char>& Channel::getChanFlags() const {
+  return this->_chanFlags;
+}
 unsigned int Channel::getLimit() const { return this->_limit; }
 const std::string Channel::getKey() const { return this->_key; }
 const std::string Channel::getTopic() const { return this->_topic; }
 unsigned int Channel::getMaxMembers() const { return this->_limit; }
 
-std::string& Channel::getChannelName() {  return this->_channel_name; }
-std::vector<Client*>& Channel::getAdmins()  { return this->_admins; }
-std::vector<Client*>& Channel::getMembers()  { return this->_members; }
-std::vector<std::string>& Channel::getInvited()  { return this->_invited; }
-std::vector<char>& Channel::getChanFlags()  { return this->_chanFlags; }
-std::string Channel::getKey()  { return this->_key; }
-std::string Channel::getTopic()  { return this->_topic; }
+std::string& Channel::getChannelName() { return this->_channel_name; }
+std::vector<Client*>& Channel::getAdmins() { return this->_admins; }
+std::vector<Client*>& Channel::getMembers() { return this->_members; }
+std::vector<std::string>& Channel::getInvited() { return this->_invited; }
+std::vector<char>& Channel::getChanFlags() { return this->_chanFlags; }
+std::string Channel::getKey() { return this->_key; }
+std::string Channel::getTopic() { return this->_topic; }
 
 void Channel::setKey(std::string& key) { _key = key; }
 void Channel::setTopic(std::string topic) { this->_topic = topic; }

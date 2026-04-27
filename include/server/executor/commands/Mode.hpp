@@ -5,10 +5,8 @@
 #include "Client.hpp"
 #include "Message.hpp"
 #include "Server.hpp"
-#include "reply_factory.hpp"
-
 #include "mode_reporter.hpp"
-
+#include "reply_factory.hpp"
 
 class Mode : public ACommand {
  public:

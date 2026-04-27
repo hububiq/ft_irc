@@ -30,10 +30,10 @@ SRCS = \
        src/server/executor/commands/Quit.cpp \
        src/server/executor/commands/Topic.cpp \
        src/server/executor/commands/User.cpp \
-       src/server/parser/join_gatekeeper.cpp \
-       src/server/parser/message_parser.cpp \
-       src/server/parser/mode_reporter.cpp \
-       src/server/parser/validator.cpp \
+       src/server/executor/join_gatekeeper.cpp \
+       src/server/executor/message_parser.cpp \
+       src/server/executor/mode_reporter.cpp \
+       src/server/executor/validator.cpp \
        src/domain/Channel.cpp \
        src/domain/Client.cpp
 OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))

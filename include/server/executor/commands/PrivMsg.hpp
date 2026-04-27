@@ -7,11 +7,12 @@
 #include "ServerDao.hpp"
 #include "reply_factory.hpp"
 
-class PrivMsg : public ACommand {
- public:
-  PrivMsg(ServerDao *server = NULL);
+class PrivMsg : public ACommand
+{
+  public:
+	PrivMsg(ServerDao *server = NULL);
 
-  void execute(Client &, Message &);
+	void execute(Client &, Message &);
 };
 
 #endif

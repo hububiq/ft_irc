@@ -3,11 +3,12 @@
 
 #include "ACommand.hpp"
 
-class Cap : public ACommand {
- public:
-  Cap(ServerDao *server = NULL);
+class Cap : public ACommand
+{
+  public:
+	Cap(ServerDao *server = NULL);
 
-  void execute(Client &, Message &);
+	void execute(Client &, Message &);
 };
 
 #endif

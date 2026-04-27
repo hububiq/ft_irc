@@ -49,8 +49,8 @@ ${NAME}: ${OBJS}
 	${CC} ${FLAGS} $^ -o $@
 
 format:
-	find -iname '*.hpp' -o -iname '*.cpp' | xargs clang-format --style=Google -i
-# 	find -iname '*.hpp' -o -iname '*.cpp' | xargs clang-format --style=file:.clang-format -i
+# 	find -iname '*.hpp' -o -iname '*.cpp' | xargs clang-format --style=Google -i
+	find -iname '*.hpp' -o -iname '*.cpp' | xargs clang-format --style=file:.clang-format -i
 
 clean:
 	${RM} ${OBJ_DIR}

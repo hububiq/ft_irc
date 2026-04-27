@@ -4,14 +4,15 @@
 #include "Client.hpp"
 #include "ServerDao.hpp"
 
-class ConnHandler {
- public:
-  ConnHandler(ServerDao *server);
-  void process_connect(int socket_fd);
+class ConnHandler
+{
+  public:
+	ConnHandler(ServerDao *server);
+	void process_connect(int socket_fd);
 
- private:
-  ServerDao *m_server;
-  void register_client(int client_fd, std::string &hostname);
+  private:
+	ServerDao *m_server;
+	void       register_client(int client_fd, std::string &hostname);
 };
 
 #endif

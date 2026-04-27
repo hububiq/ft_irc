@@ -5,19 +5,20 @@
 #include "Client.hpp"
 #include "Message.hpp"
 #include "ServerDao.hpp"
-#include "reply_factory.hpp"
 #include "Validator.hpp"
+#include "reply_factory.hpp"
 
 class Validator;
 
-class Nick : public ACommand {
- private:
-  Validator *m_validator;
+class Nick : public ACommand
+{
+  private:
+	Validator *m_validator;
 
- public:
-  Nick(ServerDao *server = NULL, Validator *Validator = NULL);
+  public:
+	Nick(ServerDao *server = NULL, Validator *Validator = NULL);
 
-  void execute(Client &, Message &);
+	void execute(Client &, Message &);
 };
 
 #endif

@@ -19,9 +19,10 @@
 #include <sstream>
 #include <vector>
 
-class Listener {
- public:
-  int init_socket(uint32_t host_ip, uint16_t port_num);
+class Listener
+{
+  public:
+	int init_socket(uint32_t host_ip, uint16_t port_num);
 };
 
 #endif

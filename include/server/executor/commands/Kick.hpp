@@ -8,13 +8,14 @@
 class Channel;
 class Client;
 
-class Kick : public ACommand {
- public:
-  Kick(ServerDao *server = NULL);
+class Kick : public ACommand
+{
+  public:
+	Kick(ServerDao *server = NULL);
 
-  void execute(Client &, Message &);
-  bool clientCanKICK(Channel *, Client &);
-  Client *clientToBeKICKed(Channel *, const std::string &);
+	void    execute(Client &, Message &);
+	bool    clientCanKICK(Channel *, Client &);
+	Client *clientToBeKICKed(Channel *, const std::string &);
 };
 
 // Client *clientToBeKICKed(Channel *, const std::string &);

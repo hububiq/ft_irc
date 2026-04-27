@@ -3,25 +3,25 @@
 
 #include "ACommand.hpp"
 #include "Client.hpp"
+#include "JoinGatekeeper.hpp"
 #include "Message.hpp"
 #include "ServerDao.hpp"
-#include "JoinGatekeeper.hpp"
-#include "reply_factory.hpp"
 #include "Validator.hpp"
+#include "reply_factory.hpp"
 
 class Validator;
 class JoinGatekeeper;
 
-class Join : public ACommand {
- private:
-  Validator *m_validator;
-  JoinGatekeeper *m_joinGatekeeper;
+class Join : public ACommand
+{
+  private:
+	Validator      *m_validator;
+	JoinGatekeeper *m_joinGatekeeper;
 
- public:
-  Join(ServerDao *server = NULL, Validator *Validator = NULL,
-       JoinGatekeeper *joinGatekeeper = NULL);
+  public:
+	Join(ServerDao *server = NULL, Validator *Validator = NULL, JoinGatekeeper *joinGatekeeper = NULL);
 
-  void execute(Client &, Message &);
+	void execute(Client &, Message &);
 };
 
 #endif

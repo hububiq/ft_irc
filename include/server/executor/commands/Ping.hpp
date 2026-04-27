@@ -3,11 +3,12 @@
 
 #include "ACommand.hpp"
 
-class Ping : public ACommand {
- public:
-  Ping(ServerDao *server = NULL);
+class Ping : public ACommand
+{
+  public:
+	Ping(ServerDao *server = NULL);
 
-  void execute(Client &, Message &);
+	void execute(Client &, Message &);
 };
 
 #endif

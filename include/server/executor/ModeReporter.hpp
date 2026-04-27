@@ -9,13 +9,14 @@
 #include "ServerDao.hpp"
 #include "reply_factory.hpp"
 
-class ModeReporter {
- private:
-  ServerDao *m_server;
+class ModeReporter
+{
+  private:
+	ServerDao *m_server;
 
- public:
-  ModeReporter(ServerDao *server);
-  void reportChannelModes(Client &client, const std::string &channelName);
+  public:
+	ModeReporter(ServerDao *server);
+	void reportChannelModes(Client &client, const std::string &channelName);
 };
 
 #endif

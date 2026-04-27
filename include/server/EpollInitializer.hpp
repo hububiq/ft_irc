@@ -3,9 +3,10 @@
 
 #include <sys/epoll.h>
 
-class EpollInitializer {
- public:
-  int init_epoll(int socket_fd);
+class EpollInitializer
+{
+  public:
+	int init_epoll(int socket_fd);
 };
 
 #endif

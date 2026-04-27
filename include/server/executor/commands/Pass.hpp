@@ -3,11 +3,12 @@
 
 #include "ACommand.hpp"
 
-class Pass : public ACommand {
- public:
-  Pass(ServerDao *server = NULL);
+class Pass : public ACommand
+{
+  public:
+	Pass(ServerDao *server = NULL);
 
-  void execute(Client &, Message &);
+	void execute(Client &, Message &);
 };
 
 #endif

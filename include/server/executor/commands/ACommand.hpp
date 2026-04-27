@@ -7,14 +7,17 @@ class Client;
 class ServerDao;
 struct Message;
 
-class ACommand {
- protected:
-  ServerDao *m_server;
+class ACommand
+{
+  protected:
+	ServerDao *m_server;
 
- public:
-  ACommand(ServerDao *server = NULL) : m_server(server) {}
-  virtual ~ACommand() {};
-  virtual void execute(Client &, Message &) = 0;
+  public:
+	ACommand(ServerDao *server = NULL) : m_server(server)
+	{
+	}
+	virtual ~ACommand() {};
+	virtual void execute(Client &, Message &) = 0;
 };
 
 #endif

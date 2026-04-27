@@ -1,4 +1,9 @@
 #ifndef CLIENT_STATE_HPP
 #define CLIENT_STATE_HPP
-enum ClientState { CONNECTED, HANDSHAKE, REGISTERED };
+enum ClientState
+{
+	CONNECTED,
+	HANDSHAKE,
+	REGISTERED
+};
 #endif

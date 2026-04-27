@@ -8,11 +8,12 @@
 #include "Message.hpp"
 #include "reply_factory.hpp"
 
-class User : public ACommand {
- public:
-  User(ServerDao *server = NULL);
+class User : public ACommand
+{
+  public:
+	User(ServerDao *server = NULL);
 
-  void execute(Client &, Message &);
+	void execute(Client &, Message &);
 };
 
 #endif

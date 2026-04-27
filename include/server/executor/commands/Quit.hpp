@@ -10,11 +10,12 @@
 #include "ServerDao.hpp"
 #include "reply_factory.hpp"
 
-class Quit : public ACommand {
- public:
-  Quit(ServerDao *server = NULL);
+class Quit : public ACommand
+{
+  public:
+	Quit(ServerDao *server = NULL);
 
-  void execute(Client &, Message &);
+	void execute(Client &, Message &);
 };
 
 #endif

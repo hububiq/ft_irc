@@ -8,10 +8,10 @@
 #include <stdexcept>
 #include <string>
 
-#include "ServerDao.hpp"
 #include "EpollInitializer.hpp"
 #include "Listener.hpp"
 #include "Multiplexer.hpp"
+#include "ServerDao.hpp"
 
 class MessageParser;
 class CommandHandler;
@@ -25,8 +25,8 @@ class ServerRunner
 	void run();
 
   private:
-  std::string parse_pwd(char *arg);
-  long parse_port(char *arg);
+	std::string      parse_pwd(char *arg);
+	long             parse_port(char *arg);
 	ServerDao       *m_server;
 	Listener         m_Listener;
 	EpollInitializer m_epollInitializer;

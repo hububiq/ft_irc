@@ -1,5 +1,4 @@
-#include "Server.hpp"
-#include "CommandHandler.hpp"
+#include "ServerRunner.hpp"
 
 volatile sig_atomic_t g_running = 1;
 
@@ -17,9 +16,8 @@ int main(int argc, char **argv)
 
 	try
 	{
-    	CommandHandler::initCommands();
-		Server server(argc, argv);
-		server.run();
+		ServerRunner runner(argc, argv);
+		runner.run();
 	}
 	catch (const std::exception &e)
 	{

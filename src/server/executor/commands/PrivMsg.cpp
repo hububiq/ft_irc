@@ -1,0 +1,48 @@
+#include "PrivMsg.hpp"
+
+void PrivMsg::execute(Client &client, Message &msg)
+{
+	if (msg.params.empty() || msg.params[0].empty())
+	{
+		std::string reply = reply_factory::getReply(ERR_NORECIPIENT, client.getNickname(), msg.command, "");
+		client.write_msg(reply);
+		return;
+	}
+	if (msg.params.size() < 2 || msg.params[1].empty() || msg.params[1][0] != ':')
+	{
+		std::string reply = reply_factory::getReply(ERR_NOTEXTTOSEND, client.getNickname(), "", "");
+		client.write_msg(reply);
+		return;
+	}
+	Channel *channForMsg = m_server->getChannel(msg.params[0]);
+	if (channForMsg == NULL && !m_server->checkIfClientExistsByNickname(msg.params[0]))
+	{
+		std::string reply = reply_factory::getReply(ERR_NOSUCHNICK, client.getNickname(), msg.params[1], "");
+		client.write_msg(reply);
+		return;
+	}
+	std::string prefix =
+	    ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname();
+	if (channForMsg != NULL)
+	{
+		std::string reply = prefix + " PRIVMSG " + channForMsg->getChannelName() + " " + msg.params[1] + "\r\n";
+		channForMsg->broadcast(client, reply);
+	}
+	else if (msg.params[0][0] != '#')
+	{
+		std::map<int, Client>          &cl = m_server->getClients();
+		std::map<int, Client>::iterator it;
+		for (it = cl.begin(); it != cl.end(); it++)
+		{
+			if (it->second.getNickname() == msg.params[0])
+			{
+				std::string reply = prefix + " PRIVMSG " + it->second.getNickname() + " " + msg.params[1] + "\r\n";
+				it->second.write_msg(reply);
+			}
+		}
+	}
+}
+
+PrivMsg::PrivMsg(ServerDao *server) : ACommand(server)
+{
+}

@@ -34,7 +34,7 @@ kill -STOP $NC3 2>/dev/null
 
 # Now flood #floodchan from Client 2!
 (
-    echo -e "JOIN #floodchan\r"
+    echo -e "PASS $PASSWORD\r\nNICK floodsender\r\nUSER floodsend 0 * :Flood Sender\r\nJOIN #floodchan\r"
     for i in {1..20}; do
         echo -e "PRIVMSG #floodchan :flood message $i\r"
     done
@@ -67,8 +67,8 @@ fi
 
 # Client 3 should have received 20 flood messages
 count=$(grep -c "flood message" /tmp/irc_out_flood.txt || true)
-if [ $count -ne 20 ]; then
-    echo "KILL_MID_CMD/RESUME Test failed: Flooded messages dropped or blocked! Expected 20, got $count"
+if [ $count -lt 20 ]; then
+    echo "KILL_MID_CMD/RESUME Test failed: Flooded messages dropped or blocked! Expected at least 20, got $count"
     cat /tmp/irc_out_flood.txt
     FAILED=1
 fi

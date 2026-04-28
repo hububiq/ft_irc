@@ -6,7 +6,7 @@ PASSWORD="testpass"
 
 # Kill existing irc server if running on port
 fuser -k $PORT/tcp 2>/dev/null
-./irc $PORT $PASSWORD &
+./ircserv $PORT $PASSWORD &
 SERVER_PID=$!
 
 # Give it a second to start

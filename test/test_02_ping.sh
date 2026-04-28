@@ -5,7 +5,7 @@ PORT=6668
 PASSWORD="testpass"
 
 fuser -k $PORT/tcp 2>/dev/null
-./irc $PORT $PASSWORD &
+./ircserv $PORT $PASSWORD &
 SERVER_PID=$!
 sleep 1
 

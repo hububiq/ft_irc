@@ -22,11 +22,7 @@ void ConnHandler::process_connect(int socket_fd)
 	if (client_fd >= 0)
 	{
 		std::string hostname = inet_ntoa(addr.sin_addr);
-		int         flags = fcntl(client_fd, F_GETFL, 0);
-		if (flags != -1)
-		{
-			fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);
-		}
+		fcntl(client_fd, F_SETFL, O_NONBLOCK);
 		struct epoll_event event;
 		event.events = EPOLLIN;
 		event.data.fd = client_fd;

@@ -1,5 +1,5 @@
 CC = c++
-NAME = irc
+NAME = ircserv
 FLAGS = -Wall -Wextra -Werror -std=c++98 -g -fsanitize=address
 INC_DIR = include
 SRC_DIR = src

@@ -8,7 +8,7 @@ void PrivMsg::execute(Client &client, Message &msg)
 		client.write_msg(reply);
 		return;
 	}
-	if (msg.params.size() < 2 || msg.params[1].empty() || msg.params[1][0] != ':')
+	if (msg.params.size() < 2 || msg.params[1].empty())
 	{
 		std::string reply = reply_factory::getReply(ERR_NOTEXTTOSEND, client.getNickname(), "", "");
 		client.write_msg(reply);

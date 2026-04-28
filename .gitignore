@@ -1,4 +1,5 @@
 obj/
 *.txt
 !README.txt
-irc
+ircservv
+.idea/

@@ -45,7 +45,7 @@ ServerRunner::ServerRunner(int argc, char **argv)
 	long        port = parse_port(argv[1]);
 	uint16_t    port_num = htons((uint16_t) port);
 	std::string pwd = parse_pwd(argv[2]);
-	uint32_t    host_ip = inet_addr("127.0.0.1");
+	uint32_t    host_ip = inet_addr("0.0.0.0");
 	int         socket_fd = m_Listener.init_socket(host_ip, port_num);
 	int         epoll_fd;
 	try

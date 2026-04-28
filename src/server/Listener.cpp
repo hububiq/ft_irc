@@ -21,8 +21,7 @@ int Listener::create_socket()
 		throw std::runtime_error("Failed to set socket SO_REUSEPORT.");
 	}
 
-	int flags = fcntl(socket_fd, F_GETFL);
-	int status = fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK);
+	int status = fcntl(socket_fd, F_SETFL, O_NONBLOCK);
 	if (status == -1)
 	{
 		throw std::runtime_error("Failed to set socket O_NONBLOCK");

@@ -39,6 +39,7 @@ void Multiplexer::loop_epoll()
 					if (res == DROP_CONNECTION)
 					{
 						std::cout << "Client disconnected" << std::endl;
+						m_server->removeClientFromAllChannels(&it->second);
 						m_server->getClients().erase(it);
 						close(event_fd);
 					}

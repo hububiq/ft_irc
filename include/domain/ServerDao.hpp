@@ -55,6 +55,7 @@ class ServerDao
 	bool isClientAdmin(Client &client, const std::string &chName);
 	bool isInviteeInChannel(const Message &msg, const std::string &channelName);
 	bool isUserInChannel(Client &client, const std::string &channelName);
+	void removeClientFromAllChannels(Client* client);
 };
 
 #endif

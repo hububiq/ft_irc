@@ -1,4 +1,5 @@
 #include "ServerDao.hpp"
+#include <algorithm>
 
 ServerDao::ServerDao(int port, uint16_t port_num, uint32_t host_ip, const std::string &password, int socket_fd, int epoll_fd)
     : _socket_fd(socket_fd), _epoll_fd(epoll_fd), _port(port), _host_ip(host_ip), _port_num(port_num), _password(password)
@@ -125,4 +126,32 @@ bool ServerDao::isUserInChannel(Client &client, const std::string &channelName)
 			return true;
 	}
 	return false;
+}
+
+void ServerDao::removeClientFromAllChannels(Client* client)
+{
+	std::map<std::string, Channel>::iterator it_channel = this->_channels.begin();
+	while (it_channel != this->_channels.end())
+	{
+		std::vector<Client *> &clients = it_channel->second.getMembers();
+		std::vector<Client *>::iterator it_client = std::find(clients.begin(), clients.end(), client);
+		if (it_client != clients.end())
+		{
+			clients.erase(it_client);
+		}
+		std::vector<Client *> &admins = it_channel->second.getAdmins();
+		std::vector<Client *>::iterator it_admin = std::find(admins.begin(), admins.end(), client);
+		if (it_admin != admins.end())
+		{
+			admins.erase(it_admin);
+		}
+		if (it_channel->second.getMembers().empty())
+		{
+			this->_channels.erase(it_channel++);
+		}
+		else
+		{
+			it_channel++;
+		}
+	}
 }
